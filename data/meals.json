@@ -368,5 +368,15 @@
     "memo": "タンパク質はP130gでかなり良い。脂質はアヒージョ・チーズ・アボカド・MCTで高め。総カロリーは1500kcalを大きく超過したため判定は×。",
     "hasDrink": true,
     "hasTrain": false
+  },
+  {
+    "date": "2026-06-27",
+    "kcal": 1500,
+    "protein": 136,
+    "fat": 45,
+    "carb": 158,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": true
   }
 ]
