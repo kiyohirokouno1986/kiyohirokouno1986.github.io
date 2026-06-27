@@ -11,10 +11,10 @@
   },
   {
     "date": "2026-05-15",
-    "kcal": 110,
-    "protein": 20,
-    "fat": 7.7,
-    "carb": 2.9,
+    "kcal": 2603,
+    "protein": 172.5,
+    "fat": 97,
+    "carb": 137.5,
     "memo": "タンパク質はかなり優秀。朝〜昼はかなり綺麗に組めていて、夜はお酒・揚げ物・けいちゃん焼きでカロリーと脂質が上振れ。明日は脂質控えめ、水多め、炭水化物は普通に戻すくらいで十分リカバリー可能。",
     "hasDrink": true,
     "hasTrain": false
@@ -43,8 +43,8 @@
     "date": "2026-05-19",
     "kcal": 1568,
     "protein": 98,
-    "fat": 22,
-    "carb": 227,
+    "fat": 23,
+    "carb": 228,
     "memo": "タンパク質はほぼ100g、脂質は低め。良い組み立て。",
     "hasDrink": false,
     "hasTrain": false
@@ -71,10 +71,10 @@
   },
   {
     "date": "2026-05-23",
-    "kcal": 500,
-    "protein": 15,
-    "fat": 15,
-    "carb": 55,
+    "kcal": 2125,
+    "protein": 80.5,
+    "fat": 83.5,
+    "carb": 260,
     "memo": "炭水化物と脂質はしっかりめ。たんぱく質は悪くないが、減量目線ならこの後はプロテイン・鶏肉・ゆで卵・豆腐系で締めると整いやすい。",
     "hasDrink": false,
     "hasTrain": false
@@ -82,9 +82,9 @@
   {
     "date": "2026-05-24",
     "kcal": 1963,
-    "protein": 138,
-    "fat": 111,
-    "carb": 76,
+    "protein": 143,
+    "fat": 117,
+    "carb": 88.5,
     "memo": "",
     "hasDrink": false,
     "hasTrain": false
@@ -192,9 +192,9 @@
   {
     "date": "2026-06-09",
     "kcal": 3640,
-    "protein": 142,
-    "fat": 110,
-    "carb": 262,
+    "protein": 149.5,
+    "fat": 120,
+    "carb": 277,
     "memo": "】",
     "hasDrink": true,
     "hasTrain": false
@@ -261,10 +261,10 @@
   },
   {
     "date": "2026-06-16",
-    "kcal": 1500,
-    "protein": 30,
-    "fat": 1,
-    "carb": 2,
+    "kcal": 1566,
+    "protein": null,
+    "fat": null,
+    "carb": null,
     "memo": "P146gでたんぱく質はかなり良好。総カロリーは1500kcalを少し超えたけど、1566kcalなので〇判定。",
     "hasDrink": true,
     "hasTrain": false
@@ -302,8 +302,8 @@
   {
     "date": "2026-06-20",
     "kcal": 1685,
-    "protein": 120,
-    "fat": 78,
+    "protein": 122.5,
+    "fat": 80.5,
     "carb": 122,
     "memo": "タンパク質はP120g前後を達成。カロリーは1500kcal目標からややオーバー。",
     "hasDrink": false,
@@ -343,7 +343,7 @@
     "date": "2026-06-24",
     "kcal": 1693,
     "protein": 153,
-    "fat": 45,
+    "fat": 47.5,
     "carb": 160,
     "memo": "",
     "hasDrink": false,
