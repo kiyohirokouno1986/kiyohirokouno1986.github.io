@@ -1,0 +1,22 @@
+{
+  "SLACK_CHANNEL_ID": "C0B3VMRH2UR",
+  "STRICT": 1500,
+  "FREE": 2200,
+  "TDEE": 2230,
+  "STRICT_DAYS": 4,
+  "FREE_DAYS_WEEK": 3,
+  "PROTEIN_TARGET": 140,
+  "PROTEIN_MIN": 100,
+  "TRAIN_BURN": 200,
+  "AFTERBURN_MULT": 1.15,
+  "TGT_BF": 15.0,
+  "CUR_BF": 25.7,
+  "CUR_FAT": 18.4,
+  "LEAN": 53.2,
+  "FAT_MIN": 17.8,
+  "FREE_HARD_CAP": 2500,
+  "BC_KEY": "calGuide_bodyComp",
+  "TL_KEY": "calGuide_trainingLog",
+  "WS_KEY": "calGuide_waist",
+  "DM_KEY": "calGuide_dailyMeasure"
+}
