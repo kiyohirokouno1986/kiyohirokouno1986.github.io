@@ -2244,9 +2244,16 @@ function render(data, calMap) {
 }
 
 // === INIT ===
-// 食事データ（ローカル保存）とカレンダー注釈を読み込んでレンダリング。
-// Slack/Google Calendar の MCP 連携はスタンドアロンでは使えないため、
-// 食事データはローカル localStorage + 取り込み(import)で管理する（API連携は次フェーズ）。
+// 食事データは localStorage に保存しつつ、GitHub Actions が Slack から生成する
+// data/meals.json を起動時に取り込んでマージする（手動取り込みも併用可）。
+async function loadServerMeals() {
+  try {
+    const res = await fetch('data/meals.json', { cache: 'no-store' });
+    if (!res.ok) return; // 未生成（404）なら無視。手動取り込みは引き続き利用可
+    const arr = await res.json();
+    if (Array.isArray(arr) && arr.length) mergeMeals(arr); // 同一日付は最新で上書き
+  } catch (e) { /* file:// やオフライン時は無視 */ }
+}
 function rerender() {
   try {
     const meals = enrichMealsPFC(loadMeals());
@@ -2258,5 +2265,8 @@ function rerender() {
     console.error(e);
   }
 }
-function init() { rerender(); }
+async function init() {
+  await loadServerMeals();
+  rerender();
+}
 init();
