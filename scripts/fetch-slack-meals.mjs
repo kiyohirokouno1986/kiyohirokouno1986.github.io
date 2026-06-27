@@ -26,7 +26,36 @@ function msgText(m) {
   return t;
 }
 
-// dashboard.js の extractDays と同じ解析ロジック（PFCのコロンはオプショナル）
+// 投稿は「品目ごとの内訳 ＋ 合計」の二段構成が多いので、合計セクションだけを解析対象にする。
+// 「合計／今日の合計／合計見積もり／総カロリー」以降を切り出し、メモ・品目行は除外する。
+function summaryBlock(text) {
+  const anchor = text.search(/今日の合計|合計見積|合計|総カロリー|総摂取|トータル/);
+  if (anchor < 0) return text; // 合計表記が無ければ全文で解析（簡易フォーマット用）
+  let block = text.slice(anchor);
+  const cut = block.search(/メモ|コメント|食べたもの|使用して送信されました/);
+  if (cut > 0) block = block.slice(0, cut);
+  return block;
+}
+// kcal を取得。範囲（2,258〜2,948kcal）は平均、それ以外は合計優先で先頭一致。
+function kcalFromBlock(block) {
+  const rng = block.match(/約?([\d,]+)\s*[〜~～\-]\s*([\d,]+)\s*kcal/i);
+  if (rng) { const v = Math.round((parseInt(rng[1].replace(/,/g, '')) + parseInt(rng[2].replace(/,/g, ''))) / 2); if (v > 200 && v < 10000) return v; }
+  for (const cp of [/総カロリー[^\d]*約?\s*([\d,]+)\s*kcal/i, /合計[^\d]*約?\s*([\d,]+)\s*kcal/i, /カロリー[^\d]*約?\s*([\d,]+)\s*kcal/i, /([\d,]+)\s*kcal/i]) {
+    const mm = block.match(cp);
+    if (mm) { const v = parseInt(mm[1].replace(/,/g, '')); if (v > 200 && v < 10000) return v; }
+  }
+  return null;
+}
+// P/F/C を取得。範囲（158〜187g）は平均。コロンは任意。
+function macroFromBlock(block, letter) {
+  const re = new RegExp(letter + '\\s*[：:]?\\s*約?\\s*([\\d.]+)(?:\\s*[〜~～\\-]\\s*([\\d.]+))?', 'i');
+  const m = block.match(re);
+  if (!m) return null;
+  let v = parseFloat(m[1]);
+  if (m[2]) v = (v + parseFloat(m[2])) / 2;
+  return Math.round(v * 10) / 10;
+}
+
 function parseDays(messages) {
   const days = [], seen = new Set();
   for (const m of messages) { // 新しい順
@@ -54,23 +83,18 @@ function parseDays(messages) {
     }
     if (!date || seen.has(date)) continue; // 同一日付は最新メッセージを優先
     seen.add(date);
-    let kcal = null;
-    const rng = block.match(/約?([\d,]+)\s*[〜~\-～]\s*([\d,]+)\s*kcal/i);
-    if (rng) { kcal = Math.round((parseInt(rng[1].replace(/,/g, '')) + parseInt(rng[2].replace(/,/g, ''))) / 2); }
-    if (!kcal) {
-      for (const cp of [/総カロリー[^\d]*約?\s*([\d,]+)\s*kcal/i, /合計[^\d]*約?\s*([\d,]+)\s*kcal/i, /\*約?([\d,]+)\s*kcal/i, /([\d,]+)\s*kcal/i]) {
-        const mm = block.match(cp);
-        if (mm) { const v = parseInt(mm[1].replace(/,/g, '')); if (v > 200 && v < 10000) { kcal = v; break; } }
-      }
-    }
+    const sb = summaryBlock(block);
+    let kcal = kcalFromBlock(sb) || kcalFromBlock(block); // 合計セクション → だめなら全文
     if (!kcal) continue;
-    const pm = block.match(/P\s*[：:]?\s*約?\s*([\d.]+)/i), fm = block.match(/F\s*[：:]?\s*約?\s*([\d.]+)/i), cm = block.match(/C\s*[：:]?\s*約?\s*([\d.]+)/i);
+    const protein = macroFromBlock(sb, 'P');
+    const fat = macroFromBlock(sb, 'F');
+    const carb = macroFromBlock(sb, 'C');
     let memo = '';
     const mmo = block.match(/メモ[：:\s]*\n?\s*([^\n*]+)/) || block.match(/コメント[：:\s]*\n?\s*([^\n*]+)/);
     if (mmo) memo = mmo[1].replace(/\*使用して送信されました\*.*/, '').trim();
-    const hasDrink = /ビール|ハイボール|日本酒|ワイン|サワー|酒|ウィスキー|焼酎/i.test(block);
+    const hasDrink = /ビール|ハイボール|日本酒|ワイン|サワー|酒|ウィスキー|ウイスキー|焼酎|ソーダ割/i.test(block);
     const hasTrain = /トレ|筋トレ|ジム|パーソナル|スクワット|ベンチ/i.test(block);
-    days.push({ date, kcal, protein: pm ? parseFloat(pm[1]) : null, fat: fm ? parseFloat(fm[1]) : null, carb: cm ? parseFloat(cm[1]) : null, memo, hasDrink, hasTrain });
+    days.push({ date, kcal, protein, fat, carb, memo, hasDrink, hasTrain });
   }
   days.sort((a, b) => a.date.localeCompare(b.date));
   return days;
