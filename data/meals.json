@@ -1,0 +1,372 @@
+[
+  {
+    "date": "2026-05-14",
+    "kcal": 1910,
+    "protein": 120,
+    "fat": 52,
+    "carb": 160,
+    "memo": "• タンパク質はかなり優秀。刺身とプロテインでしっかり積めている。",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-15",
+    "kcal": 110,
+    "protein": 20,
+    "fat": 7.7,
+    "carb": 2.9,
+    "memo": "タンパク質はかなり優秀。朝〜昼はかなり綺麗に組めていて、夜はお酒・揚げ物・けいちゃん焼きでカロリーと脂質が上振れ。明日は脂質控えめ、水多め、炭水化物は普通に戻すくらいで十分リカバリー可能。",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-16",
+    "kcal": 4060,
+    "protein": 167,
+    "fat": 128,
+    "carb": 424,
+    "memo": "_",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-18",
+    "kcal": 1528,
+    "protein": 120.2,
+    "fat": 45.1,
+    "carb": 99,
+    "memo": "_",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-19",
+    "kcal": 1568,
+    "protein": 98,
+    "fat": 22,
+    "carb": 227,
+    "memo": "タンパク質はほぼ100g、脂質は低め。良い組み立て。",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-20",
+    "kcal": 1693,
+    "protein": 119.7,
+    "fat": 73.6,
+    "carb": 141.4,
+    "memo": "たんぱく質はかなり優秀。うなぎ＋鶏もも皮付きで脂質はやや高め。",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-21",
+    "kcal": 1938,
+    "protein": null,
+    "fat": null,
+    "carb": null,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-23",
+    "kcal": 500,
+    "protein": 15,
+    "fat": 15,
+    "carb": 55,
+    "memo": "炭水化物と脂質はしっかりめ。たんぱく質は悪くないが、減量目線ならこの後はプロテイン・鶏肉・ゆで卵・豆腐系で締めると整いやすい。",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-24",
+    "kcal": 1963,
+    "protein": 138,
+    "fat": 111,
+    "carb": 76,
+    "memo": "",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-25",
+    "kcal": 2080,
+    "protein": 96,
+    "fat": 69,
+    "carb": 92,
+    "memo": "_",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-26",
+    "kcal": 1575,
+    "protein": 110.5,
+    "fat": 47.7,
+    "carb": 125.1,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-05-27",
+    "kcal": 1136,
+    "protein": 71.2,
+    "fat": 75.6,
+    "carb": 36,
+    "memo": "",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-02",
+    "kcal": 1584,
+    "protein": 135.2,
+    "fat": 76.5,
+    "carb": 49.6,
+    "memo": "",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-03",
+    "kcal": 1522,
+    "protein": 93.4,
+    "fat": 57.3,
+    "carb": 166.2,
+    "memo": "",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-04",
+    "kcal": 1437,
+    "protein": 111.2,
+    "fat": 69.7,
+    "carb": 89.5,
+    "memo": "1500kcal以内に着地。タンパク質はしっかり、脂質はやや高め。",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-05",
+    "kcal": 2860,
+    "protein": 92,
+    "fat": 90,
+    "carb": 224,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-06",
+    "kcal": 2785,
+    "protein": 107,
+    "fat": 92,
+    "carb": 298,
+    "memo": "",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-07",
+    "kcal": 1654,
+    "protein": 160.9,
+    "fat": 68.3,
+    "carb": 105.3,
+    "memo": "タンパク質はかなり高め。脂質は鶏もも由来でやや高め。1,500kcal目安からは約154kcalオーバー。",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-08",
+    "kcal": 1496,
+    "protein": 132.2,
+    "fat": 58.8,
+    "carb": 110.4,
+    "memo": "",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-09",
+    "kcal": 3640,
+    "protein": 142,
+    "fat": 110,
+    "carb": 262,
+    "memo": "】",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-10",
+    "kcal": 1740,
+    "protein": 95,
+    "fat": 61,
+    "carb": 121,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-11",
+    "kcal": 1748,
+    "protein": 133.7,
+    "fat": 38.7,
+    "carb": 219.2,
+    "memo": "",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-12",
+    "kcal": 1408,
+    "protein": 96.7,
+    "fat": 31.9,
+    "carb": 131.9,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-13",
+    "kcal": 1540,
+    "protein": 91,
+    "fat": 59,
+    "carb": 153,
+    "memo": "1,500kcalは少し超過だが、プロテイン追加によるタンパク質確保のため〇判定。",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-14",
+    "kcal": 1476,
+    "protein": 128.4,
+    "fat": 25.1,
+    "carb": 120.1,
+    "memo": "タンパク質は十分。筋トレ実施日としてはかなり良いP量。アルコール分込みで1500kcalほぼピタ着地。",
+    "hasDrink": true,
+    "hasTrain": true
+  },
+  {
+    "date": "2026-06-15",
+    "kcal": 1265,
+    "protein": 141,
+    "fat": 25,
+    "carb": 111,
+    "memo": "鶏ももは皮抜きで計算。焼酎ソーダ割りは1杯として概算。",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-16",
+    "kcal": 1500,
+    "protein": 30,
+    "fat": 1,
+    "carb": 2,
+    "memo": "P146gでたんぱく質はかなり良好。総カロリーは1500kcalを少し超えたけど、1566kcalなので〇判定。",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-17",
+    "kcal": 1675,
+    "protein": 133,
+    "fat": 50,
+    "carb": 132,
+    "memo": "鶏皮は脂落ち寄りで計算。ウィスキーはストレート1杯＝シングル想定。",
+    "hasDrink": true,
+    "hasTrain": true
+  },
+  {
+    "date": "2026-06-18",
+    "kcal": 1563,
+    "protein": 109.9,
+    "fat": 23.2,
+    "carb": 64.8,
+    "memo": "1500kcalは少し超えたけど、1563kcalなので許容範囲として〇。オーバー要因は主にアルコール。食事内容自体は高たんぱく・脂質控えめでかなり良い。",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-19",
+    "kcal": 2252,
+    "protein": 209.3,
+    "fat": 82.6,
+    "carb": 104.4,
+    "memo": "1500 kcalはオーバー。ただしPはかなり高く、糖質より肉・酒・つまみで積み上がった日。",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-20",
+    "kcal": 1685,
+    "protein": 120,
+    "fat": 78,
+    "carb": 122,
+    "memo": "タンパク質はP120g前後を達成。カロリーは1500kcal目標からややオーバー。",
+    "hasDrink": false,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-21",
+    "kcal": 1584,
+    "protein": 136.1,
+    "fat": 37,
+    "carb": 164.7,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-22",
+    "kcal": 1516,
+    "protein": 141.9,
+    "fat": 43,
+    "carb": 109.9,
+    "memo": "P140g超えでかなり優秀。脂質も暴れすぎず、1500付近に着地。",
+    "hasDrink": true,
+    "hasTrain": true
+  },
+  {
+    "date": "2026-06-23",
+    "kcal": 2169,
+    "protein": 154,
+    "fat": 58,
+    "carb": 193,
+    "memo": "】",
+    "hasDrink": true,
+    "hasTrain": false
+  },
+  {
+    "date": "2026-06-24",
+    "kcal": 1693,
+    "protein": 153,
+    "fat": 45,
+    "carb": 160,
+    "memo": "",
+    "hasDrink": false,
+    "hasTrain": true
+  },
+  {
+    "date": "2026-06-25",
+    "kcal": 1515,
+    "protein": 127,
+    "fat": 39,
+    "carb": 125,
+    "memo": "1500kcalを少し超過（+15kcal）だが、誤差範囲として〇判定。タンパク質は十分に確保。",
+    "hasDrink": true,
+    "hasTrain": true
+  },
+  {
+    "date": "2026-06-26",
+    "kcal": 2267,
+    "protein": 130,
+    "fat": 117.7,
+    "carb": 127,
+    "memo": "タンパク質はP130gでかなり良い。脂質はアヒージョ・チーズ・アボカド・MCTで高め。総カロリーは1500kcalを大きく超過したため判定は×。",
+    "hasDrink": true,
+    "hasTrain": false
+  }
+]
