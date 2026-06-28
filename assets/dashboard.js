@@ -763,13 +763,17 @@ function overflowDiagnosis(d) {
   return { pK, fK, cK, foodKcal, alcoholK, excess, overCap, daysErased, drivers, tips };
 }
 
-// === Tab switching ===
+// === Tab switching（再描画をまたいで選択タブを保持） ===
+let currentTab = 'training';
+try { const t = localStorage.getItem('calGuide_tab'); if (t) currentTab = t; } catch(e) {}
+function applyTab() {
+  document.querySelectorAll('.main-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === currentTab));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + currentTab));
+}
 function switchTab(id) {
-  document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  event.target.classList.add('active');
-  const el = document.getElementById('tab-'+id);
-  if (el) el.classList.add('active');
+  currentTab = id;
+  try { localStorage.setItem('calGuide_tab', id); } catch(e) {}
+  applyTab();
 }
 
 // === Body Comp form handlers (attached after render) ===
@@ -2184,6 +2188,7 @@ function render(data, calMap) {
   html += `</div>`; // end tab-sim
 
   app.innerHTML = html;
+  applyTab(); // 再描画後も選択中のタブを維持
 
   // Attach body comp handlers
   attachBCHandlers();
