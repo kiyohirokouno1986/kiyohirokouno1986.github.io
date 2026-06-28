@@ -570,12 +570,16 @@ function saveProfile(p) { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); 
 
 // 最新の実測体組成（体脂肪率がある最新日）。なければ旧定数にフォールバック。
 function liveBodyComp() {
-  const dm = loadDaily().filter(d => d.weight != null && d.fatPct != null);
-  if (!dm.length) return { weight: +(CUR_FAT + LEAN).toFixed(1), fatPct: CUR_BF, fatMass: CUR_FAT, lbm: LEAN, muscle: null, date: null, fallback: true };
-  const d = dm[dm.length - 1];
-  const fatMass = +(d.weight * d.fatPct / 100).toFixed(1);
-  const lbm = +(d.weight - fatMass).toFixed(1);
-  return { weight: d.weight, fatPct: d.fatPct, fatMass, lbm, muscle: (d.muscle != null ? d.muscle : null), date: d.date, fallback: false };
+  // 体重・体脂肪率の「直近7日移動平均」を現在地アンカーとする（単発の測定ノイズを避ける）。
+  const dm = loadDaily().filter(d => d.weight != null && d.fatPct != null).sort((a, b) => a.date.localeCompare(b.date));
+  if (!dm.length) return { weight: +(CUR_FAT + LEAN).toFixed(1), fatPct: CUR_BF, fatMass: CUR_FAT, lbm: LEAN, muscle: null, date: null, n: 0, fallback: true };
+  const last = dm.length - 1;
+  const weight = +calcMA(dm, 'weight', last, 7).toFixed(1);
+  const fatPct = +calcMA(dm, 'fatPct', last, 7).toFixed(1);
+  const mMA = calcMA(dm, 'muscle', last, 7);
+  const fatMass = +(weight * fatPct / 100).toFixed(1);
+  const lbm = +(weight - fatMass).toFixed(1);
+  return { weight, fatPct, fatMass, lbm, muscle: (mMA != null ? +mMA.toFixed(1) : null), date: dm[last].date, n: Math.min(7, dm.length), fallback: false };
 }
 
 // 予測式TDEE（Harris-Benedict改定版 BMR × 活動係数）。体重は最新実測。
@@ -1477,19 +1481,54 @@ function mealEmptyNotice(tabLabel) {
     <div style="font-size:0.82em;line-height:1.7;">${tabLabel}には食事記録（カロリー）が必要です。<br>Slack #河野食事管理 に投稿すると自動で取り込まれます（最大12時間で反映）。</div>
   </div>`;
 }
+// TDEE推定カード（GAP分析・目標設計の両タブで共有。複数配置できるようID不使用＝クラス指定）。
+function tdeeCardHTML(tdeeInfo, effTDEE) {
+  const m = tdeeInfo.measured, p = tdeeInfo.predicted, prof = tdeeInfo.profile;
+  const modeLabel = { measured:'実測', formula:'予測式', manual:'手動', 'formula-fallback':'予測式(実測不足)' }[tdeeInfo.source] || tdeeInfo.source;
+  const gap = (m.confident && p.tdee) ? (p.tdee - m.tdee) : null;
+  const usingMeasured = tdeeInfo.source === 'measured';
+  const usingFormula = tdeeInfo.source === 'formula' || tdeeInfo.source === 'formula-fallback';
+  const usingManual = tdeeInfo.source === 'manual';
+  return `<div class="card">
+      <h2>🔥 TDEE推定 ＆ シミュレーション基準</h2>
+      <div class="tdee-grid">
+        <div class="tdee-box${usingFormula?' active navy':''}">
+          ${usingFormula?'<span class="tdee-badge navy">使用中</span>':''}
+          <div class="tdee-k">予測式 <span>Harris-Benedict</span></div>
+          <div class="tdee-v" style="color:#1a237e;">${p.tdee.toLocaleString()}<span>kcal/日</span></div>
+          <div class="tdee-s">BMR ${p.bmr.toLocaleString()} × 活動 ${prof.activity}</div>
+        </div>
+        <div class="tdee-box${usingMeasured?' active green':''}">
+          ${usingMeasured?'<span class="tdee-badge green">使用中</span>':''}
+          <div class="tdee-k">実測 <span>収支逆算</span></div>
+          <div class="tdee-v" style="color:#2d6a4f;">${m.confident?m.tdee.toLocaleString():'—'}<span>kcal/日</span></div>
+          <div class="tdee-s">${m.confident?`摂取 ${m.meanIntake.toLocaleString()}／体重 ${m.slopeKgPerMonth>0?'+':''}${m.slopeKgPerMonth}kg/月／${m.spanDays}日`:'データ不足（食事14日・体重21日以上で算出）'}</div>
+        </div>
+      </div>
+      ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ15%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
+      <div class="tdee-use">シミュレーションに使用中　<b>${effTDEE.toLocaleString()} kcal/日</b><span>（${modeLabel}）</span></div>
+      <div class="dm-period-filter tdee-modes" data-tdee-mode>
+        <button data-mode="measured" class="${prof.tdeeMode==='measured'?'active':''}">実測</button>
+        <button data-mode="formula" class="${prof.tdeeMode==='formula'?'active':''}">予測式</button>
+        <button data-mode="manual" class="${prof.tdeeMode==='manual'?'active':''}">手動</button>
+      </div>
+      <div class="tdee-form">
+        <label>年齢 <input type="number" class="tdee-age" value="${prof.age}"></label>
+        <label>身長 <input type="number" class="tdee-height" value="${prof.heightCm}"><span class="u">cm</span></label>
+        <label>活動 <select class="tdee-activity">${ACTIVITY_LEVELS.map(a=>`<option value="${a.v}" ${a.v===prof.activity?'selected':''}>${a.label}</option>`).join('')}</select></label>
+        <label class="tdee-manual-wrap" style="${usingManual?'':'display:none;'}">手動値 <input type="number" class="tdee-manual" value="${prof.manualTDEE}"><span class="u">kcal</span></label>
+      </div>
+    </div>`;
+}
 function attachTDEEHandlers() {
-  const modeBtns = document.querySelectorAll('#tdee-mode button');
+  const modeBtns = document.querySelectorAll('[data-tdee-mode] button');
   if (!modeBtns.length) return;
   const save = (patch) => { const p = loadProfile(); saveProfile({ ...p, ...patch }); rerender(); };
   modeBtns.forEach(b => b.onclick = () => save({ tdeeMode: b.dataset.mode }));
-  const age = document.getElementById('tdee-age');
-  if (age) age.onchange = () => save({ age: parseInt(age.value) || PROFILE_DEFAULT.age });
-  const h = document.getElementById('tdee-height');
-  if (h) h.onchange = () => save({ heightCm: parseFloat(h.value) || PROFILE_DEFAULT.heightCm });
-  const act = document.getElementById('tdee-activity');
-  if (act) act.onchange = () => save({ activity: parseFloat(act.value) });
-  const man = document.getElementById('tdee-manual');
-  if (man) man.onchange = () => save({ manualTDEE: parseInt(man.value) || PROFILE_DEFAULT.manualTDEE });
+  document.querySelectorAll('.tdee-age').forEach(el => el.onchange = () => save({ age: parseInt(el.value) || PROFILE_DEFAULT.age }));
+  document.querySelectorAll('.tdee-height').forEach(el => el.onchange = () => save({ heightCm: parseFloat(el.value) || PROFILE_DEFAULT.heightCm }));
+  document.querySelectorAll('.tdee-activity').forEach(el => el.onchange = () => save({ activity: parseFloat(el.value) }));
+  document.querySelectorAll('.tdee-manual').forEach(el => el.onchange = () => save({ manualTDEE: parseInt(el.value) || PROFILE_DEFAULT.manualTDEE }));
 }
 function attachMealHandlers() {
   const importBtn = document.getElementById('meal-import-btn');
@@ -1631,13 +1670,22 @@ function render(data, calMap) {
     const adjDeficit = adjTDEE - DAILY_PLAN_AVG;
     const tDef = adjDeficit * dim;
     const tFat = +(tDef / 7200).toFixed(2);
-    const startBF = +(simFat / (simFat + liveLBM) * 100).toFixed(1);
-    simFat -= tFat;
-    const endBF = Math.max(TGT_BF, +(simFat / (simFat + liveLBM) * 100).toFixed(1));
-    const endFat = +(liveLBM * endBF / (100 - endBF)).toFixed(1);
-    const endWeight = +(liveLBM + endFat).toFixed(1);
     const act = imputedByMonth[ym];
     const isPast = ym < currentYM, isCurr = ym === currentYM, isFut = !isPast && !isCurr;
+    const startBF = +(simFat / (simFat + liveLBM) * 100).toFixed(1);
+    let endBF, endFat, endWeight;
+    if (isCurr) {
+      // 現在月は「実測7日平均」に固定（シミュではなく現在地）。投影は来月から。
+      endBF = startBF;
+      endFat = +simFat.toFixed(1);
+      endWeight = +(liveLBM + simFat).toFixed(1);
+    } else {
+      simFat -= tFat;
+      endBF = Math.max(TGT_BF, +(simFat / (simFat + liveLBM) * 100).toFixed(1));
+      endFat = +(liveLBM * endBF / (100 - endBF)).toFixed(1);
+      endWeight = +(liveLBM + endFat).toFixed(1);
+      rmTotalLost += tFat;
+    }
     roadmap.push({
       ym, label: `${rmM}月`, dim, startBF, endBF, endFat, endWeight, tDef, tFat,
       isPast, isCurr, isFut,
@@ -1646,7 +1694,6 @@ function render(data, calMap) {
       rec: act ? act.rec : 0, calDays: act ? act.calDays : 0, miss: act ? act.miss : 0, avg: act ? act.avg : null,
       rate: act ? Math.round((isCurr ? act.fullDef : act.impDef) / tDef * 100) : null,
     });
-    rmTotalLost += tFat;
     rmM++; if (rmM > 12) { rmM = 1; rmY++; }
   }
   const goalFat = +(liveLBM * TGT_BF / (100 - TGT_BF)).toFixed(1);
@@ -1699,44 +1746,7 @@ function render(data, calMap) {
   }
 
   // === TDEE推定 ＆ シミュレーション基準 ===
-  {
-    const m = tdeeInfo.measured, p = tdeeInfo.predicted, prof = tdeeInfo.profile;
-    const modeLabel = { measured:'実測', formula:'予測式', manual:'手動', 'formula-fallback':'予測式(実測不足)' }[tdeeInfo.source] || tdeeInfo.source;
-    const gap = (m.confident && p.tdee) ? (p.tdee - m.tdee) : null;
-    const usingMeasured = tdeeInfo.source === 'measured';
-    const usingFormula = tdeeInfo.source === 'formula' || tdeeInfo.source === 'formula-fallback';
-    const usingManual = tdeeInfo.source === 'manual';
-    html += `<div class="card">
-      <h2>🔥 TDEE推定 ＆ シミュレーション基準</h2>
-      <div class="tdee-grid">
-        <div class="tdee-box${usingFormula?' active navy':''}">
-          ${usingFormula?'<span class="tdee-badge navy">使用中</span>':''}
-          <div class="tdee-k">予測式 <span>Harris-Benedict</span></div>
-          <div class="tdee-v" style="color:#1a237e;">${p.tdee.toLocaleString()}<span>kcal/日</span></div>
-          <div class="tdee-s">BMR ${p.bmr.toLocaleString()} × 活動 ${prof.activity}</div>
-        </div>
-        <div class="tdee-box${usingMeasured?' active green':''}">
-          ${usingMeasured?'<span class="tdee-badge green">使用中</span>':''}
-          <div class="tdee-k">実測 <span>収支逆算</span></div>
-          <div class="tdee-v" style="color:#2d6a4f;">${m.confident?m.tdee.toLocaleString():'—'}<span>kcal/日</span></div>
-          <div class="tdee-s">${m.confident?`摂取 ${m.meanIntake.toLocaleString()}／体重 ${m.slopeKgPerMonth>0?'+':''}${m.slopeKgPerMonth}kg/月／${m.spanDays}日`:'データ不足（食事14日・体重21日以上で算出）'}</div>
-        </div>
-      </div>
-      ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ15%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
-      <div class="tdee-use">シミュレーションに使用中　<b>${effTDEE.toLocaleString()} kcal/日</b><span>（${modeLabel}）</span></div>
-      <div class="dm-period-filter tdee-modes" id="tdee-mode">
-        <button data-mode="measured" class="${prof.tdeeMode==='measured'?'active':''}">実測</button>
-        <button data-mode="formula" class="${prof.tdeeMode==='formula'?'active':''}">予測式</button>
-        <button data-mode="manual" class="${prof.tdeeMode==='manual'?'active':''}">手動</button>
-      </div>
-      <div class="tdee-form">
-        <label>年齢 <input type="number" id="tdee-age" value="${prof.age}"></label>
-        <label>身長 <input type="number" id="tdee-height" value="${prof.heightCm}"><span class="u">cm</span></label>
-        <label>活動 <select id="tdee-activity">${ACTIVITY_LEVELS.map(a=>`<option value="${a.v}" ${a.v===prof.activity?'selected':''}>${a.label}</option>`).join('')}</select></label>
-        <label id="tdee-manual-wrap" style="${usingManual?'':'display:none;'}">手動値 <input type="number" id="tdee-manual" value="${prof.manualTDEE}"><span class="u">kcal</span></label>
-      </div>
-    </div>`;
-  }
+  html += tdeeCardHTML(tdeeInfo, effTDEE);
 
   // === 15% Roadmap - Current Month Progress (TOP) ===
   if (curRM) {
@@ -1757,7 +1767,7 @@ function render(data, calMap) {
       <div style="text-align:center;margin-bottom:14px;padding:10px 0;background:rgba(255,255,255,0.06);border-radius:10px;">
         <div style="font-size:0.72em;opacity:0.6;">今月の実績ベース脂肪減</div>
         <div style="font-size:2em;font-weight:800;color:#64ffda;line-height:1.1;">-${Math.abs(fatLostThisMonth)}<span style="font-size:0.35em;">kg</span></div>
-        <div style="font-size:0.75em;opacity:0.5;margin-top:4px;">月末予測: -${Math.abs(fatProjThisMonth)}kg ／ 目標: -${curRM.tFat}kg ／ 残り${liveFatToLose}kgで約${roadmap.length-1}ヶ月</div>
+        <div style="font-size:0.75em;opacity:0.5;margin-top:4px;">月末予測: -${Math.abs(fatProjThisMonth)}kg ／ 目標: -${curRM.tFat}kg ／ 残り${liveFatToLose}kgで約${effPlanMonths}ヶ月</div>
       </div>
       <div class="roadmap-kpi">
         <div class="roadmap-kpi-item"><div class="rl">今月の目標赤字</div><div class="rv" style="color:#ffd740;">-${curRM.tDef.toLocaleString()}<span style="font-size:0.4em;">kcal</span></div><div class="rs" style="opacity:0.5;">(-${effDeficitPlan}kcal/日 × ${curRM.dim}日)</div></div>
@@ -1788,7 +1798,7 @@ function render(data, calMap) {
     html += `<tr class="${rc}"><td>${rm.label}${rm.isCurr?' <span style="font-size:0.75em;color:#64ffda;">now</span>':''}${rm.miss>0?' <span style="font-size:0.65em;opacity:0.5;" title="'+rm.miss+'日分を平均値で補完">*</span>':''}</td><td>${rm.endBF}%</td><td style="color:#ffd740;">-${rm.tDef.toLocaleString()}</td><td style="color:${dDef!=null&&dDef>0?'#64ffda':'#ff5252'};">${dDef!=null?'-'+Math.abs(Math.round(dDef)).toLocaleString():'―'}${rm.isCurr?'<span style="font-size:0.7em;opacity:0.5;"> 予測</span>':''}</td><td>${dFat!=null?'-'+Math.abs(dFat)+'kg':'―'}</td><td>${badge}</td></tr>`;
   }
   html += `</tbody></table>
-    <div style="margin-top:10px;font-size:0.72em;opacity:0.5;padding-left:8px;border-left:2px solid rgba(255,255,255,0.15);">目標赤字 = TDEE(${effTDEE}・${tdeeInfo.source==='measured'?'実測':tdeeInfo.source==='manual'?'手動':'予測式'}) - Plan C平均(${DAILY_PLAN_AVG}) = ${effDeficitPlan}kcal/日。脂肪1kg = 7,200kcal。* = 未記録日を平均値で補完。BF%・体重は最新実測（${bc2.date||'—'}）から起算。</div>
+    <div style="margin-top:10px;font-size:0.72em;opacity:0.5;padding-left:8px;border-left:2px solid rgba(255,255,255,0.15);">目標赤字 = TDEE(${effTDEE}・${tdeeInfo.source==='measured'?'実測':tdeeInfo.source==='manual'?'手動':'予測式'}) - Plan C平均(${DAILY_PLAN_AVG}) = ${effDeficitPlan}kcal/日。脂肪1kg = 7,200kcal。* = 未記録日を平均値で補完。BF%・体重は日次計測の直近7日平均（${bc2.date||'—'}時点）が起点で、現在月は実測アンカー（来月から投影）。</div>
   </div>`;
 
   // Weekly summary strip
@@ -2363,6 +2373,9 @@ function render(data, calMap) {
   // ===================== TAB 4: シミュレーション =====================
   html += `<div id="tab-sim" class="tab-content">`;
 
+  // TDEE推定カード（目標設計タブにも配置。GAP分析と同期）
+  html += tdeeCardHTML(tdeeInfo, effTDEE);
+
   html += `<div class="plan-reminder"><h3>Plan C ― メリハリ型カロリー管理</h3>
     <div class="pr-grid"><div class="pr-box"><div class="pv">1,500</div><div class="pl">節制日 × 週4日</div></div><div class="pr-box"><div class="pv">2,200</div><div class="pl">飲食日 × 週3日</div></div></div>
     <div style="text-align:center;margin-top:10px;font-size:0.82em;opacity:0.9;">週平均 ${DAILY_PLAN_AVG} kcal ／ 赤字 -${effDeficitPlan} kcal/日 ／ 月 -${effPlanMonthly}kg脂肪</div></div>`;
@@ -2382,7 +2395,7 @@ function render(data, calMap) {
   html += `<div class="card" style="margin-top:14px;"><h2>体脂肪率シミュレーション → 15%</h2><canvas id="simChart"></canvas></div>`;
 
   html += `<div class="card"><h2>Plan C 月別推移予測</h2>
-    <div style="font-size:0.74em;color:#888;margin-bottom:6px;">最新実測（${bc2.date||'—'}）の体脂肪量 ${liveFat}kg・除脂肪 ${liveLBM}kg を起点に、TDEE ${effTDEE}（${tdeeInfo.source==='measured'?'実測':tdeeInfo.source==='manual'?'手動':'予測式'}）×Plan C平均${DAILY_PLAN_AVG}kcalで試算。上の月別ロードマップと同一エンジン。</div>
+    <div style="font-size:0.74em;color:#888;margin-bottom:6px;">日次計測の直近7日平均（${bc2.date||'—'}時点）の体脂肪量 ${liveFat}kg・除脂肪 ${liveLBM}kg を起点に、TDEE ${effTDEE}（${tdeeInfo.source==='measured'?'実測':tdeeInfo.source==='manual'?'手動':'予測式'}）×Plan C平均${DAILY_PLAN_AVG}kcalで試算。6月は実測アンカー、上の月別ロードマップと同一エンジン。</div>
     <table class="proj-table"><thead><tr><th>月</th><th>体脂肪率</th><th>体脂肪量</th><th>推定体重</th></tr></thead><tbody>`;
   for (const rm of roadmap) {
     const isGoal = rm.isGoal;
