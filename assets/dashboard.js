@@ -1099,6 +1099,35 @@ function drawWaistChart(allData, periodDays) {
 // === Daily measurement handlers ===
 let dmChartInstance = null;
 let dmComboChartInstance = null;
+
+// カロリー計測を始めた日（5/14）のマーカー。
+// 表示中のデータ範囲に5/14が含まれるときだけインデックスを返す（含まれなければ -1）。
+const CAL_START_DATE = '2026-05-14';
+function calStartMarkerIndex(data) {
+  if (!data.length || data[0].date > CAL_START_DATE) return -1;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].date >= CAL_START_DATE) return i;
+  }
+  return -1;
+}
+function calStartLinePlugin(markerIdx, yScaleId) {
+  return { id: 'calStartLine', afterDraw(chart) {
+    if (markerIdx < 0) return;
+    const xScale = chart.scales.x, yScale = chart.scales[yScaleId];
+    if (!xScale || !yScale) return;
+    const c = chart.ctx;
+    const x = xScale.getPixelForValue(markerIdx);
+    c.save();
+    c.strokeStyle = '#6c5ce7'; c.lineWidth = 2; c.setLineDash([5,3]);
+    c.beginPath(); c.moveTo(x, yScale.top); c.lineTo(x, yScale.bottom); c.stroke();
+    c.setLineDash([]);
+    c.fillStyle = '#6c5ce7'; c.font = 'bold 9px sans-serif'; c.textBaseline = 'top';
+    const mid = (xScale.left + xScale.right) / 2;
+    if (x > mid) { c.textAlign = 'right'; c.fillText('5/14 管理開始', x - 4, yScale.top + 2); }
+    else { c.textAlign = 'left'; c.fillText('5/14 管理開始', x + 4, yScale.top + 2); }
+    c.restore();
+  }};
+}
 function attachDMHandlers(dmData) {
   const toggleBtn = document.getElementById('dm-toggle-btn');
   const form = document.getElementById('dm-form');
@@ -1210,9 +1239,10 @@ function drawDMComboChart(allDmData, periodDays) {
     });
     ctx2.restore();
   }};
+  const comboCalStartPlugin = calStartLinePlugin(calStartMarkerIndex(dmData), 'yMuscle');
   dmComboChartInstance = new Chart(ctx.getContext('2d'), {
     type: 'line',
-    plugins: [comboMonthPlugin],
+    plugins: [comboMonthPlugin, comboCalStartPlugin],
     data: {
       labels,
       datasets: [
@@ -1314,6 +1344,8 @@ function drawDMChart(allDmData, metric, periodDays) {
     });
     ctx2.restore();
   }};
+  const calStartIdx = calStartMarkerIndex(dmData);
+  const calStartPlugin = calStartLinePlugin(calStartIdx, 'y');
   dmChartInstance = new Chart(ctx.getContext('2d'), {
     type: 'line',
     data: {
@@ -1344,7 +1376,7 @@ function drawDMChart(allDmData, metric, periodDays) {
         }
       ]
     },
-    plugins: [monthPlugin],
+    plugins: [monthPlugin, calStartPlugin],
     options: {
       responsive: true,
       interaction: { mode: 'index', intersect: false },
@@ -1360,25 +1392,12 @@ function drawDMChart(allDmData, metric, periodDays) {
   });
 }
 
-// === Meal import UI (replaces Slack auto-fetch while API is deferred) ===
-function mealImportCard() {
-  const count = loadMeals().length;
-  return `<div class="card" style="border-left:4px solid #6c5ce7;">
-    <h2>🍽️ 食事データの取り込み <span style="font-size:0.7em;color:#888;font-weight:400;">（現在 ${count}日分）</span></h2>
-    <p style="font-size:0.78em;color:#888;margin-bottom:8px;">Slack #河野食事管理 の投稿テキストを貼り付けて取り込みます。（Slack / Google Calendar の自動連携は次フェーズ）</p>
-    <textarea id="meal-import-text" style="width:100%;min-height:90px;border:1px solid #ddd;border-radius:8px;padding:8px;font-size:0.82em;font-family:inherit;" placeholder="例）5/14 食事レコード&#10;総カロリー: 約1,450 kcal&#10;P：約120g　F：約52g　C：約160g&#10;メモ: 鶏胸肉中心"></textarea>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center;">
-      <button class="bc-btn bc-btn-primary" id="meal-import-btn">テキストから取り込む</button>
-      <label class="bc-btn bc-btn-secondary" style="cursor:pointer;">JSON/テキストファイル…<input type="file" id="meal-import-file" accept=".json,.txt,.csv,text/plain,application/json" style="display:none;"></label>
-      ${count ? `<button class="bc-btn bc-btn-secondary" id="meal-clear-btn" style="margin-left:auto;color:#c62828;">全消去</button>` : ''}
-    </div>
-  </div>`;
-}
+// === Meal empty-state notice (data now flows in via Slack auto-sync) ===
 function mealEmptyNotice(tabLabel) {
   return `<div class="card" style="text-align:center;padding:32px 18px;color:#888;">
     <div style="font-size:2.2em;">🍽️</div>
     <div style="font-size:0.95em;font-weight:700;color:#555;margin:8px 0;">食事データがまだありません</div>
-    <div style="font-size:0.82em;line-height:1.7;">${tabLabel}には食事記録（カロリー）が必要です。<br>「食事実績」タブの取り込み欄からSlackの食事記録を貼り付けてください。</div>
+    <div style="font-size:0.82em;line-height:1.7;">${tabLabel}には食事記録（カロリー）が必要です。<br>Slack #河野食事管理 に投稿すると自動で取り込まれます（最大12時間で反映）。</div>
   </div>`;
 }
 function attachMealHandlers() {
@@ -1797,17 +1816,30 @@ function render(data, calMap) {
 
   // ===================== TAB 2: 実績トラッカー =====================
   html += `<div id="tab-tracker" class="tab-content">`;
-  html += mealImportCard();
   if (all.length === 0) {
     html += mealEmptyNotice('食事実績');
   } else {
 
   // Calorie chart
-  html += `<div class="card"><h2>カロリー推移</h2><canvas id="weekChart"></canvas></div>`;
+  html += `<div class="card"><h2>カロリー推移</h2>
+    <div class="dm-period-filter" id="wk-period-filter">
+      <button data-period="30">1M</button>
+      <button data-period="90">3M</button>
+      <button data-period="180">6M</button>
+      <button class="active" data-period="0">ALL</button>
+    </div>
+    <canvas id="weekChart"></canvas></div>`;
 
   // Protein chart
   if (pAll.length >= 3) {
-    html += `<div class="card"><h2>プロテイン推移</h2><canvas id="proteinChart"></canvas></div>`;
+    html += `<div class="card"><h2>プロテイン推移</h2>
+    <div class="dm-period-filter" id="prot-period-filter">
+      <button data-period="30">1M</button>
+      <button data-period="90">3M</button>
+      <button data-period="180">6M</button>
+      <button class="active" data-period="0">ALL</button>
+    </div>
+    <canvas id="proteinChart"></canvas></div>`;
   }
 
   // PFC donut
@@ -2344,16 +2376,27 @@ function render(data, calMap) {
     });
   }
 
-  // Week chart with calendar annotations
-  const wkCtx = document.getElementById('weekChart');
-  if (wkCtx) {
+  // Week chart with calendar annotations (period-filterable)
+  let weekChartInstance = null;
+  function drawWeekChart(periodDays) {
+    const wkCtx = document.getElementById('weekChart');
+    if (!wkCtx) return;
+    let wkData = all;
+    if (periodDays > 0) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - periodDays);
+      const cutoffStr = cutoff.toISOString().slice(0, 10);
+      wkData = all.filter(d => d.date >= cutoffStr);
+    }
+    if (wkData.length === 0) wkData = all;
+    if (weekChartInstance) weekChartInstance.destroy();
     const wkTgtPlugin = {id:'tgtLines',afterDraw(chart){const c=chart.ctx,y=chart.scales.y,x=chart.scales.x;c.save();c.setLineDash([5,3]);c.lineWidth=1.5;[{v:STRICT,col:'#1565c0'},{v:FREE,col:'#e65100'}].forEach(l=>{const py=y.getPixelForValue(l.v);c.strokeStyle=l.col;c.beginPath();c.moveTo(x.left,py);c.lineTo(x.right,py);c.stroke();});c.restore();}};
     const wkCalAnnotPlugin = {id:'calAnnot',afterDraw(chart){
       if (!calMap || !Object.keys(calMap).length) return;
       const ctx2 = chart.ctx;
       const meta = chart.getDatasetMeta(0);
       ctx2.save();
-      all.forEach((d, i) => {
+      wkData.forEach((d, i) => {
         if (classify(d) !== 'over') return;
         const ann = calMap[d.date];
         if (!ann) return;
@@ -2383,28 +2426,61 @@ function render(data, calMap) {
       ctx2.restore();
     }};
     const DOW = ['日','月','火','水','木','金','土'];
-    new Chart(wkCtx.getContext('2d'), {
+    weekChartInstance = new Chart(wkCtx.getContext('2d'), {
       type:'bar',
-      data:{labels:all.map(d=>{const dt=new Date(d.date+'T12:00:00');return `${dt.getMonth()+1}/${dt.getDate()}`;}),datasets:[{data:all.map(d=>d.kcal),backgroundColor:all.map(d=>{const t=classify(d);return t==='over'?'rgba(198,40,40,0.7)':t==='free'?'rgba(230,81,0,0.65)':'rgba(21,101,192,0.65)';}),borderRadius:4,borderSkipped:false}]},
+      data:{labels:wkData.map(d=>{const dt=new Date(d.date+'T12:00:00');return `${dt.getMonth()+1}/${dt.getDate()}`;}),datasets:[{data:wkData.map(d=>d.kcal),backgroundColor:wkData.map(d=>{const t=classify(d);return t==='over'?'rgba(198,40,40,0.7)':t==='free'?'rgba(230,81,0,0.65)':'rgba(21,101,192,0.65)';}),borderRadius:4,borderSkipped:false}]},
       plugins:[wkTgtPlugin, wkCalAnnotPlugin],
       options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{
-        title:function(items){const idx=items[0].dataIndex;const d=all[idx];const dt=new Date(d.date+'T12:00:00');return `${dt.getMonth()+1}/${dt.getDate()} (${DOW[dt.getDay()]})`;},
-        afterTitle:function(items){const idx=items[0].dataIndex;const d=all[idx];if(calMap&&calMap[d.date])return '📅 '+calMap[d.date].full.replace(/\n/g, ', ');return '';},
+        title:function(items){const idx=items[0].dataIndex;const d=wkData[idx];const dt=new Date(d.date+'T12:00:00');return `${dt.getMonth()+1}/${dt.getDate()} (${DOW[dt.getDay()]})`;},
+        afterTitle:function(items){const idx=items[0].dataIndex;const d=wkData[idx];if(calMap&&calMap[d.date])return '📅 '+calMap[d.date].full.replace(/\n/g, ', ');return '';},
         label:function(item){return item.parsed.y.toLocaleString()+' kcal';}
-      }}},scales:{y:{min:0,max:Math.max(4500,...all.map(d=>d.kcal))+300,ticks:{font:{size:9},callback:v=>v.toLocaleString()}},x:{ticks:{font:{size:8}}}}}
+      }}},scales:{y:{min:0,max:Math.max(4500,...wkData.map(d=>d.kcal))+300,ticks:{font:{size:9},callback:v=>v.toLocaleString()}},x:{ticks:{font:{size:8}}}}}
+    });
+  }
+  if (document.getElementById('weekChart')) {
+    drawWeekChart(0);
+    const wkPBtns = document.querySelectorAll('#wk-period-filter button');
+    wkPBtns.forEach(btn => {
+      btn.onclick = () => {
+        wkPBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        drawWeekChart(parseInt(btn.dataset.period));
+      };
     });
   }
 
-  // Protein chart
-  const protCtx = document.getElementById('proteinChart');
-  if (protCtx && pAll.length >= 3) {
-    new Chart(protCtx.getContext('2d'), {
-      type:'bar', data:{labels:pAll.map(d=>{const dt=new Date(d.date+'T12:00:00');return `${dt.getMonth()+1}/${dt.getDate()}`;}),datasets:[
-        {label:'タンパク質(g)',data:pAll.map(d=>Math.round(d.protein)),backgroundColor:pAll.map(d=>d.protein>=PROTEIN_TARGET?'rgba(67,160,71,0.7)':d.protein>=PROTEIN_MIN?'rgba(255,179,0,0.7)':'rgba(229,57,53,0.7)'),borderRadius:4,borderSkipped:false},
-        {label:`目標 ${PROTEIN_TARGET}g`,data:Array(pAll.length).fill(PROTEIN_TARGET),type:'line',borderColor:'#2d6a4f',borderDash:[6,4],pointRadius:0,borderWidth:2,fill:false},
-        {label:`最低ライン ${PROTEIN_MIN}g`,data:Array(pAll.length).fill(PROTEIN_MIN),type:'line',borderColor:'#e65100',borderDash:[4,3],pointRadius:0,borderWidth:2,fill:false},
+  // Protein chart (period-filterable)
+  let proteinChartInstance = null;
+  function drawProteinChart(periodDays) {
+    const protCtx = document.getElementById('proteinChart');
+    if (!protCtx || pAll.length < 3) return;
+    let pData = pAll;
+    if (periodDays > 0) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - periodDays);
+      const cutoffStr = cutoff.toISOString().slice(0, 10);
+      pData = pAll.filter(d => d.date >= cutoffStr);
+    }
+    if (pData.length === 0) pData = pAll;
+    if (proteinChartInstance) proteinChartInstance.destroy();
+    proteinChartInstance = new Chart(protCtx.getContext('2d'), {
+      type:'bar', data:{labels:pData.map(d=>{const dt=new Date(d.date+'T12:00:00');return `${dt.getMonth()+1}/${dt.getDate()}`;}),datasets:[
+        {label:'タンパク質(g)',data:pData.map(d=>Math.round(d.protein)),backgroundColor:pData.map(d=>d.protein>=PROTEIN_TARGET?'rgba(67,160,71,0.7)':d.protein>=PROTEIN_MIN?'rgba(255,179,0,0.7)':'rgba(229,57,53,0.7)'),borderRadius:4,borderSkipped:false},
+        {label:`目標 ${PROTEIN_TARGET}g`,data:Array(pData.length).fill(PROTEIN_TARGET),type:'line',borderColor:'#2d6a4f',borderDash:[6,4],pointRadius:0,borderWidth:2,fill:false},
+        {label:`最低ライン ${PROTEIN_MIN}g`,data:Array(pData.length).fill(PROTEIN_MIN),type:'line',borderColor:'#e65100',borderDash:[4,3],pointRadius:0,borderWidth:2,fill:false},
       ]},
       options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:9},usePointStyle:true,padding:8}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y+'g'}}},scales:{y:{min:0,max:200,ticks:{font:{size:9}}},x:{ticks:{font:{size:8}}}}}
+    });
+  }
+  if (document.getElementById('proteinChart')) {
+    drawProteinChart(0);
+    const protPBtns = document.querySelectorAll('#prot-period-filter button');
+    protPBtns.forEach(btn => {
+      btn.onclick = () => {
+        protPBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        drawProteinChart(parseInt(btn.dataset.period));
+      };
     });
   }
 
