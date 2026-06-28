@@ -303,12 +303,6 @@ canvas { max-height: 260px; margin-top: 8px; }
 .tdee-form input, .tdee-form select { border: 1px solid #ddd; border-radius: 6px; padding: 4px 7px; font-size: 1em; font-family: inherit; color: #333; background: #fff; }
 .tdee-form input[type=number] { width: 56px; }
 .tdee-form select { max-width: 170px; }
-.tdee-form input[type=range] { width: 96px; }
-.tdee-bracket { background: #f6f6f9; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
-.tdee-bracket .tbk-l { font-size: 0.68em; color: #888; margin-bottom: 5px; }
-.tdee-bracket .tbk-row { display: flex; gap: 6px; flex-wrap: wrap; }
-.tdee-bracket .tbk { font-size: 0.7em; color: #555; background: #fff; border: 1px solid #e2e2ea; border-radius: 6px; padding: 3px 8px; }
-.tdee-bracket .tbk.on { border-color: #1a237e; color: #1a237e; font-weight: 700; background: #eef0fb; }
 
 /* ===== スマートフォン対応 ===== */
 @media (max-width: 480px) {

@@ -561,9 +561,7 @@ const ACTIVITY_LEVELS = [
   { v: 1.55,  label: '中程度（週3〜5回）' },
   { v: 1.725, label: '激しい（週6〜7回）' },
 ];
-// 成分モデル用：生活活動係数（運動を除く日常）。トレ消費は別途セッションで加算。
-const PROFILE_DEFAULT = { age: 39, heightCm: 169, activity: 1.375, tdeeMode: 'measured', manualTDEE: 2230,
-  neatMult: 1.25, sessionKcal: 300, alcFactor: 0.5 };
+const PROFILE_DEFAULT = { age: 39, heightCm: 169, activity: 1.375, tdeeMode: 'measured', manualTDEE: 2230 };
 function loadProfile() {
   try { const raw = localStorage.getItem(PROFILE_KEY); if (raw) { const p = JSON.parse(raw); if (p && typeof p === 'object') return { ...PROFILE_DEFAULT, ...p }; } } catch(e) {}
   return { ...PROFILE_DEFAULT };
@@ -622,55 +620,18 @@ function estimateTDEEMeasured() {
   return out;
 }
 
-// 1日の推定アルコールkcal（残差法：総kcal − PFC由来kcal）。PFCが無ければ0。
-function estAlcoholK(d) {
-  if (d == null || d.protein == null) return 0;
-  const r = d.kcal - (d.protein * 4 + (d.fat || 0) * 9 + (d.carb || 0) * 4);
-  return Math.max(0, Math.round(r));
-}
-
-// 成分（日別）モデルの集計。BMR×生活活動 ＋ トレ消費 − 飲酒の脂肪燃焼ストップ。平均は予測/実測とのクロスチェック用。
-function componentStats(profile, bmr) {
-  const meals = enrichMealsPFC(loadMeals()).filter(m => m.kcal);
-  if (!meals.length) return null;
-  const neat = profile.neatMult || 1.25, session = profile.sessionKcal || 300;
-  let sumBase = 0, sumAlcK = 0, nTrain = 0, nDrink = 0, sumAlcOnDrink = 0;
-  for (const d of meals) {
-    sumBase += bmr * neat + (d.hasTrain ? session : 0);
-    if (d.hasTrain) nTrain++;
-    if (d.hasDrink) { nDrink++; const ak = estAlcoholK(d); sumAlcK += ak; sumAlcOnDrink += ak; }
-  }
-  const n = meals.length;
-  const avgBase = sumBase / n;
-  const avgAlcPerDay = sumAlcK / n;
-  const f = (profile.alcFactor != null ? profile.alcFactor : 0.5);
-  const eff = factor => Math.round(avgBase - factor * avgAlcPerDay);
-  return {
-    n, neat, session, bmr, f,
-    avgBase: Math.round(avgBase), avgAlcPerDay: Math.round(avgAlcPerDay),
-    avgAlcOnDrink: nDrink ? Math.round(sumAlcOnDrink / nDrink) : 0,
-    nTrain, nDrink, trainPerWk: +(nTrain / n * 7).toFixed(1), drinkPerWk: +(nDrink / n * 7).toFixed(1),
-    effFatTDEE: eff(f), bracket: { p03: eff(0.3), p05: eff(0.5), p10: eff(1.0) },
-  };
-}
-
-// モードに応じて採用するTDEEを返す（実測 / 予測式 / 手動 / 成分）。実測/成分がデータ不足なら予測式に自動フォールバック。
+// モードに応じて採用するTDEEを返す（実測 / 予測式 / 手動）。実測がデータ不足なら予測式に自動フォールバック。
 function effectiveTDEE() {
   const profile = loadProfile();
   const bc = liveBodyComp();
   const measured = estimateTDEEMeasured();
   const predicted = predictTDEE(profile, bc.weight);
-  const component = componentStats(profile, predicted.bmr);
   let tdee, source;
   if (profile.tdeeMode === 'formula') { tdee = predicted.tdee; source = 'formula'; }
   else if (profile.tdeeMode === 'manual') { tdee = profile.manualTDEE; source = 'manual'; }
-  else if (profile.tdeeMode === 'component') {
-    if (component) { tdee = component.effFatTDEE; source = 'component'; }
-    else { tdee = predicted.tdee; source = 'formula-fallback'; }
-  }
   else if (measured.confident) { tdee = measured.tdee; source = 'measured'; }
   else { tdee = predicted.tdee; source = 'formula-fallback'; }
-  return { tdee, source, profile, bc, measured, predicted, component };
+  return { tdee, source, profile, bc, measured, predicted };
 }
 // 取得できなかった日のPFCを補完データで埋める
 function enrichMealsPFC(meals) {
@@ -1522,32 +1483,12 @@ function mealEmptyNotice(tabLabel) {
 }
 // TDEE推定カード（GAP分析・目標設計の両タブで共有。複数配置できるようID不使用＝クラス指定）。
 function tdeeCardHTML(tdeeInfo, effTDEE) {
-  const m = tdeeInfo.measured, p = tdeeInfo.predicted, prof = tdeeInfo.profile, cs = tdeeInfo.component;
-  const modeLabel = { measured:'実測', formula:'予測式', manual:'手動', component:'成分(日別)', 'formula-fallback':'予測式(実測不足)' }[tdeeInfo.source] || tdeeInfo.source;
+  const m = tdeeInfo.measured, p = tdeeInfo.predicted, prof = tdeeInfo.profile;
+  const modeLabel = { measured:'実測', formula:'予測式', manual:'手動', 'formula-fallback':'予測式(実測不足)' }[tdeeInfo.source] || tdeeInfo.source;
   const gap = (m.confident && p.tdee) ? (p.tdee - m.tdee) : null;
   const usingMeasured = tdeeInfo.source === 'measured';
   const usingFormula = tdeeInfo.source === 'formula' || tdeeInfo.source === 'formula-fallback';
   const usingManual = tdeeInfo.source === 'manual';
-  const usingComp = tdeeInfo.source === 'component';
-  // 成分モード時の内訳＋アルコール感度（0.3/0.5/1.0を併記）
-  let compBlock = '';
-  if (usingComp && cs) {
-    const monthly = (tdee) => +(((tdee - DAILY_PLAN_AVG) * 30 / 7200)).toFixed(2); // Plan C平均1800での月間脂肪減
-    const reconcile = m.confident ? cs.effFatTDEE - m.tdee : null;
-    compBlock = `
-      <div class="tdee-note">
-        <b>成分（日別）の内訳</b>　ベース BMR${cs.bmr.toLocaleString()}×${cs.neat} = ${Math.round(cs.bmr*cs.neat).toLocaleString()}／トレ日 +${cs.session}（週${cs.trainPerWk}）／飲酒 −${Math.round(cs.avgAlcPerDay*cs.f)}〜/日（週${cs.drinkPerWk}・1杯前後${cs.avgAlcOnDrink}kcal）<br>
-        平均メンテ（脂肪燃焼換算）≈ <b>${cs.effFatTDEE.toLocaleString()} kcal/日</b>${reconcile!=null?`　<span style="color:${Math.abs(reconcile)<=120?'#2d6a4f':'#b34700'};">↳ 実測${m.tdee.toLocaleString()}と差${reconcile>0?'+':''}${reconcile}（${Math.abs(reconcile)<=120?'整合OK':'要調整'}）</span>`:''}
-      </div>
-      <div class="tdee-bracket">
-        <div class="tbk-l">お酒の脂肪燃焼ストップ感度（弱⇄強）— 月間脂肪減への影響を併記</div>
-        <div class="tbk-row">
-          <span class="tbk ${cs.f===0.3?'on':''}">×0.3 → ${cs.bracket.p03.toLocaleString()}kcal（月-${monthly(cs.bracket.p03)}kg）</span>
-          <span class="tbk ${cs.f===0.5?'on':''}">×0.5 → ${cs.bracket.p05.toLocaleString()}kcal（月-${monthly(cs.bracket.p05)}kg）</span>
-          <span class="tbk ${cs.f===1?'on':''}">×1.0 → ${cs.bracket.p10.toLocaleString()}kcal（月-${monthly(cs.bracket.p10)}kg）</span>
-        </div>
-      </div>`;
-  }
   return `<div class="card">
       <h2>🔥 TDEE推定 ＆ シミュレーション基準</h2>
       <div class="tdee-grid">
@@ -1565,12 +1506,10 @@ function tdeeCardHTML(tdeeInfo, effTDEE) {
         </div>
       </div>
       ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ15%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
-      ${compBlock}
       <div class="tdee-use">シミュレーションに使用中　<b>${effTDEE.toLocaleString()} kcal/日</b><span>（${modeLabel}）</span></div>
       <div class="dm-period-filter tdee-modes" data-tdee-mode>
         <button data-mode="measured" class="${prof.tdeeMode==='measured'?'active':''}">実測</button>
         <button data-mode="formula" class="${prof.tdeeMode==='formula'?'active':''}">予測式</button>
-        <button data-mode="component" class="${prof.tdeeMode==='component'?'active':''}">成分</button>
         <button data-mode="manual" class="${prof.tdeeMode==='manual'?'active':''}">手動</button>
       </div>
       <div class="tdee-form">
@@ -1578,8 +1517,6 @@ function tdeeCardHTML(tdeeInfo, effTDEE) {
         <label>身長 <input type="number" class="tdee-height" value="${prof.heightCm}"><span class="u">cm</span></label>
         <label>活動 <select class="tdee-activity">${ACTIVITY_LEVELS.map(a=>`<option value="${a.v}" ${a.v===prof.activity?'selected':''}>${a.label}</option>`).join('')}</select></label>
         <label class="tdee-manual-wrap" style="${usingManual?'':'display:none;'}">手動値 <input type="number" class="tdee-manual" value="${prof.manualTDEE}"><span class="u">kcal</span></label>
-        <label class="tdee-comp-wrap" style="${usingComp?'':'display:none;'}">トレ消費 <input type="number" class="tdee-session" value="${prof.sessionKcal}"><span class="u">kcal</span></label>
-        <label class="tdee-comp-wrap" style="${usingComp?'':'display:none;'}">お酒感度 <input type="range" class="tdee-alcfactor" min="0.3" max="1" step="0.1" value="${prof.alcFactor}"><span class="u tdee-alc-val">×${prof.alcFactor}</span></label>
       </div>
     </div>`;
 }
@@ -1592,11 +1529,6 @@ function attachTDEEHandlers() {
   document.querySelectorAll('.tdee-height').forEach(el => el.onchange = () => save({ heightCm: parseFloat(el.value) || PROFILE_DEFAULT.heightCm }));
   document.querySelectorAll('.tdee-activity').forEach(el => el.onchange = () => save({ activity: parseFloat(el.value) }));
   document.querySelectorAll('.tdee-manual').forEach(el => el.onchange = () => save({ manualTDEE: parseInt(el.value) || PROFILE_DEFAULT.manualTDEE }));
-  document.querySelectorAll('.tdee-session').forEach(el => el.onchange = () => save({ sessionKcal: parseInt(el.value) || PROFILE_DEFAULT.sessionKcal }));
-  document.querySelectorAll('.tdee-alcfactor').forEach(el => {
-    el.oninput = () => { const v = el.parentElement.querySelector('.tdee-alc-val'); if (v) v.textContent = '×' + parseFloat(el.value).toFixed(1); };
-    el.onchange = () => save({ alcFactor: parseFloat(el.value) });
-  });
 }
 function attachMealHandlers() {
   const importBtn = document.getElementById('meal-import-btn');
@@ -1652,17 +1584,6 @@ function render(data, calMap) {
   const effPlanMonthly = +(effDeficitPlan * 30 / 7200).toFixed(1);
   const effPlanMonths = effPlanMonthly > 0 ? Math.round(liveFatToLose / effPlanMonthly) : 999;
 
-  // 日別の「脂肪燃焼換算メンテナンス」。成分モードはトレ+αと飲酒-αを日別反映。それ以外はフラットなeffTDEE。
-  const isComp = tdeeInfo.source === 'component';
-  const compProf = tdeeInfo.profile, compBMR = tdeeInfo.predicted.bmr;
-  const dayMaint = (d) => {
-    if (!isComp) return effTDEE;
-    const base = compBMR * (compProf.neatMult || 1.25) + (d.hasTrain ? (compProf.sessionKcal || 300) : 0);
-    const alc = d.hasDrink ? Math.round(estAlcoholK(d) * (compProf.alcFactor != null ? compProf.alcFactor : 0.5)) : 0;
-    return Math.round(base - alc);
-  };
-  const dayDef = (d) => dayMaint(d) - d.kcal; // その日の脂肪燃焼換算の赤字
-
   // Stats
   const avgCal = Math.round(last7.reduce((s,d)=>s+d.kcal,0)/last7.length);
   const pD = last7.filter(d=>d.protein);
@@ -1670,7 +1591,8 @@ function render(data, calMap) {
   const avgF = pD.filter(d=>d.fat).length ? Math.round(pD.filter(d=>d.fat).reduce((s,d)=>s+(d.fat||0),0)/pD.filter(d=>d.fat).length) : null;
   const avgC = pD.filter(d=>d.carb).length ? Math.round(pD.filter(d=>d.carb).reduce((s,d)=>s+(d.carb||0),0)/pD.filter(d=>d.carb).length) : null;
   const wkTotal = last7.reduce((s,d)=>s+d.kcal,0);
-  const wkDeficit = last7.reduce((s,d)=>s+dayDef(d),0);
+  const wkTDEE = effTDEE * last7.length;
+  const wkDeficit = wkTotal - wkTDEE;
   const dailyDef = wkDeficit / last7.length;
   const actMonthly = +(Math.abs(dailyDef)*30/7200).toFixed(1);
   const actMonths = actMonthly > 0 ? Math.round(liveFatToLose / actMonthly) : 999;
@@ -1694,11 +1616,11 @@ function render(data, calMap) {
   const ifCappedDeficit = effTDEE - ifCappedAvg;
   const ifCappedMonthly = +(Math.abs(ifCappedDeficit)*30/7200).toFixed(1);
 
-  // Cumulative deficit tracker (累計カロリー赤字) — 成分モードは日別補正を反映
+  // Cumulative deficit tracker (累計カロリー赤字)
   const cumDeficits = [];
   let cumTotal = 0;
   for (const d of all) {
-    const dayDeficit = dayDef(d); // positive = deficit, negative = surplus
+    const dayDeficit = effTDEE - d.kcal; // positive = deficit, negative = surplus
     cumTotal += dayDeficit;
     cumDeficits.push({ date: d.date, daily: dayDeficit, cumulative: cumTotal });
   }
@@ -1706,8 +1628,8 @@ function render(data, calMap) {
   const totalDeficit = cumTotal; // positive = net deficit
   const avgDailyDeficit = totalDays ? Math.round(totalDeficit / totalDays) : 0;
   const fatLostFromDeficit = +(totalDeficit / 7200).toFixed(2); // 1kg fat = 7200kcal
-  const surplusDays = all.filter(d => dayDef(d) < 0).length;
-  const deficitDays = all.filter(d => dayDef(d) >= 0).length;
+  const surplusDays = all.filter(d => d.kcal > effTDEE).length;
+  const deficitDays = all.filter(d => d.kcal <= effTDEE).length;
 
   // === Imputed monthly data (fill unrecorded days with average) ===
   const nowDate = new Date();
@@ -1729,11 +1651,9 @@ function render(data, calMap) {
     const isCurr = ym === currentYM;
     const calDays = isPast ? dim : (isCurr ? currentDOM : rec);
     const miss = Math.max(0, calDays - rec);
-    // 記録日の赤字を実合計し、未記録日は記録日平均で補完（成分モードの日別補正もここに乗る）
-    const sumDef = md.days.reduce((s, d) => s + dayDef(d), 0);
-    const avgDef = sumDef / rec;
-    const impDef = Math.round(sumDef + miss * avgDef);
-    const fullDef = Math.round(isCurr ? avgDef * dim : impDef);
+    const impKcal = md.sumKcal + miss * avg;
+    const impDef = effTDEE * calDays - impKcal;
+    const fullDef = isCurr ? (effTDEE - avg) * dim : impDef;
     Object.assign(md, { ym, dim, rec, avg, isPast, isCurr, calDays, miss, impDef, impFatKg: +(impDef/7200).toFixed(2), fullDef, fullFatKg: +(fullDef/7200).toFixed(2) });
   }
 
@@ -1803,10 +1723,10 @@ function render(data, calMap) {
   {
     const scD = all.filter(d => d.protein != null);
     const N = scD.length;
-    const surplusN = scD.filter(d => dayDef(d) < 0).length;
+    const surplusN = scD.filter(d => (effTDEE - d.kcal) < 0).length;
     const lowPN = scD.filter(d => d.protein < PROTEIN_MIN).length;
-    const fitN = scD.filter(d => dayDef(d) >= 0 && d.protein >= PROTEIN_MIN).length;
-    const idealN = scD.filter(d => { const def = dayDef(d); return def >= 300 && def <= 500 && d.protein >= PROTEIN_TARGET; }).length;
+    const fitN = scD.filter(d => (effTDEE - d.kcal) >= 0 && d.protein >= PROTEIN_MIN).length;
+    const idealN = scD.filter(d => { const def = effTDEE - d.kcal; return def >= 300 && def <= 500 && d.protein >= PROTEIN_TARGET; }).length;
     const fitPct = N ? Math.round(fitN / N * 100) : 0;
     html += `<div class="card">
       <h2>🎯 リコンプ・スコアカード <span style="font-size:0.68em;color:#888;font-weight:400;">赤字 × タンパク質</span></h2>
@@ -2573,7 +2493,7 @@ function render(data, calMap) {
       if (def >= 300 && def <= 500 && p >= PROTEIN_TARGET) return '#1b5e20'; // 理想ゾーン
       return '#43a047';                              // 適合
     };
-    const pts = all.filter(d => d.protein != null).map(d => ({ x: dayDef(d), y: d.protein, date: d.date, kcal: d.kcal }));
+    const pts = all.filter(d => d.protein != null).map(d => ({ x: effTDEE - d.kcal, y: d.protein, date: d.date, kcal: d.kcal }));
     const zonePlugin = { id: 'recompZone', beforeDatasetsDraw(chart) {
       const { ctx, chartArea: ca, scales: { x, y } } = chart;
       const cx = (v) => Math.max(ca.left, Math.min(ca.right, x.getPixelForValue(v)));
