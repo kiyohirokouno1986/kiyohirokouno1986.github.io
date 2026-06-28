@@ -1704,6 +1704,58 @@ function render(data, calMap) {
     </div>`;
   }
 
+  // === スケジュール別の食事傾向（カレンダー × 食事の相関） ===
+  {
+    const groupOf = (short) => {
+      if (['会食', '懇親会', '飲み会', '食事会'].includes(short)) return { key: '会食・飲み', emoji: '🍽️', col: '#c62828' };
+      if (['出張', '海外'].includes(short)) return { key: '出張・海外', emoji: '✈️', col: '#1565c0' };
+      if (['支援', '訪問'].includes(short)) return { key: '支援・訪問', emoji: '🏢', col: '#6a1b9a' };
+      return { key: '通常日', emoji: '🏠', col: '#2d6a4f' };
+    };
+    const groups = {};
+    for (const d of all) {
+      const g = groupOf(calMap[d.date] && calMap[d.date].short);
+      (groups[g.key] || (groups[g.key] = { meta: g, days: [] })).days.push(d);
+    }
+    const stat = (days) => {
+      const n = days.length;
+      const avgK = n ? Math.round(days.reduce((s, d) => s + d.kcal, 0) / n) : 0;
+      const pArr = days.filter(d => d.protein != null);
+      const avgP = pArr.length ? Math.round(pArr.reduce((s, d) => s + d.protein, 0) / pArr.length) : null;
+      const avgAlc = n ? Math.round(days.reduce((s, d) => { const p = d.protein || 0, f = d.fat || 0, c = d.carb || 0; return s + Math.max(0, d.kcal - (p * 4 + f * 9 + c * 4)); }, 0) / n) : 0;
+      const overflow = days.filter(d => d.kcal >= OVERFLOW_THRESHOLD).length;
+      return { n, avgK, avgP, avgAlc, overflowPct: n ? Math.round(overflow / n * 100) : 0 };
+    };
+    const base = stat((groups['通常日'] && groups['通常日'].days) || []);
+    const order = ['通常日', '会食・飲み', '出張・海外', '支援・訪問'];
+    const rows = order.filter(k => groups[k]).map(k => ({ k, meta: groups[k].meta, s: stat(groups[k].days) }));
+    // 一番カロリーが盛れている種別（通常日以外）を主因として抽出
+    const worst = rows.filter(r => r.k !== '通常日' && base.n).sort((a, b) => (b.s.avgK - a.s.avgK))[0];
+
+    html += `<div class="card"><h2>📅 スケジュール別の食事傾向 <span style="font-size:0.68em;color:#888;font-weight:400;">カレンダー × 食事の相関</span></h2>
+      <div style="font-size:0.76em;color:#888;margin-bottom:8px;">その日の予定の種類ごとに、平均カロリー・タンパク質・🍺アルコール・溢れ率を集計。「何の日に食べ過ぎるか」を数値化。</div>
+      <table class="cmp-table"><thead><tr><th>種別</th><th>日数</th><th>平均kcal</th><th>vs通常</th><th>平均P</th><th>🍺平均</th><th>溢れ率</th></tr></thead><tbody>`;
+    for (const r of rows) {
+      const dK = (r.k !== '通常日' && base.n) ? r.s.avgK - base.avgK : null;
+      const dP = (r.k !== '通常日' && base.n && r.s.avgP != null && base.avgP != null) ? r.s.avgP - base.avgP : null;
+      html += `<tr>
+        <td style="font-weight:600;color:${r.meta.col};">${r.meta.emoji} ${r.k}</td>
+        <td>${r.s.n}</td>
+        <td><strong>${r.s.avgK.toLocaleString()}</strong></td>
+        <td style="font-weight:700;color:${dK == null ? '#999' : dK > 0 ? '#c62828' : '#2d6a4f'};">${dK == null ? '基準' : (dK > 0 ? '+' : '') + dK.toLocaleString()}</td>
+        <td>${r.s.avgP != null ? r.s.avgP + 'g' : '—'}${dP != null ? `<span style="font-size:0.8em;color:${dP >= 0 ? '#2d6a4f' : '#c62828'};">(${dP > 0 ? '+' : ''}${dP})</span>` : ''}</td>
+        <td style="color:${r.s.avgAlc >= 200 ? '#8e24aa' : '#888'};">${r.s.avgAlc > 0 ? r.s.avgAlc : '—'}</td>
+        <td style="color:${r.s.overflowPct >= 30 ? '#c62828' : '#888'};">${r.s.overflowPct}%</td>
+      </tr>`;
+    }
+    html += `</tbody></table>`;
+    if (worst && worst.s.avgK - base.avgK > 150) {
+      const dK = worst.s.avgK - base.avgK;
+      html += `<div class="risk-box risk-yellow" style="font-size:0.8em;margin-top:8px;"><strong>💡 ${worst.meta.emoji} ${worst.k}の日</strong>は通常日より平均 <strong style="color:#c62828;">+${dK.toLocaleString()}kcal</strong>（🍺平均${worst.s.avgAlc}kcal・溢れ率${worst.s.overflowPct}%）。ここを<strong>${FREE_HARD_CAP.toLocaleString()}でキャップ＋3杯ルール</strong>で抑えるのが、リコンプの一番効くレバー。</div>`;
+    }
+    html += `</div>`;
+  }
+
   // === 溢れた日の要因診断（総カロリー × 🍺アルコール × 📅スケジュール） ===
   const overflowDays = all.filter(d => d.kcal >= OVERFLOW_THRESHOLD);
   if (overflowDays.length > 0) {
