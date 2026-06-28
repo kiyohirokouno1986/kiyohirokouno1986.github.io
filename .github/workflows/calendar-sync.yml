@@ -1,0 +1,48 @@
+name: Sync Google Calendar
+
+# Googleカレンダーを取得して data/calendar.json を更新する。
+# - 12時間ごとに自動実行（cron）
+# - 手動実行も可能（Actions タブの "Run workflow"）
+# 認証はサービスアカウント（Secrets: GOOGLE_SA_KEY ／ 任意 GOOGLE_CALENDAR_ID）。
+
+on:
+  schedule:
+    - cron: '37 */12 * * *'   # 12時間ごと（UTC・分は37でAPI集中を回避）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: calendar-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch & classify calendar
+        env:
+          GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
+          GOOGLE_CALENDAR_ID: ${{ secrets.GOOGLE_CALENDAR_ID }}
+        run: node scripts/fetch-calendar.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/calendar.json
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update calendar from Google"
+            git push
+          fi
