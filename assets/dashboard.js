@@ -1532,6 +1532,32 @@ function render(data, calMap) {
     html += mealEmptyNotice('GAP分析');
   } else {
 
+  // === リコンプ・スコアカード（赤字 × タンパク質） ===
+  {
+    const scD = all.filter(d => d.protein != null);
+    const N = scD.length;
+    const surplusN = scD.filter(d => (TDEE - d.kcal) < 0).length;
+    const lowPN = scD.filter(d => d.protein < PROTEIN_MIN).length;
+    const fitN = scD.filter(d => (TDEE - d.kcal) >= 0 && d.protein >= PROTEIN_MIN).length;
+    const idealN = scD.filter(d => { const def = TDEE - d.kcal; return def >= 300 && def <= 500 && d.protein >= PROTEIN_TARGET; }).length;
+    const fitPct = N ? Math.round(fitN / N * 100) : 0;
+    html += `<div class="card">
+      <h2>🎯 リコンプ・スコアカード <span style="font-size:0.68em;color:#888;font-weight:400;">赤字 × タンパク質</span></h2>
+      <div style="font-size:0.76em;color:#888;margin-bottom:10px;">1点＝1日。<b>緑＝適合</b>（赤字あり＆P${PROTEIN_MIN}g以上）、<b>濃緑＝理想</b>（赤字300〜500＆P${PROTEIN_TARGET}）、<b style="color:#c62828;">赤＝溢れ</b>（カロリー超過＝脂肪減ストップ）、<b style="color:#e65100;">橙＝P不足</b>（筋肉リスク）。リコンプは「Pを死守しつつ溢れを減らす」が要。</div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="kpi"><div class="label">リコンプ適合</div><div class="val" style="color:${fitPct >= 60 ? '#2d6a4f' : '#e65100'};font-size:1.3em;">${fitN}<span style="font-size:0.5em;color:#888;">/${N}</span></div><div class="sub" style="color:${fitPct >= 60 ? '#2d6a4f' : '#e65100'};">${fitPct}%</div></div>
+        <div class="kpi"><div class="label">理想ゾーン</div><div class="val" style="font-size:1.3em;color:#1b5e20;">${idealN}<span style="font-size:0.5em;color:#888;">日</span></div><div class="sub" style="color:#1b5e20;">ど真ん中</div></div>
+        <div class="kpi"><div class="label">溢れ日</div><div class="val" style="font-size:1.3em;color:${surplusN > 0 ? '#c62828' : '#999'};">${surplusN}<span style="font-size:0.5em;color:#888;">日</span></div><div class="sub" style="color:#c62828;">脂肪減↓</div></div>
+        <div class="kpi"><div class="label">P不足日</div><div class="val" style="font-size:1.3em;color:${lowPN > 0 ? '#e65100' : '#999'};">${lowPN}<span style="font-size:0.5em;color:#888;">日</span></div><div class="sub" style="color:#e65100;">筋肉リスク</div></div>
+      </div>
+      <canvas id="recompChart" style="max-height:300px;"></canvas>
+      <div style="font-size:0.68em;color:#888;margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+        <span style="color:#1b5e20;">●理想</span><span style="color:#43a047;">●適合</span><span style="color:#e65100;">●P不足</span><span style="color:#c62828;">●溢れ</span>
+        <span style="color:#aaa;">緑帯＝スイートゾーン</span>
+      </div>
+    </div>`;
+  }
+
   // === 15% Roadmap - Current Month Progress (TOP) ===
   if (curRM) {
     const progressToGoal = Math.min(100, Math.max(0, Math.round((totalDeficit / 7200) / FAT_TO_LOSE * 100)));
@@ -2186,6 +2212,50 @@ function render(data, calMap) {
           y1: { type: 'linear', position: 'right', min: 22, max: 33, grid: { drawOnChartArea: false }, title: { display: true, text: '体脂肪率 %', font: { size: 9 } }, ticks: { font: { size: 8 } } },
           y2: { type: 'linear', position: 'right', min: 16, max: 24, grid: { drawOnChartArea: false }, title: { display: true, text: '体脂肪量 kg', font: { size: 9, weight: 'bold' }, color: '#c62828' }, ticks: { font: { size: 8 }, color: '#c62828' } },
           x: { ticks: { font: { size: 7 }, maxRotation: 0, autoSkip: false } }
+        }
+      }
+    });
+  }
+
+  // Recomp scorecard scatter (赤字 × タンパク質)
+  const recompCtx = document.getElementById('recompChart');
+  if (recompCtx) {
+    const ptColor = (def, p) => {
+      if (def < 0) return '#c62828';                 // 溢れ（カロリー超過）
+      if (p < PROTEIN_MIN) return '#e65100';         // P不足（筋肉リスク）
+      if (def >= 300 && def <= 500 && p >= PROTEIN_TARGET) return '#1b5e20'; // 理想ゾーン
+      return '#43a047';                              // 適合
+    };
+    const pts = all.filter(d => d.protein != null).map(d => ({ x: TDEE - d.kcal, y: d.protein, date: d.date, kcal: d.kcal }));
+    const zonePlugin = { id: 'recompZone', beforeDatasetsDraw(chart) {
+      const { ctx, chartArea: ca, scales: { x, y } } = chart;
+      const cx = (v) => Math.max(ca.left, Math.min(ca.right, x.getPixelForValue(v)));
+      const cy = (v) => Math.max(ca.top, Math.min(ca.bottom, y.getPixelForValue(v)));
+      ctx.save();
+      // スイートゾーン：赤字300〜500 × P140以上
+      ctx.fillStyle = 'rgba(27,94,32,0.13)';
+      ctx.fillRect(cx(300), ca.top, cx(500) - cx(300), cy(PROTEIN_TARGET) - ca.top);
+      // 許容帯：赤字200〜600（薄）
+      ctx.fillStyle = 'rgba(67,160,71,0.05)';
+      ctx.fillRect(cx(200), ca.top, cx(600) - cx(200), ca.bottom - ca.top);
+      // 基準線
+      ctx.setLineDash([4, 3]); ctx.lineWidth = 1;
+      const hline = (v, col) => { const py = y.getPixelForValue(v); if (py >= ca.top && py <= ca.bottom) { ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(ca.left, py); ctx.lineTo(ca.right, py); ctx.stroke(); } };
+      const vline = (v, col) => { const px = x.getPixelForValue(v); if (px >= ca.left && px <= ca.right) { ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(px, ca.top); ctx.lineTo(px, ca.bottom); ctx.stroke(); } };
+      hline(PROTEIN_MIN, '#e65100'); hline(PROTEIN_TARGET, '#1b5e20'); vline(0, '#c62828'); vline(RECOMP_DEFICIT, '#6c5ce7');
+      ctx.restore();
+    }};
+    new Chart(recompCtx.getContext('2d'), {
+      type: 'scatter',
+      data: { datasets: [{ data: pts, pointRadius: 5, pointHoverRadius: 7, backgroundColor: pts.map(p => ptColor(p.x, p.y) + 'cc'), borderColor: pts.map(p => ptColor(p.x, p.y)), borderWidth: 1 }] },
+      plugins: [zonePlugin],
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }, tooltip: { callbacks: {
+          label: c => { const p = c.raw; const dt = new Date(p.date + 'T12:00:00'); return `${dt.getMonth()+1}/${dt.getDate()}: ${p.x >= 0 ? '赤字-' : '超過+'}${Math.abs(Math.round(p.x))} / P${Math.round(p.y)}g / ${p.kcal.toLocaleString()}kcal`; } } } },
+        scales: {
+          x: { title: { display: true, text: '日次赤字 (kcal)  ←溢れ ｜ 赤字大→', font: { size: 10 } }, min: -1900, max: 1200, ticks: { font: { size: 9 } } },
+          y: { title: { display: true, text: 'タンパク質 (g)', font: { size: 10 } }, min: 0, max: 220, ticks: { font: { size: 9 } } }
         }
       }
     });
