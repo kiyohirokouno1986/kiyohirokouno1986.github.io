@@ -1,0 +1,12 @@
+{
+  "name": "calorie-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "カロリーダッシュボード（静的サイト）。CI用のE2Eテストのみ devDependencies に持つ。",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}
