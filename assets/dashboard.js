@@ -1703,32 +1703,37 @@ function render(data, calMap) {
     const m = tdeeInfo.measured, p = tdeeInfo.predicted, prof = tdeeInfo.profile;
     const modeLabel = { measured:'実測', formula:'予測式', manual:'手動', 'formula-fallback':'予測式(実測不足)' }[tdeeInfo.source] || tdeeInfo.source;
     const gap = (m.confident && p.tdee) ? (p.tdee - m.tdee) : null;
-    html += `<div class="card" style="border-left:4px solid #6c5ce7;">
+    const usingMeasured = tdeeInfo.source === 'measured';
+    const usingFormula = tdeeInfo.source === 'formula' || tdeeInfo.source === 'formula-fallback';
+    const usingManual = tdeeInfo.source === 'manual';
+    html += `<div class="card">
       <h2>🔥 TDEE推定 ＆ シミュレーション基準</h2>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 10px;">
-        <div style="flex:1;min-width:140px;background:#f6f4ff;border-radius:10px;padding:8px 10px;">
-          <div style="font-size:0.7em;color:#6c5ce7;font-weight:700;">予測式（Harris-Benedict）</div>
-          <div style="font-size:1.5em;font-weight:800;color:#5a4bd6;line-height:1.1;">${p.tdee.toLocaleString()}<span style="font-size:0.4em;color:#888;">kcal/日</span></div>
-          <div style="font-size:0.66em;color:#888;">BMR ${p.bmr.toLocaleString()} × 活動${prof.activity}</div>
+      <div class="tdee-grid">
+        <div class="tdee-box${usingFormula?' active navy':''}">
+          ${usingFormula?'<span class="tdee-badge navy">使用中</span>':''}
+          <div class="tdee-k">予測式 <span>Harris-Benedict</span></div>
+          <div class="tdee-v" style="color:#1a237e;">${p.tdee.toLocaleString()}<span>kcal/日</span></div>
+          <div class="tdee-s">BMR ${p.bmr.toLocaleString()} × 活動 ${prof.activity}</div>
         </div>
-        <div style="flex:1;min-width:140px;background:#eefbf4;border-radius:10px;padding:8px 10px;">
-          <div style="font-size:0.7em;color:#2d6a4f;font-weight:700;">実測（収支逆算）</div>
-          <div style="font-size:1.5em;font-weight:800;color:#2d6a4f;line-height:1.1;">${m.confident?m.tdee.toLocaleString():'—'}<span style="font-size:0.4em;color:#888;">kcal/日</span></div>
-          <div style="font-size:0.66em;color:#888;">${m.confident?`摂取${m.meanIntake.toLocaleString()} / 体重${m.slopeKgPerMonth>0?'+':''}${m.slopeKgPerMonth}kg/月 / ${m.spanDays}日`:'データ不足（食事14日・体重21日以上で算出）'}</div>
+        <div class="tdee-box${usingMeasured?' active green':''}">
+          ${usingMeasured?'<span class="tdee-badge green">使用中</span>':''}
+          <div class="tdee-k">実測 <span>収支逆算</span></div>
+          <div class="tdee-v" style="color:#2d6a4f;">${m.confident?m.tdee.toLocaleString():'—'}<span>kcal/日</span></div>
+          <div class="tdee-s">${m.confident?`摂取 ${m.meanIntake.toLocaleString()}／体重 ${m.slopeKgPerMonth>0?'+':''}${m.slopeKgPerMonth}kg/月／${m.spanDays}日`:'データ不足（食事14日・体重21日以上で算出）'}</div>
         </div>
       </div>
-      ${gap!=null?`<div style="font-size:0.74em;color:${Math.abs(gap)>=120?'#c62828':'#888'};margin-bottom:8px;">予測式と実測の差 <b>${gap>0?'+':''}${gap}kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ15%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
-      <div style="font-size:0.8em;margin-bottom:6px;">シミュに使用中: <b style="color:#6c5ce7;">${effTDEE.toLocaleString()} kcal/日（${modeLabel}）</b></div>
-      <div class="dm-period-filter" id="tdee-mode" style="margin-bottom:8px;">
+      ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ15%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
+      <div class="tdee-use">シミュレーションに使用中　<b>${effTDEE.toLocaleString()} kcal/日</b><span>（${modeLabel}）</span></div>
+      <div class="dm-period-filter tdee-modes" id="tdee-mode">
         <button data-mode="measured" class="${prof.tdeeMode==='measured'?'active':''}">実測</button>
         <button data-mode="formula" class="${prof.tdeeMode==='formula'?'active':''}">予測式</button>
         <button data-mode="manual" class="${prof.tdeeMode==='manual'?'active':''}">手動</button>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:0.76em;color:#555;">
-        <label>年齢 <input type="number" id="tdee-age" value="${prof.age}" style="width:46px;"></label>
-        <label>身長 <input type="number" id="tdee-height" value="${prof.heightCm}" style="width:54px;">cm</label>
+      <div class="tdee-form">
+        <label>年齢 <input type="number" id="tdee-age" value="${prof.age}"></label>
+        <label>身長 <input type="number" id="tdee-height" value="${prof.heightCm}"><span class="u">cm</span></label>
         <label>活動 <select id="tdee-activity">${ACTIVITY_LEVELS.map(a=>`<option value="${a.v}" ${a.v===prof.activity?'selected':''}>${a.label}</option>`).join('')}</select></label>
-        <label id="tdee-manual-wrap" style="${prof.tdeeMode==='manual'?'':'display:none;'}">手動値 <input type="number" id="tdee-manual" value="${prof.manualTDEE}" style="width:62px;">kcal</label>
+        <label id="tdee-manual-wrap" style="${usingManual?'':'display:none;'}">手動値 <input type="number" id="tdee-manual" value="${prof.manualTDEE}"><span class="u">kcal</span></label>
       </div>
     </div>`;
   }

@@ -277,6 +277,33 @@ canvas { max-height: 260px; margin-top: 8px; }
 .dm-period-filter button { background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 4px 12px; font-size: 0.72em; font-weight: 600; cursor: pointer; transition: all 0.2s; color: #666; }
 .dm-period-filter button.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
 
+/* ===== TDEE推定カード ===== */
+.tdee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.tdee-box { position: relative; background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 12px 12px 11px; }
+.tdee-box.active.navy { border-color: #1a237e; box-shadow: 0 0 0 2px rgba(26,35,126,0.12); background: #fff; }
+.tdee-box.active.green { border-color: #2d6a4f; box-shadow: 0 0 0 2px rgba(45,106,79,0.12); background: #fff; }
+.tdee-box .tdee-k { font-size: 0.66em; color: #555; font-weight: 700; letter-spacing: 0.3px; }
+.tdee-box .tdee-k span { color: #aaa; font-weight: 600; font-size: 0.92em; }
+.tdee-box .tdee-v { font-size: 1.55em; font-weight: 800; line-height: 1.1; margin: 3px 0 3px; }
+.tdee-box .tdee-v span { font-size: 0.4em; color: #aaa; font-weight: 600; margin-left: 2px; }
+.tdee-box .tdee-s { font-size: 0.64em; color: #999; line-height: 1.45; }
+.tdee-badge { position: absolute; top: 9px; right: 9px; font-size: 0.56em; font-weight: 700; color: #fff; border-radius: 999px; padding: 2px 8px; letter-spacing: 0.5px; }
+.tdee-badge.navy { background: #1a237e; }
+.tdee-badge.green { background: #2d6a4f; }
+.tdee-note { font-size: 0.72em; line-height: 1.55; color: #888; background: #f6f6f9; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
+.tdee-note.warn { color: #b34700; background: #fff4ec; }
+.tdee-note b { color: inherit; }
+.tdee-use { font-size: 0.78em; color: #555; margin-bottom: 8px; }
+.tdee-use b { color: #1a237e; font-size: 1.05em; }
+.tdee-use span { color: #999; }
+.tdee-modes { margin-bottom: 10px; }
+.tdee-form { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; font-size: 0.75em; color: #666; }
+.tdee-form label { display: inline-flex; align-items: center; gap: 5px; }
+.tdee-form .u { color: #999; }
+.tdee-form input, .tdee-form select { border: 1px solid #ddd; border-radius: 6px; padding: 4px 7px; font-size: 1em; font-family: inherit; color: #333; background: #fff; }
+.tdee-form input[type=number] { width: 56px; }
+.tdee-form select { max-width: 170px; }
+
 /* ===== スマートフォン対応 ===== */
 @media (max-width: 480px) {
   body { padding: 10px; }
