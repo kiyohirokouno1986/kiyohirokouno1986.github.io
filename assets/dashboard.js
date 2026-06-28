@@ -724,6 +724,33 @@ function trainDeficit(day) {
   return { directBurn, afterburn, totalExtra, effectiveCal, deficit };
 }
 
+// === 溢れた日の要因診断（リコンプ向け） ===
+// 食事kcal = P*4+F*9+C*4。総kcalとの差(残差)を「アルコール＋未記録」とみなす。
+// 超過は飲食上限(FREE=2200)比で算出し、-400赤字の何日分を相殺したかを出す。
+const RECOMP_DEFICIT = 400; // リコンプの1日あたり目標赤字（バンド中心）
+function overflowDiagnosis(d) {
+  const p = d.protein || 0, f = d.fat || 0, c = d.carb || 0;
+  const pK = Math.round(p * 4), fK = Math.round(f * 9), cK = Math.round(c * 4);
+  const foodKcal = pK + fK + cK;
+  const alcoholK = Math.max(0, d.kcal - foodKcal); // 残差 ≒ アルコール＋未記録
+  const excess = Math.max(0, d.kcal - FREE);        // 飲食上限(2200)超過分
+  const overCap = Math.max(0, d.kcal - FREE_HARD_CAP); // 絶対上限(2500)超過分
+  const daysErased = +(excess / RECOMP_DEFICIT).toFixed(1);
+  // 主因の判定（アルコール / 脂質 / 炭水化物）
+  const drivers = [];
+  if (alcoholK >= 250) drivers.push({ key: 'alcohol', label: '🍺 アルコール', detail: `約${alcoholK.toLocaleString()}kcal`, col: '#8e24aa' });
+  if (f >= 80) drivers.push({ key: 'fat', label: '脂質', detail: `${Math.round(f)}g（高め）`, col: '#e65100' });
+  if (c >= 250) drivers.push({ key: 'carb', label: '炭水化物', detail: `${Math.round(c)}g（多め）`, col: '#1565c0' });
+  if (!drivers.length) drivers.push({ key: 'overall', label: '全体量', detail: 'バランス的に総量オーバー', col: '#c62828' });
+  // リカバリー提案（既存の教訓を自動適用）
+  const recoverPerDay = TDEE - 1300; // 1,300kcal日が生む赤字
+  const tips = [];
+  if (overCap > 0) tips.push(`上限${FREE_HARD_CAP.toLocaleString()}でキャップしていれば <strong>+${overCap.toLocaleString()}kcal</strong> 抑えられた`);
+  if (alcoholK >= 300) tips.push(`アルコールを3杯ルールで半減 → 約${Math.round(alcoholK / 2).toLocaleString()}kcal カット`);
+  tips.push(`翌日1,300kcalなら1日 −${recoverPerDay}kcal → <strong>${Math.max(1, Math.ceil(excess / recoverPerDay))}日</strong>で取り戻せる`);
+  return { pK, fK, cK, foodKcal, alcoholK, excess, overCap, daysErased, drivers, tips };
+}
+
 // === Tab switching ===
 function switchTab(id) {
   document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
@@ -1633,6 +1660,32 @@ function render(data, calMap) {
       </div>
       ${blowoutDays.length > 0 ? `<div style="font-size:0.78em;color:#888;margin-top:8px;">内訳: ${blowoutDays.map(d=>`${fmtDateShort(d.date)} ${d.kcal.toLocaleString()}kcal(+${d.kcal-FREE})${d.hasDrink?' 🍺':''}`).join(' / ')}</div>` : ''}
     </div>`;
+  }
+
+  // === 溢れた日の要因診断カード（リコンプ向け） ===
+  if (blowoutDays.length > 0) {
+    html += `<div class="card"><h2 style="color:#c62828;">🔎 溢れた日の要因診断</h2>
+      <div style="font-size:0.76em;color:#888;margin-bottom:10px;">飲食上限(2,200kcal)を超えた日を「何で溢れたか」分解。色帯はkcalの構成、🍺/他＝総量とP/F/Cの差（アルコール・未記録の推定）。</div>`;
+    for (const d of [...blowoutDays].reverse()) {
+      const dg = overflowDiagnosis(d);
+      const seg = (k, col, label) => k > 0 ? `<div title="${label} ${k.toLocaleString()}kcal" style="width:${(k / d.kcal * 100).toFixed(1)}%;background:${col};"></div>` : '';
+      html += `<div class="day-card day-over" style="margin-bottom:10px;">
+        <div class="day-header">
+          <span class="day-date">${fmtDate(d.date)} ${d.hasDrink ? '🍺' : ''}${d.hasTrain ? '🏋️' : ''}</span>
+          <span class="tag tag-bad">+${dg.excess.toLocaleString()} 超過</span>
+        </div>
+        <div style="font-size:0.82em;margin:4px 0;"><strong style="font-size:1.15em;color:#c62828;">${d.kcal.toLocaleString()}</strong> kcal ／ −${RECOMP_DEFICIT}赤字 <strong>${dg.daysErased}日分</strong>を相殺</div>
+        <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin:6px 0;background:#eee;">
+          ${seg(dg.pK, '#e63946', 'P')}${seg(dg.fK, '#f4a261', 'F')}${seg(dg.cK, '#457b9d', 'C')}${seg(dg.alcoholK, '#8e24aa', '🍺/他')}
+        </div>
+        <div style="font-size:0.7em;color:#666;display:flex;gap:10px;flex-wrap:wrap;">
+          <span style="color:#e63946;">■P ${dg.pK}</span><span style="color:#f4a261;">■F ${dg.fK}</span><span style="color:#457b9d;">■C ${dg.cK}</span>${dg.alcoholK > 0 ? `<span style="color:#8e24aa;">■🍺/他 ${dg.alcoholK}</span>` : ''}<span style="opacity:0.5;">kcal</span>
+        </div>
+        <div style="font-size:0.8em;margin-top:7px;"><strong>主因：</strong>${dg.drivers.map(x => `<span style="color:${x.col};font-weight:700;">${x.label}</span>（${x.detail}）`).join(' ＋ ')}</div>
+        <div class="risk-box risk-yellow" style="font-size:0.76em;margin-top:6px;padding:8px;">💡 ${dg.tips.join('<br>💡 ')}</div>
+      </div>`;
+    }
+    html += `</div>`;
   }
 
   // Verdict
