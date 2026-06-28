@@ -3,7 +3,12 @@
     "date": "2025-05-20",
     "session": "S1",
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 25, "reps": null, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 25,
+        "reps": null,
+        "sets": null
+      }
     ],
     "comment": "初回チャレンジ。フォーム学習が中心。"
   },
@@ -11,7 +16,12 @@
     "date": "2025-07-19",
     "session": "S3",
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 32.5, "reps": 10, "sets": 3 }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 32.5,
+        "reps": 10,
+        "sets": 3
+      }
     ],
     "comment": "フォーム修正中。脂質不足発見→MCTオイル再開。"
   },
@@ -19,7 +29,12 @@
     "date": "2025-10-15",
     "session": "S4",
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 32.5, "reps": null, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 32.5,
+        "reps": null,
+        "sets": null
+      }
     ],
     "comment": "フォーム維持。隠れカロリー特定。"
   },
@@ -27,8 +42,18 @@
     "date": "2025-11-22",
     "session": "S5",
     "exercises": [
-      { "name": "スクワット", "weight": 32.5, "reps": 10, "sets": null },
-      { "name": "サイドレイズ", "weight": 4, "reps": 15, "sets": null }
+      {
+        "name": "スクワット",
+        "weight": 32.5,
+        "reps": 10,
+        "sets": null
+      },
+      {
+        "name": "サイドレイズ",
+        "weight": 4,
+        "reps": 15,
+        "sets": null
+      }
     ],
     "comment": "★最大改善回。スクワット→次回35kgチャレンジへ。"
   },
@@ -36,9 +61,24 @@
     "date": "2026-02-07",
     "session": "S7",
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 27.5, "reps": null, "sets": null },
-      { "name": "ケーブルフライ/チェストフライ", "weight": 15, "reps": null, "sets": null },
-      { "name": "ラットプルダウン", "weight": null, "reps": null, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 27.5,
+        "reps": null,
+        "sets": null
+      },
+      {
+        "name": "ケーブルフライ/チェストフライ",
+        "weight": 15,
+        "reps": null,
+        "sets": null
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": null,
+        "reps": null,
+        "sets": null
+      }
     ],
     "comment": "体重減少中のキープ。ケーブルフライ10→15kgに増加。"
   },
@@ -46,7 +86,12 @@
     "date": "2026-04-05",
     "session": "S8",
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 43.9, "reps": null, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 43.9,
+        "reps": null,
+        "sets": null
+      }
     ],
     "comment": "★5kgプレート使用、ベンチ重量更新！"
   },
@@ -55,10 +100,30 @@
     "session": "S9",
     "waist": 86.5,
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 43.5, "reps": 10, "sets": 3 },
-      { "name": "ケーブルフライ/チェストフライ", "weight": null, "reps": 13, "sets": null },
-      { "name": "ラットプルダウン", "weight": 35, "reps": 15, "sets": null },
-      { "name": "スクワット", "weight": 56, "reps": null, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 43.5,
+        "reps": 10,
+        "sets": 3
+      },
+      {
+        "name": "ケーブルフライ/チェストフライ",
+        "weight": null,
+        "reps": 13,
+        "sets": null
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 35,
+        "reps": 15,
+        "sets": null
+      },
+      {
+        "name": "スクワット",
+        "weight": 56,
+        "reps": null,
+        "sets": null
+      }
     ],
     "comment": "ベンチ2セット目8→10回に改善。ウエスト最小値更新。"
   },
@@ -67,10 +132,30 @@
     "session": "S10",
     "waist": 87.5,
     "exercises": [
-      { "name": "インクラインベンチ（スミス）", "weight": 32.5, "reps": 10, "sets": null },
-      { "name": "ケーブルフライ/チェストフライ", "weight": null, "reps": 15, "sets": null },
-      { "name": "スクワット", "weight": 56, "reps": null, "sets": null },
-      { "name": "サイドレイズ", "weight": 4, "reps": null, "sets": null }
+      {
+        "name": "インクラインベンチ（スミス）",
+        "weight": 32.5,
+        "reps": 10,
+        "sets": null
+      },
+      {
+        "name": "ケーブルフライ/チェストフライ",
+        "weight": null,
+        "reps": 15,
+        "sets": null
+      },
+      {
+        "name": "スクワット",
+        "weight": 56,
+        "reps": null,
+        "sets": null
+      },
+      {
+        "name": "サイドレイズ",
+        "weight": 4,
+        "reps": null,
+        "sets": null
+      }
     ],
     "comment": "インクライン中心。ケーブルフライ過去最高15回。平日空腹でもインクライン上がった。"
   },
@@ -79,12 +164,42 @@
     "session": "S11",
     "waist": 87.0,
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 38.5, "reps": 11, "sets": null },
-      { "name": "インクラインベンチ（スミス）", "weight": 32.5, "reps": 10, "sets": null },
-      { "name": "ケーブルフライ/チェストフライ", "weight": null, "reps": 15, "sets": null },
-      { "name": "ラットプルダウン", "weight": 40, "reps": 15, "sets": null },
-      { "name": "スクワット", "weight": 56, "reps": 12, "sets": null },
-      { "name": "サイドレイズ", "weight": 4, "reps": null, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 38.5,
+        "reps": 11,
+        "sets": null
+      },
+      {
+        "name": "インクラインベンチ（スミス）",
+        "weight": 32.5,
+        "reps": 10,
+        "sets": null
+      },
+      {
+        "name": "ケーブルフライ/チェストフライ",
+        "weight": null,
+        "reps": 15,
+        "sets": null
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 40,
+        "reps": 15,
+        "sets": null
+      },
+      {
+        "name": "スクワット",
+        "weight": 56,
+        "reps": 12,
+        "sets": null
+      },
+      {
+        "name": "サイドレイズ",
+        "weight": 4,
+        "reps": null,
+        "sets": null
+      }
     ],
     "comment": "体重-500gで回数キープ=100点（篠澤先生）。ラットプルダウン重量UP。"
   },
@@ -93,9 +208,24 @@
     "session": "S12",
     "waist": 87.5,
     "exercises": [
-      { "name": "インクラインベンチ（スミス）", "weight": 38.5, "reps": 10, "sets": 2 },
-      { "name": "ラットプルダウン", "weight": 40, "reps": 20, "sets": null },
-      { "name": "スクワット", "weight": 58.5, "reps": 12, "sets": null }
+      {
+        "name": "インクラインベンチ（スミス）",
+        "weight": 38.5,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 40,
+        "reps": 20,
+        "sets": null
+      },
+      {
+        "name": "スクワット",
+        "weight": 58.5,
+        "reps": 12,
+        "sets": null
+      }
     ],
     "comment": "★インクライン2セット目初の10回達成。ラットプル回数20回へ引上げ。スクワット+2.5kg。家トレ開始1週目。"
   },
@@ -103,8 +233,18 @@
     "date": "2026-05-12",
     "session": "S13",
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 42.5, "reps": 10, "sets": 2 },
-      { "name": "スクワット", "weight": 58.5, "reps": 12, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 42.5,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "スクワット",
+        "weight": 58.5,
+        "reps": 12,
+        "sets": null
+      }
     ],
     "comment": "ベンチ10回が安定して上がるように。連続セッションでもスクワット維持。"
   },
@@ -112,9 +252,24 @@
     "date": "2026-05-20",
     "session": "S14",
     "exercises": [
-      { "name": "インクラインベンチ（スミス）", "weight": 38.5, "reps": 10, "sets": null },
-      { "name": "ケーブルフライ/チェストフライ", "weight": 15, "reps": 15, "sets": null },
-      { "name": "スクワット", "weight": 58.5, "reps": 12, "sets": null }
+      {
+        "name": "インクラインベンチ（スミス）",
+        "weight": 38.5,
+        "reps": 10,
+        "sets": null
+      },
+      {
+        "name": "ケーブルフライ/チェストフライ",
+        "weight": 15,
+        "reps": 15,
+        "sets": null
+      },
+      {
+        "name": "スクワット",
+        "weight": 58.5,
+        "reps": 12,
+        "sets": null
+      }
     ],
     "comment": "インクラインピークタイ・フォーム過去一。カロリー管理アプリ開始。"
   },
@@ -123,10 +278,30 @@
     "session": "S15",
     "waist": 87.5,
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 43.5, "reps": 10, "sets": 2 },
-      { "name": "インクラインダンベルフライ", "weight": null, "reps": 15, "sets": null },
-      { "name": "ラットプルダウン", "weight": 40, "reps": 20, "sets": 3 },
-      { "name": "スクワット", "weight": 58.5, "reps": 12, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 43.5,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "インクラインダンベルフライ",
+        "weight": null,
+        "reps": 15,
+        "sets": null
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 40,
+        "reps": 20,
+        "sets": 3
+      },
+      {
+        "name": "スクワット",
+        "weight": 58.5,
+        "reps": 12,
+        "sets": null
+      }
     ],
     "comment": "★ベンチ43.5kg余裕クリア→次回46kgへ。ダンベルフライ13→15回記録更新（家トレ効果）。ラットプル3セット安定。"
   },
@@ -135,10 +310,30 @@
     "session": "S16",
     "waist": 87.0,
     "exercises": [
-      { "name": "インクラインベンチ（スミス）", "weight": 38.5, "reps": 10, "sets": 2 },
-      { "name": "ケーブルフライ/チェストフライ", "weight": null, "reps": 15, "sets": 2 },
-      { "name": "ラットプルダウン", "weight": 40, "reps": 17, "sets": null },
-      { "name": "スクワット", "weight": 58.5, "reps": 12, "sets": null }
+      {
+        "name": "インクラインベンチ（スミス）",
+        "weight": 38.5,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "ケーブルフライ/チェストフライ",
+        "weight": null,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 40,
+        "reps": 17,
+        "sets": null
+      },
+      {
+        "name": "スクワット",
+        "weight": 58.5,
+        "reps": 12,
+        "sets": null
+      }
     ],
     "comment": "出張後もパワー維持。ウエスト87.0cm改善。体脂肪量18.5kg過去最小タイ。"
   },
@@ -147,10 +342,30 @@
     "session": "S17",
     "waist": 87.0,
     "exercises": [
-      { "name": "ベンチプレス（スミス）", "weight": 46, "reps": 10, "sets": null },
-      { "name": "インクラインダンベルフライ", "weight": null, "reps": 15, "sets": 2 },
-      { "name": "ラットプルダウン", "weight": 40, "reps": 20, "sets": 2 },
-      { "name": "スクワット", "weight": 61, "reps": 12, "sets": null }
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 46,
+        "reps": 10,
+        "sets": null
+      },
+      {
+        "name": "インクラインダンベルフライ",
+        "weight": null,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 40,
+        "reps": 20,
+        "sets": 2
+      },
+      {
+        "name": "スクワット",
+        "weight": 61,
+        "reps": 12,
+        "sets": null
+      }
     ],
     "comment": "★ベンチ46kg自己ベスト更新！台湾出張疲れで粘り不足も完遂。スクワット58.5→61kgへ重量UP。"
   },
@@ -159,11 +374,36 @@
     "session": "S18",
     "waist": 87.0,
     "exercises": [
-      { "name": "インクラインベンチ（スミス）", "weight": 41, "reps": 10, "sets": 2 },
-      { "name": "ケーブルフライ/チェストフライ", "weight": null, "reps": 15, "sets": 2 },
-      { "name": "ラットプルダウン", "weight": 40, "reps": null, "sets": 3 },
-      { "name": "ロープーリー", "weight": 40, "reps": 15, "sets": null },
-      { "name": "スクワット", "weight": 61, "reps": 12, "sets": null }
+      {
+        "name": "インクラインベンチ（スミス）",
+        "weight": 41,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "ケーブルフライ/チェストフライ",
+        "weight": null,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 40,
+        "reps": null,
+        "sets": 3
+      },
+      {
+        "name": "ロープーリー",
+        "weight": 40,
+        "reps": 15,
+        "sets": null
+      },
+      {
+        "name": "スクワット",
+        "weight": 61,
+        "reps": 12,
+        "sets": null
+      }
     ],
     "comment": "★インクライン41kg自己ベスト更新（+2.5kg）。ラットプル「今日が一番パワフル」（篠澤先生）。スクワット61kg定着。ロープーリー40kg×15回（従来35kg×20回から重量UP）。次回ロープーリー筋肥大セットへ。"
   },
@@ -171,14 +411,54 @@
     "date": "2026-06-16",
     "session": "S19",
     "exercises": [
-      { "name": "ロープーリー", "weight": 45, "reps": 13, "sets": 3 },
-      { "name": "ラットプルダウン", "weight": 40, "reps": 12, "sets": 2 },
-      { "name": "ベンチプレス（スミス）", "weight": 46, "reps": 10, "sets": 2 },
-      { "name": "インクラインダンベルフライ", "weight": 10, "reps": 15, "sets": 2 },
-      { "name": "サイドレイズ", "weight": null, "reps": 12, "sets": 2 },
-      { "name": "スクワット", "weight": 61, "reps": 12, "sets": 1 },
-      { "name": "モンスターウォーク", "weight": null, "reps": null, "sets": 3 },
-      { "name": "ハンズアップクランチ", "weight": null, "reps": 15, "sets": 3 }
+      {
+        "name": "ロープーリー",
+        "weight": 45,
+        "reps": 13,
+        "sets": 3
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 40,
+        "reps": 12,
+        "sets": 2
+      },
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 46,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "インクラインダンベルフライ",
+        "weight": 10,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "サイドレイズ",
+        "weight": null,
+        "reps": 12,
+        "sets": 2
+      },
+      {
+        "name": "スクワット",
+        "weight": 61,
+        "reps": 12,
+        "sets": 1
+      },
+      {
+        "name": "モンスターウォーク",
+        "weight": null,
+        "reps": null,
+        "sets": 3
+      },
+      {
+        "name": "ハンズアップクランチ",
+        "weight": null,
+        "reps": 15,
+        "sets": 3
+      }
     ],
     "comment": "★体脂肪量18.4kg全期間最小値更新！ロープーリー40→45kgへ重量UP。ラットプル筋肥大セット移行（12回×2）。ベンチ46kgキープ、二の腕強化が課題。炭水化物はトレ前後に集中。篠澤先生「今までで一番いい日、おめでとうございます」"
   },
@@ -187,14 +467,54 @@
     "session": "S20",
     "waist": 86.5,
     "exercises": [
-      { "name": "ラットプルダウン", "weight": 45, "reps": 12, "sets": 2 },
-      { "name": "ロープーリー", "weight": 40, "reps": 15, "sets": 1 },
-      { "name": "インクラインベンチ（スミス）", "weight": 41, "reps": 10, "sets": 2 },
-      { "name": "ケーブルフライ/デックフライ", "weight": 15, "reps": 15, "sets": 2 },
-      { "name": "サイドレイズ", "weight": 4, "reps": 15, "sets": 2 },
-      { "name": "スクワット", "weight": 61, "reps": 17, "sets": 1 },
-      { "name": "モンスターウォーク", "weight": null, "reps": null, "sets": 3 },
-      { "name": "腹筋（下腹）", "weight": null, "reps": 17, "sets": 3 }
+      {
+        "name": "ラットプルダウン",
+        "weight": 45,
+        "reps": 12,
+        "sets": 2
+      },
+      {
+        "name": "ロープーリー",
+        "weight": 40,
+        "reps": 15,
+        "sets": 1
+      },
+      {
+        "name": "インクラインベンチ（スミス）",
+        "weight": 41,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "ケーブルフライ/デックフライ",
+        "weight": 15,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "サイドレイズ",
+        "weight": 4,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "スクワット",
+        "weight": 61,
+        "reps": 17,
+        "sets": 1
+      },
+      {
+        "name": "モンスターウォーク",
+        "weight": null,
+        "reps": null,
+        "sets": 3
+      },
+      {
+        "name": "腹筋（下腹）",
+        "weight": null,
+        "reps": 17,
+        "sets": 3
+      }
     ],
     "comment": "★★体脂肪量18.2kg全期間最小値再更新！ラットプル45kgデビュー！ケーブルデックフライ「ついに脳と筋肉がつながった」MMC成立。肩のカット出てきた「河野さんの肩じゃないみたい」。スクワット61kg×17回（12→17回UP）。ウエスト86.5cm最小タイ。「この半年楽しみですよ」"
   },
@@ -202,15 +522,105 @@
     "date": "2026-06-24",
     "session": "S21",
     "exercises": [
-      { "name": "ロープーリー", "weight": 45, "reps": 13, "sets": 3 },
-      { "name": "ラットプルダウン", "weight": 40, "reps": 12, "sets": 2 },
-      { "name": "ベンチプレス（スミス）", "weight": 46, "reps": 10, "sets": 2 },
-      { "name": "インクラインダンベルフライ", "weight": 10, "reps": 15, "sets": 2 },
-      { "name": "ショルダープレス", "weight": 8, "reps": 12, "sets": 2 },
-      { "name": "スクワット", "weight": 61, "reps": 12, "sets": 1 },
-      { "name": "モンスターウォーク", "weight": null, "reps": null, "sets": 3 },
-      { "name": "ハンズアップクランチ", "weight": null, "reps": 15, "sets": 3 }
+      {
+        "name": "ロープーリー",
+        "weight": 45,
+        "reps": 13,
+        "sets": 3
+      },
+      {
+        "name": "ラットプルダウン",
+        "weight": 40,
+        "reps": 12,
+        "sets": 2
+      },
+      {
+        "name": "ベンチプレス（スミス）",
+        "weight": 46,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "インクラインダンベルフライ",
+        "weight": 10,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "ショルダープレス",
+        "weight": 8,
+        "reps": 12,
+        "sets": 2
+      },
+      {
+        "name": "スクワット",
+        "weight": 61,
+        "reps": 12,
+        "sets": 1
+      },
+      {
+        "name": "モンスターウォーク",
+        "weight": null,
+        "reps": null,
+        "sets": 3
+      },
+      {
+        "name": "ハンズアップクランチ",
+        "weight": null,
+        "reps": 15,
+        "sets": 3
+      }
     ],
     "comment": "★★★体脂肪量17.8kg全期間最小値大幅更新（初の17kg台）！ベンチ46kg補助なし10回達成！フォーム改善（足→尻→アーチ→全身）。InBody74点最高。シックスパック出現。ショルダープレス8kg初記録。「ついにブレイク」"
+  },
+  {
+    "date": "2026-06-28",
+    "session": "S22",
+    "waist": 86.5,
+    "exercises": [
+      {
+        "name": "ラットプルダウン",
+        "weight": 45,
+        "reps": 12,
+        "sets": 2
+      },
+      {
+        "name": "ロープーリー",
+        "weight": 40,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "インクラインベンチ（スミス）",
+        "weight": 41,
+        "reps": 10,
+        "sets": 2
+      },
+      {
+        "name": "ケーブルフライ/チェストフライ",
+        "weight": 15,
+        "reps": 15,
+        "sets": 2
+      },
+      {
+        "name": "スクワット",
+        "weight": 61,
+        "reps": 12,
+        "sets": 1
+      },
+      {
+        "name": "モンスターウォーク",
+        "weight": null,
+        "reps": null,
+        "sets": 3
+      },
+      {
+        "name": "腹筋（下腹）",
+        "weight": null,
+        "reps": 15,
+        "sets": 2
+      }
+    ],
+    "comment": "★インクラインベンチ（スミス）41kg自力初成功（前回は7回＋5kg補助）！ラットプル45kg×12×2安定（3set目40kg×15）。今日はケーブルフライの日（ダンベルフライなし）。スクワットは重さより深さ＝腿と床が平行を課題に。体脂肪量17.8kg維持・体脂肪率24.4%最良。就寝前プロテイン15g導入。ウエスト86.5維持、健診まで約14日で85目標。"
   }
 ]
