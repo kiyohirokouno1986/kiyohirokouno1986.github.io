@@ -2254,6 +2254,23 @@ async function loadServerMeals() {
     if (Array.isArray(arr) && arr.length) mergeMeals(arr); // 同一日付は最新で上書き
   } catch (e) { /* file:// やオフライン時は無視 */ }
 }
+// data/seed_daily.json（Tanita日次計測）を取り込み、未登録の日付だけ localStorage に追加。
+// 端末で入力済みの日は上書きしない（編集を保持）。今後の日次追加は seed_daily.json の更新だけでOK。
+async function loadServerDaily() {
+  try {
+    const res = await fetch('data/seed_daily.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const arr = await res.json();
+    if (!Array.isArray(arr) || !arr.length) return;
+    let stored = [];
+    try { const raw = localStorage.getItem(DM_KEY); if (raw) stored = JSON.parse(raw) || []; } catch (e) {}
+    const byDate = {};
+    for (const d of stored) byDate[d.date] = d;
+    for (const d of arr) if (!byDate[d.date]) byDate[d.date] = d; // 未登録の日付だけ追加
+    const merged = Object.values(byDate).sort((a, b) => a.date.localeCompare(b.date));
+    localStorage.setItem(DM_KEY, JSON.stringify(merged));
+  } catch (e) { /* file:// やオフライン時は無視 */ }
+}
 function rerender() {
   try {
     const meals = enrichMealsPFC(loadMeals());
@@ -2267,6 +2284,7 @@ function rerender() {
 }
 async function init() {
   await loadServerMeals();
+  await loadServerDaily();
   rerender();
 }
 init();
