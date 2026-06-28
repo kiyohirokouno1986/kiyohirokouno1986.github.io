@@ -304,6 +304,26 @@ canvas { max-height: 260px; margin-top: 8px; }
 .tdee-form input[type=number] { width: 56px; }
 .tdee-form select { max-width: 170px; }
 
+/* ===== 日次カロリー収支シート ===== */
+.led-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.led-kpi { background: #fafafa; border: 1px solid #eee; border-radius: 10px; padding: 10px 6px; text-align: center; }
+.led-kpi .lk-l { font-size: 0.6em; color: #888; font-weight: 600; }
+.led-kpi .lk-v { font-size: 1.12em; font-weight: 800; line-height: 1.1; margin-top: 3px; }
+.led-kpi .lk-v span { font-size: 0.45em; color: #aaa; font-weight: 600; margin-left: 1px; }
+.led-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+.led-table th { padding: 6px 4px; border-bottom: 2px solid #ddd; font-weight: 600; text-align: right; color: #888; font-size: 0.9em; }
+.led-table th:first-child { text-align: left; }
+.led-table td { padding: 6px 4px; border-bottom: 1px solid #f2f2f2; text-align: right; }
+.led-table td:first-child { text-align: left; font-weight: 500; white-space: nowrap; }
+.led-table .led-sub { font-size: 0.75em; color: #2d6a4f; margin-left: 3px; }
+.led-table .led-good { color: #2d6a4f; font-weight: 700; }
+.led-table .led-ok { color: #e65100; font-weight: 700; }
+.led-table .led-bad { color: #c62828; font-weight: 700; }
+.led-tag { font-size: 0.72em; padding: 0 5px; border-radius: 4px; font-weight: 700; }
+.led-tag.tr { background: #e8f3ec; color: #2d6a4f; }
+.led-tag.dk { background: #fdeee2; color: #e65100; }
+.led-note { font-size: 0.7em; color: #999; line-height: 1.5; margin-top: 8px; }
+
 /* ===== スマートフォン対応 ===== */
 @media (max-width: 480px) {
   body { padding: 10px; }

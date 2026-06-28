@@ -620,6 +620,14 @@ function estimateTDEEMeasured() {
   return out;
 }
 
+// 1日の推定アルコールkcal（残差法：総kcal − PFC由来kcal）。PFCが無ければ0。
+const ALC_FACTOR = 0.5; // 飲酒日の脂肪燃焼ストップ係数（固定）
+function estAlcoholK(d) {
+  if (d == null || d.protein == null) return 0;
+  const r = d.kcal - (d.protein * 4 + (d.fat || 0) * 9 + (d.carb || 0) * 4);
+  return Math.max(0, Math.round(r));
+}
+
 // モードに応じて採用するTDEEを返す（実測 / 予測式 / 手動）。実測がデータ不足なら予測式に自動フォールバック。
 function effectiveTDEE() {
   const profile = loadProfile();
@@ -1584,6 +1592,16 @@ function render(data, calMap) {
   const effPlanMonthly = +(effDeficitPlan * 30 / 7200).toFixed(1);
   const effPlanMonths = effPlanMonthly > 0 ? Math.round(liveFatToLose / effPlanMonthly) : 999;
 
+  // === 日次カロリー収支ロジック（常時ON）===
+  // その日のTDEE = 通常日TDEE ＋ トレ日のアフターバーン。平均は選択中TDEE(effTDEE)に一致するよう配分（二重計上回避）。
+  // ネット赤字 = その日のTDEE − 摂取 − お酒ブレーキ(推定アルコールkcal×0.5)。
+  const trainBonus = TRAIN_BURN + Math.round(effTDEE * (AFTERBURN_MULT - 1)); // トレ日の追加消費（直接＋アフターバーン）
+  const trainFrac = all.length ? all.filter(d => d.hasTrain).length / all.length : 0;
+  const restTDEE = Math.round(effTDEE - trainBonus * trainFrac); // 通常日TDEE（平均をeffTDEEに保つ）
+  const dayTDEE = (d) => restTDEE + (d.hasTrain ? trainBonus : 0);
+  const alcBrake = (d) => (d.hasDrink ? Math.round(ALC_FACTOR * estAlcoholK(d)) : 0);
+  const dayDef = (d) => dayTDEE(d) - d.kcal - alcBrake(d); // その日の脂肪燃焼換算ネット赤字
+
   // Stats
   const avgCal = Math.round(last7.reduce((s,d)=>s+d.kcal,0)/last7.length);
   const pD = last7.filter(d=>d.protein);
@@ -1591,8 +1609,7 @@ function render(data, calMap) {
   const avgF = pD.filter(d=>d.fat).length ? Math.round(pD.filter(d=>d.fat).reduce((s,d)=>s+(d.fat||0),0)/pD.filter(d=>d.fat).length) : null;
   const avgC = pD.filter(d=>d.carb).length ? Math.round(pD.filter(d=>d.carb).reduce((s,d)=>s+(d.carb||0),0)/pD.filter(d=>d.carb).length) : null;
   const wkTotal = last7.reduce((s,d)=>s+d.kcal,0);
-  const wkTDEE = effTDEE * last7.length;
-  const wkDeficit = wkTotal - wkTDEE;
+  const wkDeficit = last7.reduce((s,d)=>s+dayDef(d),0);
   const dailyDef = wkDeficit / last7.length;
   const actMonthly = +(Math.abs(dailyDef)*30/7200).toFixed(1);
   const actMonths = actMonthly > 0 ? Math.round(liveFatToLose / actMonthly) : 999;
@@ -1620,7 +1637,7 @@ function render(data, calMap) {
   const cumDeficits = [];
   let cumTotal = 0;
   for (const d of all) {
-    const dayDeficit = effTDEE - d.kcal; // positive = deficit, negative = surplus
+    const dayDeficit = dayDef(d); // 日次ネット赤字（トレ+／酒−を反映）
     cumTotal += dayDeficit;
     cumDeficits.push({ date: d.date, daily: dayDeficit, cumulative: cumTotal });
   }
@@ -1628,8 +1645,8 @@ function render(data, calMap) {
   const totalDeficit = cumTotal; // positive = net deficit
   const avgDailyDeficit = totalDays ? Math.round(totalDeficit / totalDays) : 0;
   const fatLostFromDeficit = +(totalDeficit / 7200).toFixed(2); // 1kg fat = 7200kcal
-  const surplusDays = all.filter(d => d.kcal > effTDEE).length;
-  const deficitDays = all.filter(d => d.kcal <= effTDEE).length;
+  const surplusDays = all.filter(d => dayDef(d) < 0).length;
+  const deficitDays = all.filter(d => dayDef(d) >= 0).length;
 
   // === Imputed monthly data (fill unrecorded days with average) ===
   const nowDate = new Date();
@@ -1651,9 +1668,11 @@ function render(data, calMap) {
     const isCurr = ym === currentYM;
     const calDays = isPast ? dim : (isCurr ? currentDOM : rec);
     const miss = Math.max(0, calDays - rec);
-    const impKcal = md.sumKcal + miss * avg;
-    const impDef = effTDEE * calDays - impKcal;
-    const fullDef = isCurr ? (effTDEE - avg) * dim : impDef;
+    // 記録日の日次ネット赤字を実合計し、未記録日は記録日平均で補完
+    const sumDef = md.days.reduce((s, d) => s + dayDef(d), 0);
+    const avgDef = sumDef / rec;
+    const impDef = Math.round(sumDef + miss * avgDef);
+    const fullDef = Math.round(isCurr ? avgDef * dim : impDef);
     Object.assign(md, { ym, dim, rec, avg, isPast, isCurr, calDays, miss, impDef, impFatKg: +(impDef/7200).toFixed(2), fullDef, fullFatKg: +(fullDef/7200).toFixed(2) });
   }
 
@@ -1723,10 +1742,10 @@ function render(data, calMap) {
   {
     const scD = all.filter(d => d.protein != null);
     const N = scD.length;
-    const surplusN = scD.filter(d => (effTDEE - d.kcal) < 0).length;
+    const surplusN = scD.filter(d => dayDef(d) < 0).length;
     const lowPN = scD.filter(d => d.protein < PROTEIN_MIN).length;
-    const fitN = scD.filter(d => (effTDEE - d.kcal) >= 0 && d.protein >= PROTEIN_MIN).length;
-    const idealN = scD.filter(d => { const def = effTDEE - d.kcal; return def >= 300 && def <= 500 && d.protein >= PROTEIN_TARGET; }).length;
+    const fitN = scD.filter(d => dayDef(d) >= 0 && d.protein >= PROTEIN_MIN).length;
+    const idealN = scD.filter(d => { const def = dayDef(d); return def >= 300 && def <= 500 && d.protein >= PROTEIN_TARGET; }).length;
     const fitPct = N ? Math.round(fitN / N * 100) : 0;
     html += `<div class="card">
       <h2>🎯 リコンプ・スコアカード <span style="font-size:0.68em;color:#888;font-weight:400;">赤字 × タンパク質</span></h2>
@@ -1747,6 +1766,40 @@ function render(data, calMap) {
 
   // === TDEE推定 ＆ シミュレーション基準 ===
   html += tdeeCardHTML(tdeeInfo, effTDEE);
+
+  // === 日次カロリー収支シート（毎日のネット赤字を全部計算） ===
+  {
+    const ledgerDays = [...all].reverse().slice(0, 14); // 直近14日
+    const sumNet = all.reduce((s, d) => s + dayDef(d), 0);
+    const avgNet = all.length ? Math.round(sumNet / all.length) : 0;
+    const sumAlc = all.reduce((s, d) => s + alcBrake(d), 0);
+    const nTrain = all.filter(d => d.hasTrain).length;
+    let rows = '';
+    for (const d of ledgerDays) {
+      const t = dayTDEE(d), a = alcBrake(d), net = dayDef(d);
+      const dt = new Date(d.date + 'T12:00:00');
+      const dlabel = `${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})`;
+      const netCls = net >= 300 ? 'led-good' : net >= 0 ? 'led-ok' : 'led-bad';
+      rows += `<tr>
+        <td>${dlabel}${d.hasTrain?' <span class="led-tag tr">筋</span>':''}${d.hasDrink?' <span class="led-tag dk">酒</span>':''}</td>
+        <td>${d.kcal.toLocaleString()}</td>
+        <td>${t.toLocaleString()}${d.hasTrain?`<span class="led-sub">+${trainBonus}</span>`:''}</td>
+        <td>${a>0?'-'+a.toLocaleString():'—'}</td>
+        <td class="${netCls}">${net>=0?'-':'+'}${Math.abs(net).toLocaleString()}</td>
+      </tr>`;
+    }
+    html += `<div class="card">
+      <h2>📒 日次カロリー収支 <span style="font-size:0.66em;color:#888;font-weight:400;">毎日のネット赤字（トレ＋／酒−）</span></h2>
+      <div class="led-kpis">
+        <div class="led-kpi"><div class="lk-l">平均ネット赤字</div><div class="lk-v" style="color:${avgNet>=0?'#2d6a4f':'#c62828'};">${avgNet>=0?'-':'+'}${Math.abs(avgNet).toLocaleString()}<span>kcal/日</span></div></div>
+        <div class="led-kpi"><div class="lk-l">累計（${all.length}日）</div><div class="lk-v" style="color:#1a237e;">${sumNet>=0?'-':'+'}${Math.abs(sumNet).toLocaleString()}<span>kcal</span></div></div>
+        <div class="led-kpi"><div class="lk-l">脂肪換算</div><div class="lk-v" style="color:#1a237e;">${(sumNet/7200).toFixed(1)}<span>kg</span></div></div>
+        <div class="led-kpi"><div class="lk-l">お酒で相殺</div><div class="lk-v" style="color:#e65100;">-${sumAlc.toLocaleString()}<span>kcal</span></div></div>
+      </div>
+      <table class="led-table"><thead><tr><th>日</th><th>摂取</th><th>TDEE</th><th>酒-</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="led-note">その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。お酒ブレーキ = 推定アルコールkcal × ${ALC_FACTOR}。直近14日を表示／全${all.length}日を集計。</div>
+    </div>`;
+  }
 
   // === 15% Roadmap - Current Month Progress (TOP) ===
   if (curRM) {
@@ -2493,7 +2546,7 @@ function render(data, calMap) {
       if (def >= 300 && def <= 500 && p >= PROTEIN_TARGET) return '#1b5e20'; // 理想ゾーン
       return '#43a047';                              // 適合
     };
-    const pts = all.filter(d => d.protein != null).map(d => ({ x: effTDEE - d.kcal, y: d.protein, date: d.date, kcal: d.kcal }));
+    const pts = all.filter(d => d.protein != null).map(d => ({ x: dayDef(d), y: d.protein, date: d.date, kcal: d.kcal }));
     const zonePlugin = { id: 'recompZone', beforeDatasetsDraw(chart) {
       const { ctx, chartArea: ca, scales: { x, y } } = chart;
       const cx = (v) => Math.max(ca.left, Math.min(ca.right, x.getPixelForValue(v)));
