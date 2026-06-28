@@ -20,5 +20,6 @@
   { "date": "2026-06-14", "session": "S18", "weight": 72.5, "muscle": 50.9, "fatMass": 18.6, "fatPct": 25.6, "waist": 87.0, "inbody": null, "note": "懇親会連戦もキープ、インクライン41kg新記録、食事管理定着" },
   { "date": "2026-06-16", "session": "S19", "weight": 71.6, "muscle": 50.2, "fatMass": 18.4, "fatPct": 25.7, "waist": null, "inbody": null, "note": "★体脂肪量18.4kg全期間最小値更新！体重71.6kgも最小、ロープーリー45kg、ラットプル筋肥大セット移行" },
   { "date": "2026-06-21", "session": "S20", "weight": 72.6, "muscle": 51.3, "fatMass": 18.2, "fatPct": 25.1, "waist": 86.5, "inbody": null, "note": "★★体脂肪量18.2kg全期間最小値更新！体脂肪率25.1%最良タイ、ウエスト86.5cm最小タイ、ラットプル45kgデビュー" },
-  { "date": "2026-06-24", "session": "S21", "weight": 72.6, "muscle": 51.7, "fatMass": 17.8, "fatPct": 24.5, "waist": null, "inbody": 74, "note": "★★★体脂肪量17.8kg全期間最小値大幅更新（初の17kg台）！体脂肪率24.5%最良更新、ベンチ46kg補助なし10回、InBody74点最高、シックスパック出現" }
+  { "date": "2026-06-24", "session": "S21", "weight": 72.6, "muscle": 51.7, "fatMass": 17.8, "fatPct": 24.5, "waist": null, "inbody": 74, "note": "★★★体脂肪量17.8kg全期間最小値大幅更新（初の17kg台）！体脂肪率24.5%最良更新、ベンチ46kg補助なし10回、InBody74点最高、シックスパック出現" },
+  { "date": "2026-06-28", "session": "S22", "weight": 72.9, "muscle": 51.9, "fatMass": 17.8, "fatPct": 24.4, "waist": 86.5, "inbody": null, "note": "★体脂肪率24.4%最良更新・体脂肪量17.8kg維持（17kg台キープ）。先生「体脂肪は横ばい→落ちるのが理想、理想の1周目」。インクライン41kg自力初成功。GLP-1オフで中途覚醒→就寝前プロテイン15g導入。" }
 ]

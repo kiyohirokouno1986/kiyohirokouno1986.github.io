@@ -42,6 +42,7 @@ const SEED_DATA = [
   { date:'2026-06-16', session:'S19', weight:71.6, muscle:50.2, fatMass:18.4, fatPct:25.7, waist:null, inbody:null, note:'★体脂肪量18.4kg全期間最小値更新！体重71.6kgも最小、ロープーリー45kg、ラットプル筋肥大セット移行' },
   { date:'2026-06-21', session:'S20', weight:72.6, muscle:51.3, fatMass:18.2, fatPct:25.1, waist:86.5, inbody:null, note:'★★体脂肪量18.2kg全期間最小値更新！体脂肪率25.1%最良タイ、ウエスト86.5cm最小タイ、ラットプル45kgデビュー' },
   { date:'2026-06-24', session:'S21', weight:72.6, muscle:51.7, fatMass:17.8, fatPct:24.5, waist:null, inbody:74, note:'★★★体脂肪量17.8kg全期間最小値大幅更新（初の17kg台）！体脂肪率24.5%最良更新、ベンチ46kg補助なし10回、InBody74点最高、シックスパック出現' },
+  { date:'2026-06-28', session:'S22', weight:72.9, muscle:51.9, fatMass:17.8, fatPct:24.4, waist:86.5, inbody:null, note:'★体脂肪率24.4%最良更新・体脂肪量17.8kg維持（17kg台キープ）。先生「体脂肪は横ばい→落ちるのが理想、今は理想の1周目」。インクライン41kg自力初成功。GLP-1オフで中途覚醒→就寝前プロテイン15g導入。水分増で一時的に体重増も慣れれば落ちる見込み。' },
 ];
 
 function loadBodyComp() {
@@ -198,6 +199,15 @@ const SEED_TRAINING = [
     {name:'モンスターウォーク',weight:null,reps:null,sets:3},
     {name:'ハンズアップクランチ',weight:null,reps:15,sets:3}
   ], comment:'★★★体脂肪量17.8kg全期間最小値大幅更新（初の17kg台）！ベンチ46kg補助なし10回達成！フォーム改善（足→尻→アーチ→全身）。InBody74点最高。シックスパック出現。ショルダープレス8kg初記録。「ついにブレイク」' },
+  { date:'2026-06-28', session:'S22', waist:86.5, exercises:[
+    {name:'ラットプルダウン',weight:45,reps:12,sets:2},
+    {name:'ロープーリー',weight:40,reps:15,sets:2},
+    {name:'インクラインベンチ（スミス）',weight:41,reps:10,sets:2},
+    {name:'ケーブルフライ/チェストフライ',weight:15,reps:15,sets:2},
+    {name:'スクワット',weight:61,reps:12,sets:1},
+    {name:'モンスターウォーク',weight:null,reps:null,sets:3},
+    {name:'腹筋（下腹）',weight:null,reps:15,sets:2}
+  ], comment:'★インクラインベンチ（スミス）41kg自力初成功（前回は7回＋5kg補助）！ラットプル45kg×12×2安定（3set目40kg×15）。今日はケーブルフライの日（ダンベルフライなし）。スクワットは重さより深さ＝腿と床が平行を課題に（60kgまでは深さ優先）。体脂肪量17.8kg維持・体脂肪率24.4%最良。先生「横ばいして落ちるのが理想、今は理想の1周目」。GLP-1オフで中途覚醒→就寝前プロテイン15g導入（睡眠優先、1500kcalは維持）。ウエスト86.5維持、健診まで約14日で85目標。' },
 ];
 
 function loadTraining() {
@@ -256,6 +266,7 @@ const SEED_WAIST = [
   { date:'2026-06-07', waist:87.0 },
   { date:'2026-06-14', waist:87.0 },
   { date:'2026-06-21', waist:86.5 },
+  { date:'2026-06-28', waist:86.5 },
 ];
 function loadWaist() {
   let stored = null;
@@ -2127,6 +2138,7 @@ function render(data, calMap) {
     <div class="rule-item"><strong>節制日（1,500kcal）：</strong>P ${PROTEIN_MIN}g未満 → 1,600kcalまでOK。${PROTEIN_TARGET}gが理想。</div>
     <div class="rule-item"><strong>飲食日（2,200kcal）：</strong>P不足でも追加プロテイン不要。炭水化物・脂質がカバー。</div>
     <div class="rule-item"><strong>朝プロテイン30g：</strong>寝起きは栄養カラカラで吸収率MAX。ここで稼ぐ。</div>
+    <div class="rule-item" style="border-left:3px solid #6c5ce7;padding-left:8px;"><strong>就寝前プロテイン15g（S22・GLP-1オフ対応）：</strong>夜中に空腹で起きるなら就寝前に15gを飲んで寝る（飲むのはOK・睡眠の質を最優先）。1,500kcalは維持し、第二段階で夜の一杯分を確保。起きてしまったら炭酸水/水で空腹をごまかす。</div>
     <div class="rule-item"><strong>達成パターン：</strong>プロテイン2回（30g×2=60g）＋食事2回（40g×2=80g）= ${PROTEIN_TARGET}g</div></div>`;
 
   html += `<div class="train-card" style="margin-top:14px;"><h3>🏋️ トレーニング日のカロリールール</h3>
