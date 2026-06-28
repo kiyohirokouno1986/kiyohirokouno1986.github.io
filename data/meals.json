@@ -378,5 +378,15 @@
     "memo": "",
     "hasDrink": true,
     "hasTrain": true
+  },
+  {
+    "date": "2026-06-28",
+    "kcal": 1717,
+    "protein": 153.9,
+    "fat": 55.1,
+    "carb": 120.3,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": true
   }
 ]
