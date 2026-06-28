@@ -724,6 +724,34 @@ function trainDeficit(day) {
   return { directBurn, afterburn, totalExtra, effectiveCal, deficit };
 }
 
+// === 溢れた日の要因診断（リコンプ向け） ===
+// 食事kcal = P*4+F*9+C*4。総kcalとの差(残差)を「アルコール＋未記録」とみなす。
+// 超過は飲食上限(FREE=2200)比で算出し、-400赤字の何日分を相殺したかを出す。
+const RECOMP_DEFICIT = 400;     // リコンプの1日あたり目標赤字（バンド中心）
+const OVERFLOW_THRESHOLD = 2500; // この総カロリー以上を「溢れた日」とする（2,200は適正圏）
+function overflowDiagnosis(d) {
+  const p = d.protein || 0, f = d.fat || 0, c = d.carb || 0;
+  const pK = Math.round(p * 4), fK = Math.round(f * 9), cK = Math.round(c * 4);
+  const foodKcal = pK + fK + cK;
+  const alcoholK = Math.max(0, d.kcal - foodKcal); // 残差 ≒ アルコール＋未記録
+  const excess = Math.max(0, d.kcal - FREE);        // 飲食上限(2200)超過分
+  const overCap = Math.max(0, d.kcal - FREE_HARD_CAP); // 絶対上限(2500)超過分
+  const daysErased = +(excess / RECOMP_DEFICIT).toFixed(1);
+  // 主因の判定（アルコール / 脂質 / 炭水化物）
+  const drivers = [];
+  if (alcoholK >= 250) drivers.push({ key: 'alcohol', label: '🍺 アルコール', detail: `約${alcoholK.toLocaleString()}kcal`, col: '#8e24aa' });
+  if (f >= 80) drivers.push({ key: 'fat', label: '脂質', detail: `${Math.round(f)}g（高め）`, col: '#e65100' });
+  if (c >= 250) drivers.push({ key: 'carb', label: '炭水化物', detail: `${Math.round(c)}g（多め）`, col: '#1565c0' });
+  if (!drivers.length) drivers.push({ key: 'overall', label: '全体量', detail: 'バランス的に総量オーバー', col: '#c62828' });
+  // リカバリー提案（既存の教訓を自動適用）
+  const recoverPerDay = TDEE - 1300; // 1,300kcal日が生む赤字
+  const tips = [];
+  if (overCap > 0) tips.push(`上限${FREE_HARD_CAP.toLocaleString()}でキャップしていれば <strong>+${overCap.toLocaleString()}kcal</strong> 抑えられた`);
+  if (alcoholK >= 300) tips.push(`アルコールを3杯ルールで半減 → 約${Math.round(alcoholK / 2).toLocaleString()}kcal カット`);
+  tips.push(`翌日1,300kcalなら1日 −${recoverPerDay}kcal → <strong>${Math.max(1, Math.ceil(excess / recoverPerDay))}日</strong>で取り戻せる`);
+  return { pK, fK, cK, foodKcal, alcoholK, excess, overCap, daysErased, drivers, tips };
+}
+
 // === Tab switching ===
 function switchTab(id) {
   document.querySelectorAll('.main-tab').forEach(t=>t.classList.remove('active'));
@@ -1635,6 +1663,36 @@ function render(data, calMap) {
     </div>`;
   }
 
+  // === 溢れた日の要因診断（総カロリー × 🍺アルコール × 📅スケジュール） ===
+  const overflowDays = all.filter(d => d.kcal >= OVERFLOW_THRESHOLD);
+  if (overflowDays.length > 0) {
+    const schedColors = { '会食': '#c62828', '懇親会': '#c62828', '飲み会': '#8e24aa', '出張': '#1565c0', '海外': '#00838f', '支援': '#6a1b9a', '訪問': '#2e7d32', '食事会': '#e65100' };
+    html += `<div class="card"><h2 style="color:#c62828;">🔎 溢れた日の要因診断（${OVERFLOW_THRESHOLD.toLocaleString()}kcal以上）</h2>
+      <div style="font-size:0.76em;color:#888;margin-bottom:10px;">「📅その日が何の日だったか」と「🍺アルコール（総量−P/F/C＝推定）」を軸に要因を特定。色帯はkcal構成。2,200台は適正圏として除外。</div>`;
+    for (const d of [...overflowDays].reverse()) {
+      const dg = overflowDiagnosis(d);
+      const ann = calMap[d.date];
+      const schedCol = ann ? (schedColors[ann.short] || '#c62828') : '#9e9e9e';
+      const seg = (k, col, label) => k > 0 ? `<div title="${label} ${k.toLocaleString()}kcal" style="width:${(k / d.kcal * 100).toFixed(1)}%;background:${col};"></div>` : '';
+      html += `<div class="day-card day-over" style="margin-bottom:10px;">
+        <div class="day-header">
+          <span class="day-date">${fmtDate(d.date)} ${d.hasDrink ? '🍺' : ''}${d.hasTrain ? '🏋️' : ''}</span>
+          <span class="tag" style="background:${schedCol};color:#fff;">📅 ${ann ? ann.short : '予定なし'}</span>
+        </div>
+        ${ann ? `<div style="font-size:0.78em;color:#444;margin:5px 0;background:#f7f7f7;border-left:3px solid ${schedCol};padding:5px 8px;border-radius:4px;">${ann.full}</div>` : `<div style="font-size:0.72em;color:#aaa;margin:5px 0;">カレンダーに該当予定なし（未連携 or 通常日）</div>`}
+        <div style="font-size:0.82em;margin:4px 0;"><strong style="font-size:1.2em;color:#c62828;">${d.kcal.toLocaleString()}</strong> kcal ／ −${RECOMP_DEFICIT}赤字 <strong>${dg.daysErased}日分</strong>を相殺${dg.alcoholK >= 150 ? ` ／ 🍺<strong>約${dg.alcoholK.toLocaleString()}kcal</strong>` : ''}</div>
+        <div style="display:flex;height:12px;border-radius:6px;overflow:hidden;margin:6px 0;background:#eee;">
+          ${seg(dg.pK, '#e63946', 'P')}${seg(dg.fK, '#f4a261', 'F')}${seg(dg.cK, '#457b9d', 'C')}${seg(dg.alcoholK, '#8e24aa', '🍺/他')}
+        </div>
+        <div style="font-size:0.68em;color:#777;display:flex;gap:9px;flex-wrap:wrap;">
+          <span style="color:#e63946;">■P${dg.pK}</span><span style="color:#f4a261;">■F${dg.fK}</span><span style="color:#457b9d;">■C${dg.cK}</span>${dg.alcoholK > 0 ? `<span style="color:#8e24aa;">■🍺/他${dg.alcoholK}</span>` : ''}<span style="opacity:0.5;">kcal</span>
+        </div>
+        <div class="risk-box risk-yellow" style="font-size:0.75em;margin-top:6px;padding:8px;">💡 ${dg.tips.join('<br>💡 ')}</div>
+      </div>`;
+    }
+    html += `</div>`;
+  }
+
   // Verdict
   const score = (gapCal<=0?1:0) + (avgP&&avgP>=PROTEIN_MIN?1:0) + (strictN>=3?1:0) + (wkDeficit<0?1:0) + (pBelow100Strict===0?1:0);
   const verdict = score>=5 ? {text:'完璧！計画通りのペースです',cl:'risk-green',emoji:'🎯'} : score>=3 ? {text:'おおむね順調。プロテインと節制日を微調整',cl:'risk-yellow',emoji:'💪'} : {text:'計画とのGAPが大きめ。節制日を増やし、P100gを死守',cl:'risk-red',emoji:'⚠️'};
@@ -2271,6 +2329,16 @@ async function loadServerDaily() {
     localStorage.setItem(DM_KEY, JSON.stringify(merged));
   } catch (e) { /* file:// やオフライン時は無視 */ }
 }
+// data/calendar.json（Googleカレンダーを分類した予定マップ）を読み込み、calMap として保存。
+// 形式: { "YYYY-MM-DD": { short, full } }。会食/出張などの「その日の性質」をGAP分析で使う。
+async function loadServerCalendar() {
+  try {
+    const res = await fetch('data/calendar.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const map = await res.json();
+    if (map && typeof map === 'object') localStorage.setItem('calGuide_calMap', JSON.stringify(map));
+  } catch (e) { /* file:// やオフライン時は無視 */ }
+}
 function rerender() {
   try {
     const meals = enrichMealsPFC(loadMeals());
@@ -2285,6 +2353,7 @@ function rerender() {
 async function init() {
   await loadServerMeals();
   await loadServerDaily();
+  await loadServerCalendar();
   rerender();
 }
 init();
