@@ -276,3 +276,22 @@ canvas { max-height: 260px; margin-top: 8px; }
 .dm-period-filter { display: flex; gap: 4px; margin-bottom: 10px; }
 .dm-period-filter button { background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 4px 12px; font-size: 0.72em; font-weight: 600; cursor: pointer; transition: all 0.2s; color: #666; }
 .dm-period-filter button.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+
+/* ===== スマートフォン対応 ===== */
+@media (max-width: 480px) {
+  body { padding: 10px; }
+  .main-tabs { padding: 3px; gap: 2px; }
+  .main-tab { font-size: 0.72em; padding: 9px 2px; white-space: nowrap; letter-spacing: -0.3px; }
+  .card, .bc-section, .tl-section, .dm-section, .tl-chart-card, .dm-chart-card,
+  .deficit-tracker, .roadmap-card { padding: 14px; }
+  .kpi { padding: 12px 4px; }
+  .kpi .label { font-size: 0.58em; }
+  .kpi .val { font-size: 1.3em; }
+  /* 4列KPIが詰まりやすいので少し小さく */
+  .bc-kpi-item .bv, .tl-kpi-item .tv2, .dm-kpi-item .dm-val { font-size: 1.15em; }
+  .bc-kpi-item .bl, .tl-kpi-item .tl2, .dm-kpi-item .dm-label { font-size: 0.56em; }
+  .week-strip { gap: 4px; }
+  .ws-item { padding: 8px 2px; }
+  /* 横長テーブルはフォントを詰めて収める */
+  .roadmap-table, .month-table, .cmp-table, .proj-table, .bc-table { font-size: 0.72em; }
+}
