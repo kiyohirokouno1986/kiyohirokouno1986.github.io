@@ -74,14 +74,23 @@ const RULES = [
 ];
 const cleanSummary = (s) => s.replace(/^[🚕🚖✈️🏨🍽️📅🎯\s]+/, '').trim();
 
+// 筋トレ日の判定：パーソナルトレーナー「篠澤先生」の予定があった日。業務分類とは独立に train フラグを付ける。
+const TRAIN_RE = /篠澤/;
+
 function classify(items) {
   const byDate = {};
+  const trainDates = new Set();
   for (const ev of items) {
     if (ev.status === 'cancelled') continue;
     const summary = ev.summary || '';
     if (!summary || /kcal|食事記録/.test(summary)) continue; // 食事ログは除外
     const date = ev.start?.date || (ev.start?.dateTime ? ev.start.dateTime.slice(0, 10) : null);
     if (!date) continue;
+    // トレーニング日（篠澤先生）を検知。業務ルールに当てはまらなくても拾う。
+    if (TRAIN_RE.test(summary)) {
+      trainDates.add(date);
+      if (!byDate[date]) byDate[date] = { short: 'トレ', full: cleanSummary(summary), prio: 99 };
+    }
     for (let i = 0; i < RULES.length; i++) {
       if (RULES[i].re.test(summary)) {
         const prev = byDate[date];
@@ -95,7 +104,10 @@ function classify(items) {
     }
   }
   const out = {};
-  for (const date of Object.keys(byDate).sort()) out[date] = { short: byDate[date].short, full: byDate[date].full };
+  for (const date of Object.keys(byDate).sort()) {
+    out[date] = { short: byDate[date].short, full: byDate[date].full };
+    if (trainDates.has(date)) out[date].train = true; // 筋トレ日フラグ
+  }
   return out;
 }
 
