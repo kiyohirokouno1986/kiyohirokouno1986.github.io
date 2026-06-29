@@ -388,5 +388,15 @@
     "memo": "",
     "hasDrink": true,
     "hasTrain": true
+  },
+  {
+    "date": "2026-06-29",
+    "kcal": 1446,
+    "protein": 140,
+    "fat": 53,
+    "carb": 98,
+    "memo": "タンパク質140gでかなり優秀。天ぷらで脂質は乗ったが、総カロリーは1500kcal内に収まった。",
+    "hasDrink": true,
+    "hasTrain": true
   }
 ]
