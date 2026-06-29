@@ -1,7 +1,7 @@
 name: Fetch Slack meals
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    - cron: '7,37 * * * *'   # 30分ごと（毎時 :07 / :37・API集中を避けてオフセット）
   workflow_dispatch:
 permissions:
   contents: write

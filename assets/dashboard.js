@@ -1732,6 +1732,12 @@ function render(data, calMap) {
 
   let html = '';
 
+  // 同期ステータスバー（自動同期データの最終更新時刻。GitHub Pages上でのみ表示）
+  if (syncStatus.meals || syncStatus.calendar) {
+    const fmtS = (iso) => { if (!iso) return '—'; const d = new Date(iso); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+    html += `<div class="sync-status">🔄 自動同期データ最終更新　食事 <b>${fmtS(syncStatus.meals)}</b> ／ 予定 <b>${fmtS(syncStatus.calendar)}</b></div>`;
+  }
+
   // ===================== TAB 1: GAP分析 =====================
   html += `<div id="tab-gap" class="tab-content">`;
   if (all.length === 0) {
@@ -2784,10 +2790,32 @@ function rerender() {
     console.error(e);
   }
 }
+// 自動同期データ(meals/calendar)の「最終更新時刻」をGitHub APIから取得（GitHub Pagesでのみ・公開APIで認証不要）。
+let syncStatus = {};
+async function loadSyncStatus() {
+  try {
+    const host = location.hostname;
+    if (!host.endsWith('github.io')) return; // ローカル/その他では表示しない
+    const owner = host.split('.')[0], repo = host;
+    const commitDate = async (path) => {
+      try {
+        const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&per_page=1`, { cache: 'no-store' });
+        if (!r.ok) return null;
+        const j = await r.json();
+        return (j && j[0] && j[0].commit && j[0].commit.committer && j[0].commit.committer.date) || null;
+      } catch (e) { return null; }
+    };
+    const [meals, calendar] = await Promise.all([commitDate('data/meals.json'), commitDate('data/calendar.json')]);
+    syncStatus = { meals, calendar };
+  } catch (e) { /* 失敗時は表示しないだけ */ }
+}
 async function init() {
   await loadServerMeals();
   await loadServerDaily();
   await loadServerCalendar();
   rerender();
+  // 同期ステータスは後追いで取得し、取れたら再描画（初回表示をブロックしない）
+  await loadSyncStatus();
+  if (syncStatus.meals || syncStatus.calendar) rerender();
 }
 init();
