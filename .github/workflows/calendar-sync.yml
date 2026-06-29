@@ -1,13 +1,13 @@
 name: Sync Google Calendar
 
 # Googleカレンダーを取得して data/calendar.json を更新する。
-# - 12時間ごとに自動実行（cron）
+# - 2時間ごとに自動実行（cron）
 # - 手動実行も可能（Actions タブの "Run workflow"）
 # 認証はサービスアカウント（Secrets: GOOGLE_SA_KEY ／ 任意 GOOGLE_CALENDAR_ID）。
 
 on:
   schedule:
-    - cron: '37 */12 * * *'   # 12時間ごと（UTC・分は37でAPI集中を回避）
+    - cron: '37 */2 * * *'   # 2時間ごと（毎偶数時 :37・API集中を回避）
   workflow_dispatch:
 
 permissions:
