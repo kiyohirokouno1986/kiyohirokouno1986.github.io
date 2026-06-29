@@ -2784,6 +2784,8 @@ function rerender() {
     const meals = enrichMealsPFC(loadMeals());
     let calMap = {};
     try { const raw = localStorage.getItem('calGuide_calMap'); if (raw) calMap = JSON.parse(raw) || {}; } catch(e) {}
+    // 筋トレ日はGoogleカレンダーの「篠澤先生」(train)で判定（Slackキーワードは使わない）
+    for (const m of meals) m.hasTrain = !!(calMap[m.date] && calMap[m.date].train);
     render(meals, calMap);
   } catch(e) {
     document.getElementById('app').innerHTML = `<div class="card" style="border-left:4px solid #c62828;"><h2 style="color:#c62828;">エラー</h2><p style="font-size:0.85em;">${e.message||e}</p></div>`;
