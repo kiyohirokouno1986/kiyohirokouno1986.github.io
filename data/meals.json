@@ -408,5 +408,15 @@
     "memo": "タンパク質は143gでしっかり達成。カロリーオーバーの主因はウィスキー180ml。食事内容自体は高タンパクでかなり良い構成。",
     "hasDrink": true,
     "hasTrain": false
+  },
+  {
+    "date": "2026-07-01",
+    "kcal": 2385,
+    "protein": 125.5,
+    "fat": 71.5,
+    "carb": 161,
+    "memo": "",
+    "hasDrink": true,
+    "hasTrain": false
   }
 ]
