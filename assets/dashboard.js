@@ -1860,6 +1860,68 @@ function render(data, calMap) {
     <div style="margin-top:10px;font-size:0.72em;opacity:0.5;padding-left:8px;border-left:2px solid rgba(255,255,255,0.15);">目標赤字 = TDEE(${effTDEE}・${tdeeInfo.source==='measured'?'実測':tdeeInfo.source==='manual'?'手動':'予測式'}) - Plan C平均(${DAILY_PLAN_AVG}) = ${effDeficitPlan}kcal/日。脂肪1kg = 7,200kcal。* = 未記録日を平均値で補完。BF%・体重は日次計測の直近7日平均（${bc2.date||'—'}時点）が起点で、現在月は実測アンカー（来月から投影）。</div>
   </div>`;
 
+  // === 月別 予実アーカイブ（過去月の予実も見られる） ===
+  {
+    const months = Object.values(imputedByMonth).filter(md => md.ym)
+      .sort((a, b) => a.ym.localeCompare(b.ym))
+      .map(md => {
+        const target = effDeficitPlan * md.calDays;             // 経過日数ぶんの目標（過去月は満月=dim）
+        const actual = md.impDef;                               // 実績（過去=確定／現在=経過ぶんの積み上げ）
+        const fatKg = md.impFatKg;
+        const rate = target ? Math.round(actual / target * 100) : 0;
+        const trainDays = md.days.filter(d => d.hasTrain).length;
+        return { ym: md.ym, label: `${Number(md.ym.slice(5))}月`, dim: md.dim, calDays: md.calDays, rec: md.rec, miss: md.miss,
+          target, actual, fatKg, rate, trainDays, isCurr: md.isCurr, isPast: md.isPast };
+      });
+    if (months.length) {
+      let selYM = (archiveMonth && months.some(m => m.ym === archiveMonth)) ? archiveMonth : null;
+      if (!selYM) { const pasts = months.filter(m => m.isPast); selYM = (pasts.length ? pasts[pasts.length - 1] : months[months.length - 1]).ym; }
+      const sel = months.find(m => m.ym === selYM);
+      const vd = (m) => m.isCurr ? { t: '進行中', c: '#64ffda', chip: '進行中', cc: '#0d8f74' }
+        : m.rate >= 80 ? { t: '計画通り ◎', c: '#64ffda', chip: '◎', cc: '#2d6a4f' }
+        : m.rate >= 50 ? { t: 'ほぼ計画通り', c: '#ffd740', chip: 'ほぼ', cc: '#c46a00' }
+        : { t: '要改善', c: '#ff8a80', chip: '要改善', cc: '#c62828' };
+      const v = vd(sel);
+      const signed = (n) => `${n >= 0 ? '-' : '+'}${Math.abs(n).toLocaleString()}`;      // 赤字=マイナス表記／黒字(超過)=プラス
+      const signedKg = (n) => `${n >= 0 ? '-' : '+'}${Math.abs(n)}kg`;
+      const early = (m) => m.isCurr && m.calDays < 5;                                     // 月初の数日は達成率が暴れるので集計中扱い
+      let tabs = '';
+      for (const m of months) tabs += `<button class="arch-tab${m.ym === selYM ? ' active' : ''}" data-ym="${m.ym}">${m.label}${m.isCurr ? '<span class="now"> now</span>' : ''}</button>`;
+      html += `<div class="roadmap-card">
+        <h2>📅 月別 予実 ― ${sel.label}${sel.isCurr ? '（進行中）' : ''}</h2>
+        <div class="arch-tabs">${tabs}</div>
+        <div style="text-align:center;margin-bottom:14px;padding:10px 0;background:rgba(255,255,255,0.06);border-radius:10px;">
+          <div style="font-size:0.72em;opacity:0.6;">${sel.label}の実績ベース脂肪減${sel.isCurr ? `（${sel.calDays}日時点）` : ''}</div>
+          <div style="font-size:2em;font-weight:800;color:#64ffda;line-height:1.1;">${signedKg(sel.fatKg)}</div>
+          <div style="font-size:0.75em;opacity:0.5;margin-top:4px;">目標 -${(sel.target/7200).toFixed(2)}kg ／ 記録 ${sel.rec}日${sel.miss>0?`（+${sel.miss}日補完）`:''} ／ 筋トレ ${sel.trainDays}日</div>
+        </div>
+        <div class="roadmap-kpi">
+          <div class="roadmap-kpi-item"><div class="rl">目標赤字</div><div class="rv" style="color:#ffd740;">-${sel.target.toLocaleString()}</div><div class="rs" style="opacity:0.5;">-${effDeficitPlan}/日 × ${sel.calDays}日</div></div>
+          <div class="roadmap-kpi-item"><div class="rl">実績赤字</div><div class="rv" style="color:#64ffda;">${signed(sel.actual)}</div><div class="rs" style="opacity:0.5;">${sel.isCurr ? sel.calDays + '日時点' : '確定'}${sel.miss>0?`（${sel.miss}日補完）`:''}</div></div>
+          <div class="roadmap-kpi-item"><div class="rl">達成率</div><div class="rv" style="color:${early(sel)?'#cfd3f7':v.c};">${early(sel) ? '集計中' : sel.rate + '%'}</div><div class="rs" style="color:${early(sel)?'#cfd3f7':v.c};">${early(sel) ? 'データ蓄積中' : v.t}</div></div>
+        </div>
+      </div>`;
+      let rows = '';
+      for (const m of months) {
+        const mv = vd(m);
+        rows += `<tr class="arch-row${m.ym === selYM ? ' sel' : ''}" data-ym="${m.ym}">
+          <td>${m.label}${m.isCurr ? ' <span style="font-size:0.7em;color:#0d8f74;">now</span>' : ''}${m.miss>0 && !m.isCurr ? ' <span style="font-size:0.7em;color:#aaa;">*</span>' : ''}</td>
+          <td>-${m.target.toLocaleString()}</td>
+          <td class="${early(m)?'':m.rate>=80?'arch-good':m.rate<50?'arch-bad':''}">${signed(m.actual)}${m.isCurr?'<span style="font-size:0.8em;color:#999;"> 途中</span>':''}</td>
+          <td>${early(m) ? '—' : m.rate + '%'}</td>
+          <td>${signedKg(m.fatKg)}</td>
+          <td><span class="arch-badge" style="color:${mv.cc};background:${mv.cc}1f;">${mv.chip}</span></td>
+        </tr>`;
+      }
+      html += `<div class="card">
+        <h2>📊 月別 予実アーカイブ</h2>
+        <div style="font-size:0.7em;color:#999;margin-bottom:10px;">過去の予実を月ごとに保存。上のタブ／下の行タップで詳細を切替。</div>
+        <table class="arch-table"><thead><tr><th>月</th><th>目標</th><th>実績</th><th>達成</th><th>脂肪減</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table>
+        <div style="font-size:0.66em;color:#aaa;margin-top:8px;line-height:1.5;">* = 未記録日を平均補完。実績＝日次ネット赤字の月合計（トレ+／酒−込み）。判定：達成80%↑=◎／50〜80%=ほぼ／未満=要改善。</div>
+      </div>`;
+    }
+  }
+
   // Weekly summary strip
   html += `<div class="week-strip">
     <div class="ws-item"><div class="ws-l">平均kcal</div><div class="ws-v" style="color:${gapCal<=0?'#2d6a4f':'#e65100'};">${avgCal.toLocaleString()}</div><div class="ws-l">${gapCal<=0?'計画内':'+'+(gapCal)}</div></div>
@@ -2507,6 +2569,8 @@ function render(data, calMap) {
   attachMealHandlers();
   // Attach TDEE/profile handlers
   attachTDEEHandlers();
+  // Attach 月別予実アーカイブ handlers
+  attachArchiveHandlers();
 
   // ===================== CHARTS =====================
 
@@ -2791,6 +2855,13 @@ function rerender() {
     document.getElementById('app').innerHTML = `<div class="card" style="border-left:4px solid #c62828;"><h2 style="color:#c62828;">エラー</h2><p style="font-size:0.85em;">${e.message||e}</p></div>`;
     console.error(e);
   }
+}
+// 月別予実アーカイブで選択中の月（YYYY-MM。null=最新の完了月）
+let archiveMonth = null;
+function attachArchiveHandlers() {
+  document.querySelectorAll('.arch-tab, .arch-row').forEach(el => {
+    el.onclick = () => { archiveMonth = el.dataset.ym; rerender(); };
+  });
 }
 // 自動同期データ(meals/calendar)の「最終更新時刻」をGitHub APIから取得（GitHub Pagesでのみ・公開APIで認証不要）。
 let syncStatus = {};
