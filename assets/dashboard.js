@@ -2091,15 +2091,30 @@ function render(data, calMap) {
     const sumNet = all.reduce((s, d) => s + dayDef(d), 0);
     const avgNet = all.length ? Math.round(sumNet / all.length) : 0;
     const sumAlc = all.reduce((s, d) => s + alcBrake(d), 0);
+    const DRINK_KCAL = 150; // 1杯あたり推定kcal（ビール/ハイボール/ワイン等の平均）
+    const pCol = (v) => v == null ? '<span style="color:#bbb;">—</span>'
+      : `<span style="color:${v>=PROTEIN_TARGET?'#2d6a4f':v>=PROTEIN_MIN?'#e65100':'#c62828'};font-weight:700;">${Math.round(v)}</span>`;
     let rows = '';
     for (const d of ledgerDays) {
       const t = dayTDEE(d), a = alcBrake(d), net = dayDef(d);
       const dt = new Date(d.date + 'T12:00:00');
       const dlabel = `${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})`;
       const netCls = net >= 300 ? 'led-good' : net >= 0 ? 'led-ok' : 'led-bad';
+      // 酒アイコン：推定アルコールkcal÷150で杯数換算し、3杯相当以内=「酒」/超過=「深酒」
+      let drinkTag = '';
+      if (d.hasDrink) {
+        const alcK = estAlcoholK(d);
+        const drinks = alcK > 0 ? Math.round(alcK / DRINK_KCAL) : 0;
+        const heavy = drinks > ALCOHOL_CAP; // 3杯超＝大幅超過
+        const ttl = alcK > 0 ? `推定${drinks}杯・${alcK.toLocaleString()}kcal` : '飲酒あり（量不明）';
+        drinkTag = ` <span class="led-tag ${heavy?'dk-over':'dk'}" title="${ttl}">${heavy?'深酒':'酒'}</span>`;
+      }
       rows += `<tr>
-        <td>${dlabel}${d.hasTrain?' <span class="led-tag tr">筋</span>':''}${d.hasDrink?' <span class="led-tag dk">酒</span>':''}</td>
+        <td>${dlabel}${d.hasTrain?' <span class="led-tag tr">筋</span>':''}${drinkTag}</td>
         <td>${d.kcal.toLocaleString()}</td>
+        <td>${pCol(d.protein)}</td>
+        <td>${d.fat!=null?Math.round(d.fat):'<span style="color:#bbb;">—</span>'}</td>
+        <td>${d.carb!=null?Math.round(d.carb):'<span style="color:#bbb;">—</span>'}</td>
         <td>${t.toLocaleString()}${d.hasTrain?`<span class="led-sub">+${trainBonus}</span>`:''}</td>
         <td>${a>0?'-'+a.toLocaleString():'—'}</td>
         <td class="${netCls}">${net>=0?'-':'+'}${Math.abs(net).toLocaleString()}</td>
@@ -2113,8 +2128,8 @@ function render(data, calMap) {
         <div class="led-kpi"><div class="lk-l">脂肪換算</div><div class="lk-v" style="color:#1a237e;">${(sumNet/7200).toFixed(1)}<span>kg</span></div></div>
         <div class="led-kpi"><div class="lk-l">お酒で相殺</div><div class="lk-v" style="color:#e65100;">-${sumAlc.toLocaleString()}<span>kcal</span></div></div>
       </div>
-      <table class="led-table"><thead><tr><th>日</th><th>摂取</th><th>TDEE</th><th>酒-</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="led-note">その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。お酒ブレーキ = 推定アルコールkcal × ${ALC_FACTOR}。直近14日を表示／全${all.length}日を集計。</div>
+      <div class="led-scroll"><table class="led-table"><thead><tr><th>日</th><th>摂取</th><th title="タンパク質(g)">P</th><th title="脂質(g)">F</th><th title="炭水化物(g)">C</th><th>TDEE</th><th>酒-</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="led-note">P（緑=${PROTEIN_TARGET}g以上／橙=${PROTEIN_MIN}g以上／赤=不足）・F・C はg。<span class="led-tag dk">酒</span>=3杯相当以内／<span class="led-tag dk-over">深酒</span>=推定${ALCOHOL_CAP}杯超（残差法の推定アルコールkcal÷150kcal/杯で換算）。その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。お酒ブレーキ = 推定アルコールkcal × ${ALC_FACTOR}。直近14日を表示／全${all.length}日を集計。</div>
     </div>`;
   }
 
