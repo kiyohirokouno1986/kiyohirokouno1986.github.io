@@ -1748,6 +1748,15 @@ function render(data, calMap) {
     html += mealEmptyNotice('GAP分析');
   } else {
 
+  // 各カードを種別バッファに描画し、最後に読みやすい順で結合する（並び替え）
+  let cScore='', cProgress='', cStrip='', cCompare='', cPlanline='', cLedger='',
+      cOverflow='', cBlowout='', cSchedule='', cTrainreal='', cPfc='',
+      cRoadmap='', cArchive='', cTdee='', cVerdict='';
+  // 「計画 vs 実績」の実績は日次カロリー収支（全期間）ベース
+  const avgCalAll = all.length ? Math.round(all.reduce((s,d)=>s+d.kcal,0)/all.length) : 0;
+  const actMonthlyAll = +(avgDailyDeficit*30/7200).toFixed(1);
+  const actMonthsAll = actMonthlyAll > 0 ? Math.round(liveFatToLose / actMonthlyAll) : 999;
+
   // === リコンプ・スコアカード（赤字 × タンパク質） ===
   {
     const scD = all.filter(d => d.protein != null);
@@ -1757,7 +1766,7 @@ function render(data, calMap) {
     const fitN = scD.filter(d => dayDef(d) >= 0 && d.protein >= PROTEIN_MIN).length;
     const idealN = scD.filter(d => { const def = dayDef(d); return def >= 300 && def <= 500 && d.protein >= PROTEIN_TARGET; }).length;
     const fitPct = N ? Math.round(fitN / N * 100) : 0;
-    html += `<div class="card">
+    cScore += `<div class="card">
       <h2>🎯 リコンプ・スコアカード <span style="font-size:0.68em;color:#888;font-weight:400;">赤字 × タンパク質</span></h2>
       <div style="font-size:0.76em;color:#888;margin-bottom:10px;">1点＝1日。<b>緑＝適合</b>（赤字あり＆P${PROTEIN_MIN}g以上）、<b>濃緑＝理想</b>（赤字300〜500＆P${PROTEIN_TARGET}）、<b style="color:#c62828;">赤＝溢れ</b>（カロリー超過＝脂肪減ストップ）、<b style="color:#e65100;">橙＝P不足</b>（筋肉リスク）。リコンプは「Pを死守しつつ溢れを減らす」が要。</div>
       <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);">
@@ -1775,7 +1784,7 @@ function render(data, calMap) {
   }
 
   // === TDEE推定 ＆ シミュレーション基準 ===
-  html += tdeeCardHTML(tdeeInfo, effTDEE);
+  cTdee += tdeeCardHTML(tdeeInfo, effTDEE);
 
   // === 日次カロリー収支シート（毎日のネット赤字を全部計算） ===
   {
@@ -1798,7 +1807,7 @@ function render(data, calMap) {
         <td class="${netCls}">${net>=0?'-':'+'}${Math.abs(net).toLocaleString()}</td>
       </tr>`;
     }
-    html += `<div class="card">
+    cLedger += `<div class="card">
       <h2>📒 日次カロリー収支 <span style="font-size:0.66em;color:#888;font-weight:400;">毎日のネット赤字（トレ＋／酒−）</span></h2>
       <div class="led-kpis">
         <div class="led-kpi"><div class="lk-l">平均ネット赤字</div><div class="lk-v" style="color:${avgNet>=0?'#2d6a4f':'#c62828'};">${avgNet>=0?'-':'+'}${Math.abs(avgNet).toLocaleString()}<span>kcal/日</span></div></div>
@@ -1825,7 +1834,7 @@ function render(data, calMap) {
     const fatLostThisMonth = +(defSoFar / 7200).toFixed(2);
     const fatProjThisMonth = +(projEnd / 7200).toFixed(2);
 
-    html += `<div class="roadmap-card">
+    cProgress += `<div class="roadmap-card">
       <h2>🎯 15%ロードマップ ― 今月の進捗</h2>
       <div style="text-align:center;margin-bottom:14px;padding:10px 0;background:rgba(255,255,255,0.06);border-radius:10px;">
         <div style="font-size:0.72em;opacity:0.6;">今月の実績ベース脂肪減</div>
@@ -1842,12 +1851,12 @@ function render(data, calMap) {
   }
 
   // === Monthly Roadmap Table (TOP) ===
-  html += `<div class="roadmap-card">
+  cRoadmap += `<div class="roadmap-card">
     <h2>📅 月別ロードマップ ― シミュレーション vs 実績</h2>
     <table class="roadmap-table"><thead><tr><th>月</th><th>目標BF%</th><th>目標赤字</th><th>実績赤字</th><th>脂肪減</th><th>判定</th></tr></thead><tbody>`;
   for (const rm of roadmap) {
     if (rm.isGoal) {
-      html += `<tr class="rm-goal"><td style="color:#ffd740;">${rm.label} ★</td><td style="color:#ffd740;font-weight:700;">${rm.endBF}%</td><td>―</td><td>―</td><td>―</td><td><span class="rm-badge" style="background:rgba(255,215,64,0.2);color:#ffd740;">GOAL</span></td></tr>`;
+      cRoadmap += `<tr class="rm-goal"><td style="color:#ffd740;">${rm.label} ★</td><td style="color:#ffd740;font-weight:700;">${rm.endBF}%</td><td>―</td><td>―</td><td>―</td><td><span class="rm-badge" style="background:rgba(255,215,64,0.2);color:#ffd740;">GOAL</span></td></tr>`;
       continue;
     }
     const rc = rm.isCurr ? 'rm-current' : rm.isFut ? 'rm-future' : '';
@@ -1858,9 +1867,9 @@ function render(data, calMap) {
     if (rm.isCurr) badge = `<span class="rm-badge" style="background:rgba(100,255,218,0.15);color:#64ffda;">進行中</span>`;
     else if (rm.isFut) badge = '―';
     else if (rate != null) { const bc = rate>=80?'#64ffda':rate>=50?'#ffd740':'#ff5252'; badge = `<span class="rm-badge" style="background:rgba(${rate>=80?'100,255,218':rate>=50?'255,215,64':'255,82,82'},0.2);color:${bc};">${rate}%</span>`; }
-    html += `<tr class="${rc}"><td>${rm.label}${rm.isCurr?' <span style="font-size:0.75em;color:#64ffda;">now</span>':''}${rm.miss>0?' <span style="font-size:0.65em;opacity:0.5;" title="'+rm.miss+'日分を平均値で補完">*</span>':''}</td><td>${rm.endBF}%</td><td style="color:#ffd740;">-${rm.tDef.toLocaleString()}</td><td style="color:${dDef!=null&&dDef>0?'#64ffda':'#ff5252'};">${dDef!=null?sgnDef(dDef):'―'}${rm.isCurr?'<span style="font-size:0.7em;opacity:0.5;"> 予測</span>':''}</td><td>${dFat!=null?sgnKg(dFat):'―'}</td><td>${badge}</td></tr>`;
+    cRoadmap += `<tr class="${rc}"><td>${rm.label}${rm.isCurr?' <span style="font-size:0.75em;color:#64ffda;">now</span>':''}${rm.miss>0?' <span style="font-size:0.65em;opacity:0.5;" title="'+rm.miss+'日分を平均値で補完">*</span>':''}</td><td>${rm.endBF}%</td><td style="color:#ffd740;">-${rm.tDef.toLocaleString()}</td><td style="color:${dDef!=null&&dDef>0?'#64ffda':'#ff5252'};">${dDef!=null?sgnDef(dDef):'―'}${rm.isCurr?'<span style="font-size:0.7em;opacity:0.5;"> 予測</span>':''}</td><td>${dFat!=null?sgnKg(dFat):'―'}</td><td>${badge}</td></tr>`;
   }
-  html += `</tbody></table>
+  cRoadmap += `</tbody></table>
     <div style="margin-top:10px;font-size:0.72em;opacity:0.5;padding-left:8px;border-left:2px solid rgba(255,255,255,0.15);">目標赤字 = TDEE(${effTDEE}・${tdeeInfo.source==='measured'?'実測':tdeeInfo.source==='manual'?'手動':'予測式'}) - Plan C平均(${DAILY_PLAN_AVG}) = ${effDeficitPlan}kcal/日。脂肪1kg = 7,200kcal。* = 未記録日を平均値で補完。BF%・体重は日次計測の直近7日平均（${bc2.date||'—'}時点）が起点で、現在月は実測アンカー（来月から投影）。</div>
   </div>`;
 
@@ -1891,7 +1900,7 @@ function render(data, calMap) {
       const early = (m) => m.isCurr && m.calDays < 5;                                     // 月初の数日は達成率が暴れるので集計中扱い
       let tabs = '';
       for (const m of months) tabs += `<button class="arch-tab${m.ym === selYM ? ' active' : ''}" data-ym="${m.ym}">${m.label}${m.isCurr ? '<span class="now"> now</span>' : ''}</button>`;
-      html += `<div class="roadmap-card">
+      cArchive += `<div class="roadmap-card">
         <h2>📅 月別 予実 ― ${sel.label}${sel.isCurr ? '（進行中）' : ''}</h2>
         <div class="arch-tabs">${tabs}</div>
         <div style="text-align:center;margin-bottom:14px;padding:10px 0;background:rgba(255,255,255,0.06);border-radius:10px;">
@@ -1917,7 +1926,7 @@ function render(data, calMap) {
           <td><span class="arch-badge" style="color:${mv.cc};background:${mv.cc}1f;">${mv.chip}</span></td>
         </tr>`;
       }
-      html += `<div class="card">
+      cArchive += `<div class="card">
         <h2>📊 月別 予実アーカイブ</h2>
         <div style="font-size:0.7em;color:#999;margin-bottom:10px;">過去の予実を月ごとに保存。上のタブ／下の行タップで詳細を切替。</div>
         <table class="arch-table"><thead><tr><th>月</th><th>目標</th><th>実績</th><th>達成</th><th>脂肪減</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table>
@@ -1927,7 +1936,7 @@ function render(data, calMap) {
   }
 
   // Weekly summary strip
-  html += `<div class="week-strip">
+  cStrip += `<div class="week-strip">
     <div class="ws-item"><div class="ws-l">平均kcal</div><div class="ws-v" style="color:${gapCal<=0?'#2d6a4f':'#e65100'};">${avgCal.toLocaleString()}</div><div class="ws-l">${gapCal<=0?'計画内':'+'+(gapCal)}</div></div>
     <div class="ws-item"><div class="ws-l">節制日</div><div class="ws-v" style="color:${strictN>=4?'#2d6a4f':'#e65100'};">${strictN}<span style="font-size:0.6em;color:#888;">/${last7.length}日</span></div><div class="ws-l">${strictN>=4?'OK':'目標4日'}</div></div>
     <div class="ws-item"><div class="ws-l">P平均</div><div class="ws-v" style="color:${avgP&&avgP>=PROTEIN_TARGET?'#2d6a4f':avgP&&avgP>=PROTEIN_MIN?'#e65100':'#c62828'};">${avgP||'—'}<span style="font-size:0.6em;">g</span></div><div class="ws-l">${PROTEIN_MIN}〜${PROTEIN_TARGET}g</div></div>
@@ -1936,20 +1945,20 @@ function render(data, calMap) {
   </div>`;
 
   // Gap comparison table
-  html += `<div class="card"><h2>計画 vs 実績 比較</h2>
+  cCompare += `<div class="card"><h2>計画 vs 実績 比較 <span style="font-size:0.64em;color:#888;font-weight:400;">実績＝日次カロリー収支（全${all.length}日）</span></h2>
     <table class="cmp-table"><thead><tr><th>指標</th><th style="color:#6c5ce7;">計画</th><th style="color:#e65100;">実績</th><th>GAP</th></tr></thead><tbody>
-      <tr><td>平均kcal/日</td><td>${DAILY_PLAN_AVG.toLocaleString()}</td><td>${avgCal.toLocaleString()}</td><td style="color:${gapCal<=0?'#2d6a4f':'#c62828'};font-weight:700;">${gapCal>0?'+':''}${gapCal}</td></tr>
-      <tr><td>カロリー赤字/日</td><td>-${effDeficitPlan}</td><td>${Math.round(dailyDef)}</td><td style="color:${dailyDef<=-effDeficitPlan?'#2d6a4f':'#c62828'};font-weight:700;">${gapDef>0?'+':''}${gapDef}</td></tr>
-      <tr><td>週間カロリー赤字</td><td>-${(effDeficitPlan*7).toLocaleString()}</td><td>${Math.round(wkDeficit).toLocaleString()}</td><td style="color:${wkDeficit<=-(effDeficitPlan*7)?'#2d6a4f':'#c62828'};font-weight:700;">${wkDeficit+(effDeficitPlan*7)>0?'+':''}${Math.round(wkDeficit+(effDeficitPlan*7))}</td></tr>
-      <tr><td>月間脂肪減</td><td>-${effPlanMonthly}kg</td><td>${actMonthly>=0?'-':'+'}${Math.abs(actMonthly)}kg</td><td style="color:${actMonthly>=effPlanMonthly?'#2d6a4f':'#c62828'};font-weight:700;">${gapMonthly>0?'+':''}${gapMonthly}kg</td></tr>
-      <tr><td>15%到達予測</td><td>約${effPlanMonths}ヶ月</td><td>約${actMonths<100?actMonths:'—'}ヶ月</td><td style="color:${actMonths<=effPlanMonths?'#2d6a4f':'#c62828'};font-weight:700;">${actMonths<100?(gapMonths>0?'+':'')+gapMonths+'ヶ月':'—'}</td></tr>
+      <tr><td>平均kcal/日</td><td>${DAILY_PLAN_AVG.toLocaleString()}</td><td>${avgCalAll.toLocaleString()}</td><td style="color:${avgCalAll<=DAILY_PLAN_AVG?'#2d6a4f':'#c62828'};font-weight:700;">${avgCalAll-DAILY_PLAN_AVG>0?'+':''}${avgCalAll-DAILY_PLAN_AVG}</td></tr>
+      <tr><td>カロリー赤字/日</td><td>-${effDeficitPlan}</td><td>${sgnDef(avgDailyDeficit)}</td><td style="color:${avgDailyDeficit>=effDeficitPlan?'#2d6a4f':'#c62828'};font-weight:700;">${(avgDailyDeficit-effDeficitPlan)>=0?'+':''}${Math.round(avgDailyDeficit-effDeficitPlan)}</td></tr>
+      <tr><td>週間カロリー赤字</td><td>-${(effDeficitPlan*7).toLocaleString()}</td><td>${sgnDef(avgDailyDeficit*7)}</td><td style="color:${avgDailyDeficit>=effDeficitPlan?'#2d6a4f':'#c62828'};font-weight:700;">${(avgDailyDeficit-effDeficitPlan)>=0?'+':''}${Math.round((avgDailyDeficit-effDeficitPlan)*7).toLocaleString()}</td></tr>
+      <tr><td>月間脂肪減</td><td>-${effPlanMonthly}kg</td><td>${sgnKg(actMonthlyAll)}</td><td style="color:${actMonthlyAll>=effPlanMonthly?'#2d6a4f':'#c62828'};font-weight:700;">${(actMonthlyAll-effPlanMonthly)>0?'+':''}${+(actMonthlyAll-effPlanMonthly).toFixed(1)}kg</td></tr>
+      <tr><td>15%到達予測</td><td>約${effPlanMonths}ヶ月</td><td>約${actMonthsAll<100?actMonthsAll:'—'}ヶ月</td><td style="color:${actMonthsAll<=effPlanMonths?'#2d6a4f':'#c62828'};font-weight:700;">${actMonthsAll<100?((actMonthsAll-effPlanMonths)>0?'+':'')+(actMonthsAll-effPlanMonths)+'ヶ月':'—'}</td></tr>
       <tr><td>タンパク質/日</td><td><strong>${PROTEIN_TARGET}g</strong></td><td>${avgP||'—'}g</td><td>${avgP?`<span class="tag ${avgP>=PROTEIN_TARGET?'tag-good':avgP>=PROTEIN_MIN?'tag-warn':'tag-bad'}">${avgP>=PROTEIN_TARGET?'◎':avgP>=PROTEIN_MIN?'最低ラインOK':'不足'}</span>`:''}</td></tr>
       <tr><td>P最低100g遵守</td><td>${pDaysWithData.length}/${pDaysWithData.length}日</td><td>${pAbove100}/${pDaysWithData.length}日</td><td>${pBelow100Strict>0?`<span class="tag tag-bad">節制日${pBelow100Strict}日不足</span>`:'<span class="tag tag-good">OK</span>'}</td></tr>
       <tr><td>節制日 vs 飲食日</td><td>4:3</td><td>${strictN}:${freeN}</td><td>${strictN>=4?'<span class="tag tag-good">OK</span>':'<span class="tag tag-warn">飲食日多め</span>'}</td></tr>
     </tbody></table></div>`;
 
   // GAP chart
-  html += `<div class="card"><h2>直近${last7.length}日 計画ライン vs 実績</h2><canvas id="gapChart"></canvas>
+  cPlanline += `<div class="card"><h2>直近${last7.length}日 計画ライン vs 実績</h2><canvas id="gapChart"></canvas>
     <div style="margin-top:10px;" class="grid-3">
       <div class="mini"><div class="v c-plan">${DAILY_PLAN_AVG}</div><div class="l">計画平均</div></div>
       <div class="mini"><div class="v c-actual">${avgCal}</div><div class="l">実績平均</div></div>
@@ -1959,24 +1968,25 @@ function render(data, calMap) {
   // PFC GAP
   if (avgP) {
     const planP=PROTEIN_TARGET, planF=52, planC_carb=180;
-    html += `<div class="card"><h2>PFC・プロテインGAP</h2>
+    cPfc += `<div class="card"><h2>PFC・プロテインGAP</h2>
       <table class="cmp-table"><thead><tr><th></th><th style="color:#6c5ce7;">計画</th><th style="color:#e65100;">実績</th><th>GAP</th></tr></thead><tbody>
         <tr><td style="color:#e63946;font-weight:600;">P（タンパク質）</td><td>${planP}g</td><td>${avgP}g</td><td style="color:${avgP>=planP?'#2d6a4f':'#c62828'};font-weight:700;">${avgP>=planP?'+':''}${avgP-planP}g</td></tr>
         ${avgF?`<tr><td style="color:#f4a261;font-weight:600;">F（脂質）</td><td>${planF}g</td><td>${avgF}g</td><td style="color:${avgF<=planF+10?'#2d6a4f':'#c62828'};font-weight:700;">${avgF>planF?'+':''}${avgF-planF}g</td></tr>`:''}
         ${avgC?`<tr><td style="color:#457b9d;font-weight:600;">C（炭水化物）</td><td>${planC_carb}g</td><td>${avgC}g</td><td style="font-weight:700;">${avgC>planC_carb?'+':''}${avgC-planC_carb}g</td></tr>`:''}
       </tbody></table>`;
+    // (cPfc へ続けて追記)
     if (avgP < PROTEIN_TARGET) {
       const isBelow100 = avgP < PROTEIN_MIN;
-      html += `<div class="${isBelow100?'risk-red':'risk-yellow'} risk-box" style="margin-top:10px;"><strong>${isBelow100?'⚠️ 危険':'💡 改善ポイント'}：</strong>${isBelow100?`タンパク質が最低ライン${PROTEIN_MIN}gを下回っています。1,500kcal日でも1,600kcalまでOK。朝プロテイン30gを徹底。`:`タンパク質が目標${PROTEIN_TARGET}gに未到達。朝プロテインを30gに増やし、2回（30g×2=60g）＋食事（80g）で達成を。`}</div>`;
+      cPfc += `<div class="${isBelow100?'risk-red':'risk-yellow'} risk-box" style="margin-top:10px;"><strong>${isBelow100?'⚠️ 危険':'💡 改善ポイント'}：</strong>${isBelow100?`タンパク質が最低ライン${PROTEIN_MIN}gを下回っています。1,500kcal日でも1,600kcalまでOK。朝プロテイン30gを徹底。`:`タンパク質が目標${PROTEIN_TARGET}gに未到達。朝プロテインを30gに増やし、2回（30g×2=60g）＋食事（80g）で達成を。`}</div>`;
     }
-    html += `</div>`;
+    cPfc += `</div>`;
   }
 
   // Training deficit
   if (trainDays.length > 0) {
     const td = trainDeficits2[trainDeficits2.length-1] || trainDeficits2[0];
     if (td) {
-      html += `<div class="train-card"><h3>🏋️ トレーニング日の実質カロリー赤字</h3>
+      cTrainreal += `<div class="train-card"><h3>🏋️ トレーニング日の実質カロリー赤字</h3>
         <div class="train-grid">
           <div class="train-box"><div class="tv">-${td.directBurn}</div><div class="tl">直接消費</div></div>
           <div class="train-box"><div class="tv">-${td.afterburn}</div><div class="tl">アフターバーン</div></div>
@@ -1989,7 +1999,7 @@ function render(data, calMap) {
 
   // Blowout impact card
   if (blowoutDays.length > 0) {
-    html += `<div class="card"><h2 style="color:#c62828;">💥 爆発日インパクト分析</h2>
+    cBlowout += `<div class="card"><h2 style="color:#c62828;">💥 爆発日インパクト分析</h2>
       <div class="grid-3" style="margin-bottom:12px;">
         <div class="mini"><div class="v" style="color:#c62828;">${blowoutDays.length}<span style="font-size:0.5em;">日</span></div><div class="l">2,200超の日</div></div>
         <div class="mini"><div class="v" style="color:#c62828;">+${blowoutExcess.toLocaleString()}<span style="font-size:0.5em;">kcal</span></div><div class="l">超過カロリー合計</div></div>
@@ -2032,13 +2042,13 @@ function render(data, calMap) {
     // 一番カロリーが盛れている種別（通常日以外）を主因として抽出
     const worst = rows.filter(r => r.k !== '通常日' && base.n).sort((a, b) => (b.s.avgK - a.s.avgK))[0];
 
-    html += `<div class="card"><h2>📅 スケジュール別の食事傾向 <span style="font-size:0.68em;color:#888;font-weight:400;">カレンダー × 食事の相関</span></h2>
+    cSchedule += `<div class="card"><h2>📅 スケジュール別の食事傾向 <span style="font-size:0.68em;color:#888;font-weight:400;">カレンダー × 食事の相関</span></h2>
       <div style="font-size:0.76em;color:#888;margin-bottom:8px;">その日の予定の種類ごとに、平均カロリー・タンパク質・🍺アルコール・溢れ率を集計。「何の日に食べ過ぎるか」を数値化。</div>
       <table class="cmp-table"><thead><tr><th>種別</th><th>日数</th><th>平均kcal</th><th>vs通常</th><th>平均P</th><th>🍺平均</th><th>溢れ率</th></tr></thead><tbody>`;
     for (const r of rows) {
       const dK = (r.k !== '通常日' && base.n) ? r.s.avgK - base.avgK : null;
       const dP = (r.k !== '通常日' && base.n && r.s.avgP != null && base.avgP != null) ? r.s.avgP - base.avgP : null;
-      html += `<tr>
+      cSchedule += `<tr>
         <td style="font-weight:600;color:${r.meta.col};">${r.meta.emoji} ${r.k}</td>
         <td>${r.s.n}</td>
         <td><strong>${r.s.avgK.toLocaleString()}</strong></td>
@@ -2048,26 +2058,26 @@ function render(data, calMap) {
         <td style="color:${r.s.overflowPct >= 30 ? '#c62828' : '#888'};">${r.s.overflowPct}%</td>
       </tr>`;
     }
-    html += `</tbody></table>`;
+    cSchedule += `</tbody></table>`;
     if (worst && worst.s.avgK - base.avgK > 150) {
       const dK = worst.s.avgK - base.avgK;
-      html += `<div class="risk-box risk-yellow" style="font-size:0.8em;margin-top:8px;"><strong>💡 ${worst.meta.emoji} ${worst.k}の日</strong>は通常日より平均 <strong style="color:#c62828;">+${dK.toLocaleString()}kcal</strong>（🍺平均${worst.s.avgAlc}kcal・溢れ率${worst.s.overflowPct}%）。ここを<strong>${FREE_HARD_CAP.toLocaleString()}でキャップ＋3杯ルール</strong>で抑えるのが、リコンプの一番効くレバー。</div>`;
+      cSchedule += `<div class="risk-box risk-yellow" style="font-size:0.8em;margin-top:8px;"><strong>💡 ${worst.meta.emoji} ${worst.k}の日</strong>は通常日より平均 <strong style="color:#c62828;">+${dK.toLocaleString()}kcal</strong>（🍺平均${worst.s.avgAlc}kcal・溢れ率${worst.s.overflowPct}%）。ここを<strong>${FREE_HARD_CAP.toLocaleString()}でキャップ＋3杯ルール</strong>で抑えるのが、リコンプの一番効くレバー。</div>`;
     }
-    html += `</div>`;
+    cSchedule += `</div>`;
   }
 
   // === 溢れた日の要因診断（総カロリー × 🍺アルコール × 📅スケジュール） ===
   const overflowDays = all.filter(d => d.kcal >= OVERFLOW_THRESHOLD);
   if (overflowDays.length > 0) {
     const schedColors = { '会食': '#c62828', '懇親会': '#c62828', '飲み会': '#8e24aa', '出張': '#1565c0', '海外': '#00838f', '支援': '#6a1b9a', '訪問': '#2e7d32', '食事会': '#e65100' };
-    html += `<div class="card"><h2 style="color:#c62828;">🔎 溢れた日の要因診断（${OVERFLOW_THRESHOLD.toLocaleString()}kcal以上）</h2>
+    cOverflow += `<div class="card"><h2 style="color:#c62828;">🔎 溢れた日の要因診断（${OVERFLOW_THRESHOLD.toLocaleString()}kcal以上）</h2>
       <div style="font-size:0.76em;color:#888;margin-bottom:10px;">「📅その日が何の日だったか」と「🍺アルコール（総量−P/F/C＝推定）」を軸に要因を特定。色帯はkcal構成。2,200台は適正圏として除外。</div>`;
     for (const d of [...overflowDays].reverse()) {
       const dg = overflowDiagnosis(d);
       const ann = calMap[d.date];
       const schedCol = ann ? (schedColors[ann.short] || '#c62828') : '#9e9e9e';
       const seg = (k, col, label) => k > 0 ? `<div title="${label} ${k.toLocaleString()}kcal" style="width:${(k / d.kcal * 100).toFixed(1)}%;background:${col};"></div>` : '';
-      html += `<div class="day-card day-over" style="margin-bottom:10px;">
+      cOverflow += `<div class="day-card day-over" style="margin-bottom:10px;">
         <div class="day-header">
           <span class="day-date">${fmtDate(d.date)} ${d.hasDrink ? '🍺' : ''}${d.hasTrain ? '🏋️' : ''}</span>
           <span class="tag" style="background:${schedCol};color:#fff;">📅 ${ann ? ann.short : '予定なし'}</span>
@@ -2083,13 +2093,20 @@ function render(data, calMap) {
         <div class="risk-box risk-yellow" style="font-size:0.75em;margin-top:6px;padding:8px;">💡 ${dg.tips.join('<br>💡 ')}</div>
       </div>`;
     }
-    html += `</div>`;
+    cOverflow += `</div>`;
   }
 
   // Verdict
   const score = (gapCal<=0?1:0) + (avgP&&avgP>=PROTEIN_MIN?1:0) + (strictN>=3?1:0) + (wkDeficit<0?1:0) + (pBelow100Strict===0?1:0);
   const verdict = score>=5 ? {text:'完璧！計画通りのペースです',cl:'risk-green',emoji:'🎯'} : score>=3 ? {text:'おおむね順調。プロテインと節制日を微調整',cl:'risk-yellow',emoji:'💪'} : {text:'計画とのGAPが大きめ。節制日を増やし、P100gを死守',cl:'risk-red',emoji:'⚠️'};
-  html += `<div class="${verdict.cl} risk-box" style="font-size:0.92em;"><strong>${verdict.emoji} ${verdict.text}</strong></div>`;
+  cVerdict += `<div class="${verdict.cl} risk-box" style="font-size:0.92em;"><strong>${verdict.emoji} ${verdict.text}</strong></div>`;
+
+  // ★カードを読みやすい順で結合（A 現在地→B 計画vs実績→C 日次内訳→D 要因分析→E 中長期・設定）
+  html += cScore + cProgress + cStrip + cCompare + cPlanline
+        + cLedger
+        + cOverflow + cBlowout + cSchedule + cTrainreal + cPfc
+        + cRoadmap + cArchive + cTdee
+        + cVerdict;
   } // end else (meals present)
   html += `</div>`; // end tab-gap
 
