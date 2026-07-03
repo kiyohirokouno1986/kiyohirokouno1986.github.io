@@ -428,5 +428,15 @@
     "memo": "",
     "hasDrink": true,
     "hasTrain": false
+  },
+  {
+    "date": "2026-07-03",
+    "kcal": 2065,
+    "protein": 156,
+    "fat": 61.5,
+    "carb": 84,
+    "memo": "タンパク質はかなり優秀。オーバー要因は主にアルコール6杯。翌日は脂質低め・P120g狙い・酒なし/少なめでリカバリ。",
+    "hasDrink": true,
+    "hasTrain": false
   }
 ]
