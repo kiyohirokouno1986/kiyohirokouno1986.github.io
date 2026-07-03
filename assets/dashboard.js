@@ -1749,7 +1749,7 @@ function render(data, calMap) {
   } else {
 
   // 各カードを種別バッファに描画し、最後に読みやすい順で結合する（並び替え）
-  let cScore='', cProgress='', cStrip='', cCompare='', cPlanline='', cLedger='',
+  let cScore='', cProgress='', cStrip='', cCompare='',
       cOverflow='', cBlowout='', cSchedule='', cTrainreal='', cPfc='',
       cRoadmap='', cArchive='', cTdee='', cVerdict='';
   // 「計画 vs 実績」の実績は日次カロリー収支（全期間）ベース
@@ -1785,40 +1785,6 @@ function render(data, calMap) {
 
   // === TDEE推定 ＆ シミュレーション基準 ===
   cTdee += tdeeCardHTML(tdeeInfo, effTDEE);
-
-  // === 日次カロリー収支シート（毎日のネット赤字を全部計算） ===
-  {
-    const ledgerDays = [...all].reverse().slice(0, 14); // 直近14日
-    const sumNet = all.reduce((s, d) => s + dayDef(d), 0);
-    const avgNet = all.length ? Math.round(sumNet / all.length) : 0;
-    const sumAlc = all.reduce((s, d) => s + alcBrake(d), 0);
-    const nTrain = all.filter(d => d.hasTrain).length;
-    let rows = '';
-    for (const d of ledgerDays) {
-      const t = dayTDEE(d), a = alcBrake(d), net = dayDef(d);
-      const dt = new Date(d.date + 'T12:00:00');
-      const dlabel = `${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})`;
-      const netCls = net >= 300 ? 'led-good' : net >= 0 ? 'led-ok' : 'led-bad';
-      rows += `<tr>
-        <td>${dlabel}${d.hasTrain?' <span class="led-tag tr">筋</span>':''}${d.hasDrink?' <span class="led-tag dk">酒</span>':''}</td>
-        <td>${d.kcal.toLocaleString()}</td>
-        <td>${t.toLocaleString()}${d.hasTrain?`<span class="led-sub">+${trainBonus}</span>`:''}</td>
-        <td>${a>0?'-'+a.toLocaleString():'—'}</td>
-        <td class="${netCls}">${net>=0?'-':'+'}${Math.abs(net).toLocaleString()}</td>
-      </tr>`;
-    }
-    cLedger += `<div class="card">
-      <h2>📒 日次カロリー収支 <span style="font-size:0.66em;color:#888;font-weight:400;">毎日のネット赤字（トレ＋／酒−）</span></h2>
-      <div class="led-kpis">
-        <div class="led-kpi"><div class="lk-l">平均ネット赤字</div><div class="lk-v" style="color:${avgNet>=0?'#2d6a4f':'#c62828'};">${avgNet>=0?'-':'+'}${Math.abs(avgNet).toLocaleString()}<span>kcal/日</span></div></div>
-        <div class="led-kpi"><div class="lk-l">累計（${all.length}日）</div><div class="lk-v" style="color:#1a237e;">${sumNet>=0?'-':'+'}${Math.abs(sumNet).toLocaleString()}<span>kcal</span></div></div>
-        <div class="led-kpi"><div class="lk-l">脂肪換算</div><div class="lk-v" style="color:#1a237e;">${(sumNet/7200).toFixed(1)}<span>kg</span></div></div>
-        <div class="led-kpi"><div class="lk-l">お酒で相殺</div><div class="lk-v" style="color:#e65100;">-${sumAlc.toLocaleString()}<span>kcal</span></div></div>
-      </div>
-      <table class="led-table"><thead><tr><th>日</th><th>摂取</th><th>TDEE</th><th>酒-</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table>
-      <div class="led-note">その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。お酒ブレーキ = 推定アルコールkcal × ${ALC_FACTOR}。直近14日を表示／全${all.length}日を集計。</div>
-    </div>`;
-  }
 
   // === 15% Roadmap - Current Month Progress (TOP) ===
   if (curRM) {
@@ -1957,14 +1923,6 @@ function render(data, calMap) {
       <tr><td>節制日 vs 飲食日</td><td>4:3</td><td>${strictN}:${freeN}</td><td>${strictN>=4?'<span class="tag tag-good">OK</span>':'<span class="tag tag-warn">飲食日多め</span>'}</td></tr>
     </tbody></table></div>`;
 
-  // GAP chart
-  cPlanline += `<div class="card"><h2>直近${last7.length}日 計画ライン vs 実績</h2><canvas id="gapChart"></canvas>
-    <div style="margin-top:10px;" class="grid-3">
-      <div class="mini"><div class="v c-plan">${DAILY_PLAN_AVG}</div><div class="l">計画平均</div></div>
-      <div class="mini"><div class="v c-actual">${avgCal}</div><div class="l">実績平均</div></div>
-      <div class="mini"><div class="v" style="color:${gapCal<=0?'#2d6a4f':'#c62828'};">${gapCal>0?'+':''}${gapCal}</div><div class="l">GAP</div></div>
-    </div></div>`;
-
   // PFC GAP
   if (avgP) {
     const planP=PROTEIN_TARGET, planF=52, planC_carb=180;
@@ -2102,8 +2060,7 @@ function render(data, calMap) {
   cVerdict += `<div class="${verdict.cl} risk-box" style="font-size:0.92em;"><strong>${verdict.emoji} ${verdict.text}</strong></div>`;
 
   // ★カードを読みやすい順で結合（A 現在地→B 計画vs実績→C 日次内訳→D 要因分析→E 中長期・設定）
-  html += cScore + cProgress + cStrip + cCompare + cPlanline
-        + cLedger
+  html += cScore + cProgress + cStrip + cCompare
         + cOverflow + cBlowout + cSchedule + cTrainreal + cPfc
         + cRoadmap + cArchive + cTdee
         + cVerdict;
@@ -2127,6 +2084,39 @@ function render(data, calMap) {
       <button class="active" data-period="0">ALL</button>
     </div>
     <canvas id="weekChart"></canvas></div>`;
+
+  // === 日次カロリー収支シート（毎日のネット赤字を全部計算・GAP分析から移設） ===
+  {
+    const ledgerDays = [...all].reverse().slice(0, 14); // 直近14日
+    const sumNet = all.reduce((s, d) => s + dayDef(d), 0);
+    const avgNet = all.length ? Math.round(sumNet / all.length) : 0;
+    const sumAlc = all.reduce((s, d) => s + alcBrake(d), 0);
+    let rows = '';
+    for (const d of ledgerDays) {
+      const t = dayTDEE(d), a = alcBrake(d), net = dayDef(d);
+      const dt = new Date(d.date + 'T12:00:00');
+      const dlabel = `${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})`;
+      const netCls = net >= 300 ? 'led-good' : net >= 0 ? 'led-ok' : 'led-bad';
+      rows += `<tr>
+        <td>${dlabel}${d.hasTrain?' <span class="led-tag tr">筋</span>':''}${d.hasDrink?' <span class="led-tag dk">酒</span>':''}</td>
+        <td>${d.kcal.toLocaleString()}</td>
+        <td>${t.toLocaleString()}${d.hasTrain?`<span class="led-sub">+${trainBonus}</span>`:''}</td>
+        <td>${a>0?'-'+a.toLocaleString():'—'}</td>
+        <td class="${netCls}">${net>=0?'-':'+'}${Math.abs(net).toLocaleString()}</td>
+      </tr>`;
+    }
+    html += `<div class="card">
+      <h2>📒 日次カロリー収支 <span style="font-size:0.66em;color:#888;font-weight:400;">毎日のネット赤字（トレ＋／酒−）</span></h2>
+      <div class="led-kpis">
+        <div class="led-kpi"><div class="lk-l">平均ネット赤字</div><div class="lk-v" style="color:${avgNet>=0?'#2d6a4f':'#c62828'};">${avgNet>=0?'-':'+'}${Math.abs(avgNet).toLocaleString()}<span>kcal/日</span></div></div>
+        <div class="led-kpi"><div class="lk-l">累計（${all.length}日）</div><div class="lk-v" style="color:#1a237e;">${sumNet>=0?'-':'+'}${Math.abs(sumNet).toLocaleString()}<span>kcal</span></div></div>
+        <div class="led-kpi"><div class="lk-l">脂肪換算</div><div class="lk-v" style="color:#1a237e;">${(sumNet/7200).toFixed(1)}<span>kg</span></div></div>
+        <div class="led-kpi"><div class="lk-l">お酒で相殺</div><div class="lk-v" style="color:#e65100;">-${sumAlc.toLocaleString()}<span>kcal</span></div></div>
+      </div>
+      <table class="led-table"><thead><tr><th>日</th><th>摂取</th><th>TDEE</th><th>酒-</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="led-note">その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。お酒ブレーキ = 推定アルコールkcal × ${ALC_FACTOR}。直近14日を表示／全${all.length}日を集計。</div>
+    </div>`;
+  }
 
   // Protein chart
   if (pAll.length >= 3) {
@@ -2672,20 +2662,6 @@ function render(data, calMap) {
     });
   }
 
-  // Gap chart
-  const gapCtx2 = document.getElementById('gapChart');
-  if (gapCtx2) {
-    const labels = last7.map(d=>{const dt=new Date(d.date+'T12:00:00');return `${dt.getMonth()+1}/${dt.getDate()}`;});
-    new Chart(gapCtx2.getContext('2d'), {
-      type:'bar', data:{ labels, datasets:[
-        {label:'実績',data:last7.map(d=>d.kcal),backgroundColor:last7.map(d=>{const t=classify(d);return t==='over'?'rgba(198,40,40,0.7)':t==='free'?'rgba(230,81,0,0.65)':'rgba(21,101,192,0.65)';}),borderRadius:6,borderSkipped:false,order:2},
-        {label:'計画平均',data:Array(last7.length).fill(DAILY_PLAN_AVG),type:'line',borderColor:'#6c5ce7',borderDash:[6,4],pointRadius:0,borderWidth:2,fill:false,order:1},
-      ]},
-      plugins:[{id:'lines',afterDraw(chart){const c=chart.ctx,y=chart.scales.y,x=chart.scales.x;c.save();c.setLineDash([4,3]);c.lineWidth=1;[{v:STRICT,col:'#90caf9',lbl:'1,500'},{v:FREE,col:'#ffcc80',lbl:'2,200'}].forEach(l=>{const py=y.getPixelForValue(l.v);c.strokeStyle=l.col;c.beginPath();c.moveTo(x.left,py);c.lineTo(x.right,py);c.stroke();c.fillStyle=l.col;c.font='9px sans-serif';c.fillText(l.lbl,x.right-28,py-3);});c.restore();}}],
-      options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:10},usePointStyle:true,padding:10}},tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.parsed.y.toLocaleString()+' kcal'}}},scales:{y:{min:0,max:Math.max(4500,...last7.map(d=>d.kcal))+300,ticks:{font:{size:9},callback:v=>v.toLocaleString()}},x:{ticks:{font:{size:9}}}}}
-    });
-  }
-
   // Week chart with calendar annotations (period-filterable)
   let weekChartInstance = null;
   function drawWeekChart(periodDays) {
@@ -2700,7 +2676,7 @@ function render(data, calMap) {
     }
     if (wkData.length === 0) wkData = all;
     if (weekChartInstance) weekChartInstance.destroy();
-    const wkTgtPlugin = {id:'tgtLines',afterDraw(chart){const c=chart.ctx,y=chart.scales.y,x=chart.scales.x;c.save();c.setLineDash([5,3]);c.lineWidth=1.5;[{v:STRICT,col:'#1565c0'},{v:FREE,col:'#e65100'}].forEach(l=>{const py=y.getPixelForValue(l.v);c.strokeStyle=l.col;c.beginPath();c.moveTo(x.left,py);c.lineTo(x.right,py);c.stroke();});c.restore();}};
+    const wkTgtPlugin = {id:'tgtLines',afterDraw(chart){const c=chart.ctx,y=chart.scales.y,x=chart.scales.x;c.save();c.setLineDash([5,3]);c.lineWidth=1.5;[{v:STRICT,col:'#1565c0'},{v:FREE,col:'#e65100'}].forEach(l=>{const py=y.getPixelForValue(l.v);c.strokeStyle=l.col;c.beginPath();c.moveTo(x.left,py);c.lineTo(x.right,py);c.stroke();});const pp=y.getPixelForValue(DAILY_PLAN_AVG);c.setLineDash([6,4]);c.lineWidth=2;c.strokeStyle='#6c5ce7';c.beginPath();c.moveTo(x.left,pp);c.lineTo(x.right,pp);c.stroke();c.setLineDash([]);c.fillStyle='#6c5ce7';c.font='bold 9px sans-serif';c.textAlign='left';c.fillText('計画'+DAILY_PLAN_AVG.toLocaleString(),x.left+3,pp-3);c.restore();}};
     const wkCalAnnotPlugin = {id:'calAnnot',afterDraw(chart){
       if (!calMap || !Object.keys(calMap).length) return;
       const ctx2 = chart.ctx;
