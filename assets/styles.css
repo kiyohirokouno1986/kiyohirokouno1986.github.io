@@ -330,19 +330,23 @@ canvas { max-height: 260px; margin-top: 8px; }
 .led-kpi .lk-l { font-size: 0.6em; color: #888; font-weight: 600; }
 .led-kpi .lk-v { font-size: 1.12em; font-weight: 800; line-height: 1.1; margin-top: 3px; }
 .led-kpi .lk-v span { font-size: 0.45em; color: #aaa; font-weight: 600; margin-left: 1px; }
-.led-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
-.led-table th { padding: 6px 4px; border-bottom: 2px solid #ddd; font-weight: 600; text-align: right; color: #888; font-size: 0.9em; }
+.led-table { width: 100%; border-collapse: collapse; font-size: 0.72em; }
+.led-table th { padding: 6px 2px; border-bottom: 2px solid #ddd; font-weight: 600; text-align: right; color: #888; font-size: 0.92em; }
 .led-table th:first-child { text-align: left; }
-.led-table td { padding: 6px 4px; border-bottom: 1px solid #f2f2f2; text-align: right; }
-.led-table td:first-child { text-align: left; font-weight: 500; white-space: nowrap; }
-.led-table .led-sub { font-size: 0.75em; color: #2d6a4f; margin-left: 3px; }
+.led-table td { padding: 6px 2px; border-bottom: 1px solid #f2f2f2; text-align: right; }
+.led-table td:first-child { text-align: left; font-weight: 500; white-space: nowrap; padding-right: 4px; }
+.led-table .led-sub { font-size: 0.72em; color: #2d6a4f; margin-left: 1px; }
 .led-table .led-good { color: #2d6a4f; font-weight: 700; }
 .led-table .led-ok { color: #e65100; font-weight: 700; }
 .led-table .led-bad { color: #c62828; font-weight: 700; }
 .led-tag { font-size: 0.72em; padding: 0 5px; border-radius: 4px; font-weight: 700; }
 .led-tag.tr { background: #e8f3ec; color: #2d6a4f; }
 .led-tag.dk { background: #fdeee2; color: #e65100; }
+.led-tag.dk-over { background: #fde0e0; color: #c62828; }
+.led-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -6px; }
+.led-scroll .led-table { min-width: 420px; }
 .led-note { font-size: 0.7em; color: #999; line-height: 1.5; margin-top: 8px; }
+.led-note .led-tag { font-size: 0.9em; }
 
 /* ===== スマートフォン対応 ===== */
 @media (max-width: 480px) {
