@@ -438,5 +438,15 @@
     "memo": "タンパク質はかなり優秀。オーバー要因は主にアルコール6杯。翌日は脂質低め・P120g狙い・酒なし/少なめでリカバリ。",
     "hasDrink": true,
     "hasTrain": false
+  },
+  {
+    "date": "2026-07-04",
+    "kcal": 1556,
+    "protein": 128,
+    "fat": 59,
+    "carb": 131,
+    "memo": "_",
+    "hasDrink": false,
+    "hasTrain": false
   }
 ]
