@@ -265,11 +265,13 @@ canvas { max-height: 260px; margin-top: 8px; }
 .dm-field label { display: block; font-size: 0.68em; font-weight: 600; color: #555; margin-bottom: 3px; }
 .dm-field input { width: 100%; padding: 6px 8px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 0.85em; }
 .dm-history { max-height: 350px; overflow-y: auto; }
-.dm-history-row { display: grid; grid-template-columns: 1.3fr 1fr 0.7fr 0.7fr 0.9fr 0.7fr 0.3fr; gap: 3px; padding: 8px 4px; border-bottom: 1px solid #f0f0f0; align-items: center; font-size: 0.78em; }
+.dm-history-row { display: grid; grid-template-columns: 1.1fr 0.95fr 0.85fr 0.78fr 0.82fr 0.72fr 0.28fr; gap: 2px; padding: 8px 4px; border-bottom: 1px solid #f0f0f0; align-items: center; font-size: 0.78em; }
+.dm-history-row > div { white-space: nowrap; }
 .dm-history-row.header { font-weight: 700; font-size: 0.72em; color: #888; border-bottom: 2px solid #ddd; position: sticky; top: 0; background: #fff; }
 .dm-history-row .dm-del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.9em; }
 .dm-history-row .dm-del:hover { color: #e53935; }
 .dm-ma-badge { display: inline-block; background: #6c5ce7; color: #fff; padding: 1px 5px; border-radius: 3px; font-size: 0.6em; font-weight: 700; margin-left: 4px; }
+.dm-rec { font-size: 0.82em; margin-left: 2px; vertical-align: middle; line-height: 1; }
 .dm-filter { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; }
 .dm-filter button { background: #f0f0f0; border: none; border-radius: 6px; padding: 5px 10px; font-size: 0.75em; font-weight: 600; cursor: pointer; transition: all 0.2s; }
 .dm-filter button.active { background: #e65100; color: #fff; }
