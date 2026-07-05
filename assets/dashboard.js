@@ -2196,9 +2196,16 @@ function render(data, calMap) {
 
   // === 日次カロリー収支シート（毎日のネット赤字を全部計算・GAP分析から移設） ===
   {
-    const ledgerDays = [...all].reverse().slice(0, 14); // 直近14日
-    const sumNet = all.reduce((s, d) => s + dayDef(d), 0);
-    const avgNet = all.length ? Math.round(sumNet / all.length) : 0;
+    // 月フィルタ：直近14日（ledgerMonth=null）／各月（YYYY-MM）で切替
+    const ledMonths = [...new Set(all.map(d => d.date.slice(0, 7)))].sort().reverse(); // 新しい月が先頭
+    const ledSel = (ledgerMonth && ledMonths.includes(ledgerMonth)) ? ledgerMonth : null;
+    const scopeDays = ledSel ? all.filter(d => d.date.slice(0, 7) === ledSel) : all; // 集計対象
+    const ledgerDays = ledSel ? [...scopeDays].reverse() : [...all].reverse().slice(0, 14); // 表示対象
+    const sumNet = scopeDays.reduce((s, d) => s + dayDef(d), 0);
+    const avgNet = scopeDays.length ? Math.round(sumNet / scopeDays.length) : 0;
+    const cumLabel = ledSel ? `${Number(ledSel.slice(5))}月・${scopeDays.length}日` : `全${all.length}日`;
+    const ledMtabs = `<button class="led-mtab${!ledSel ? ' active' : ''}" data-lym="">直近14日</button>`
+      + ledMonths.map(ym => `<button class="led-mtab${ym === ledSel ? ' active' : ''}" data-lym="${ym}">${Number(ym.slice(5))}月</button>`).join('');
     const DRINK_KCAL = 150; // 1杯あたり推定kcal（ビール/ハイボール/ワイン等の平均）
     const pCol = (v) => v == null ? '<span style="color:#bbb;">—</span>'
       : `<span style="color:${v>=PROTEIN_TARGET?'#2d6a4f':v>=PROTEIN_MIN?'#e65100':'#c62828'};font-weight:700;">${Math.round(v)}</span>`;
@@ -2229,13 +2236,14 @@ function render(data, calMap) {
     }
     html += `<div class="card">
       <h2>📒 日次カロリー収支 <span style="font-size:0.66em;color:#888;font-weight:400;">毎日のネット赤字（トレ＋）</span></h2>
+      <div class="led-mtabs">${ledMtabs}</div>
       <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
         <div class="led-kpi"><div class="lk-l">平均ネット赤字</div><div class="lk-v" style="color:${avgNet>=0?'#2d6a4f':'#c62828'};">${avgNet>=0?'-':'+'}${Math.abs(avgNet).toLocaleString()}<span>kcal/日</span></div></div>
-        <div class="led-kpi"><div class="lk-l">累計（${all.length}日）</div><div class="lk-v" style="color:#1a237e;">${sumNet>=0?'-':'+'}${Math.abs(sumNet).toLocaleString()}<span>kcal</span></div></div>
+        <div class="led-kpi"><div class="lk-l">累計（${cumLabel}）</div><div class="lk-v" style="color:#1a237e;">${sumNet>=0?'-':'+'}${Math.abs(sumNet).toLocaleString()}<span>kcal</span></div></div>
         <div class="led-kpi"><div class="lk-l">脂肪換算</div><div class="lk-v" style="color:#1a237e;">${(sumNet/7200).toFixed(1)}<span>kg</span></div></div>
       </div>
       <div class="led-scroll"><table class="led-table"><thead><tr><th>日</th><th>摂取</th><th title="タンパク質(g)">P</th><th title="脂質(g)">F</th><th title="炭水化物(g)">C</th><th>TDEE</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="led-note">P（緑=${PROTEIN_TARGET}g以上／橙=${PROTEIN_MIN}g以上／赤=不足）・F・C はg。<span class="led-tag dk">酒</span>=3杯相当以内／<span class="led-tag dk-over">深酒</span>=推定${ALCOHOL_CAP}杯超（残差法の推定アルコールkcal÷150kcal/杯で換算・表示のみ）。その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。ネット赤字 = TDEE − 摂取（アルコールブレーキは撤去／実測TDEEが飲酒の影響も込みで反映）。直近14日を表示／全${all.length}日を集計。</div>
+      <div class="led-note">P（緑=${PROTEIN_TARGET}g以上／橙=${PROTEIN_MIN}g以上／赤=不足）・F・C はg。<span class="led-tag dk">酒</span>=3杯相当以内／<span class="led-tag dk-over">深酒</span>=推定${ALCOHOL_CAP}杯超（残差法の推定アルコールkcal÷150kcal/杯で換算・表示のみ）。その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。ネット赤字 = TDEE − 摂取（アルコールブレーキは撤去／実測TDEEが飲酒の影響も込みで反映）。${ledSel ? `${Number(ledSel.slice(5))}月の全${scopeDays.length}日を表示・集計。` : `直近14日を表示／全${all.length}日を集計。`}</div>
     </div>`;
   }
 
@@ -2874,6 +2882,8 @@ function render(data, calMap) {
   attachTDEEHandlers();
   // Attach 月別予実アーカイブ handlers
   attachArchiveHandlers();
+  // Attach 日次カロリー収支の月フィルタ handlers
+  attachLedgerHandlers();
 
   // ===================== CHARTS =====================
 
@@ -3150,6 +3160,13 @@ let archiveMonth = null;
 function attachArchiveHandlers() {
   document.querySelectorAll('.arch-tab, .arch-row').forEach(el => {
     el.onclick = () => { archiveMonth = el.dataset.ym; rerender(); };
+  });
+}
+// 日次カロリー収支の月フィルタで選択中の月（YYYY-MM。null/''=直近14日）
+let ledgerMonth = null;
+function attachLedgerHandlers() {
+  document.querySelectorAll('.led-mtab').forEach(el => {
+    el.onclick = () => { ledgerMonth = el.dataset.lym || null; rerender(); };
   });
 }
 // 自動同期データ(meals/calendar)の「最終更新時刻」をGitHub APIから取得（GitHub Pagesでのみ・公開APIで認証不要）。
