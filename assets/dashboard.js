@@ -1202,6 +1202,8 @@ function drawWaistChart(allData, periodDays) {
 // === Daily measurement handlers ===
 let dmChartInstance = null;
 let dmComboChartInstance = null;
+let correlChartInstance = null;
+let correlData = null; // 予実相関チャート用（render()で算出、attachDMHandlersで描画）
 
 // カロリー計測を始めた日（5/14）のマーカー。
 // 表示中のデータ範囲に5/14が含まれるときだけインデックスを返す（含まれなければ -1）。
@@ -1302,6 +1304,8 @@ function attachDMHandlers(dmData) {
       drawDMComboChart(dmData, dmComboPeriod);
     };
   });
+  // 予実相関チャート（案A）
+  drawCorrelChart();
 }
 
 function drawDMComboChart(allDmData, periodDays) {
@@ -1398,6 +1402,35 @@ function drawDMComboChart(allDmData, periodDays) {
           grid: { drawOnChartArea: false },
         },
         x: { ticks: { font: { size: 8 }, maxRotation: 45 } }
+      }
+    }
+  });
+}
+
+// 予実相関チャート：管理開始起点で「予測体脂肪量（起点−累積赤字÷7200）」と「実測体脂肪量7日MA」を重ねる。
+function drawCorrelChart() {
+  const ctx = document.getElementById('correlChart');
+  if (!ctx || !correlData) return;
+  if (correlChartInstance) correlChartInstance.destroy();
+  const labels = correlData.labels.map(s => { const dt = new Date(s + 'T12:00:00'); return `${dt.getMonth()+1}/${dt.getDate()}`; });
+  const vals = [...correlData.pred, ...correlData.act].filter(v => v != null);
+  const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * 0.2 || 0.3;
+  correlChartInstance = new Chart(ctx.getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets: [
+      { label: '予測（赤字ベース）', data: correlData.pred, borderColor: '#6c5ce7', backgroundColor: '#6c5ce715', borderDash: [6,4], fill: false, tension: 0.2, pointRadius: 0, borderWidth: 2 },
+      { label: '実測（体脂肪量7日MA）', data: correlData.act, borderColor: '#c62828', backgroundColor: '#c6282818', fill: true, tension: 0.3, pointRadius: 0, borderWidth: 3 },
+    ]},
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 10 }, usePointStyle: true, padding: 12 } },
+        tooltip: { callbacks: { label: c => c.dataset.label + ': ' + (c.parsed.y != null ? c.parsed.y.toFixed(2) + 'kg' : '—') } },
+      },
+      scales: {
+        y: { min: Math.floor((lo - pad) * 10) / 10, max: Math.ceil((hi + pad) * 10) / 10, title: { display: true, text: '体脂肪量 kg', font: { size: 9 }, color: '#c62828' }, ticks: { font: { size: 9 } } },
+        x: { ticks: { font: { size: 8 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 10 } },
       }
     }
   });
@@ -2359,6 +2392,109 @@ function render(data, calMap) {
         <div class="led-scroll"><table class="led-table"><thead><tr><th>更新日🔥</th><th>前回から</th><th>減少</th><th>ペース</th><th>kcal/日換算</th></tr></thead><tbody>${rowsMin}</tbody></table></div>
         ${staleNote}
         <div class="led-note">体脂肪量(体重×体脂肪率)が過去最低を更新した日だけを結び、区間ごとに「何日で何kg落ちたか」を算出（先生メソッド。リコンプでは体重より体脂肪量が本質）。🔥＝最低値更新日。日々の増減＝水分ノイズを無視できる。最新の区間ペースが実際の減脂スピードの目安。</div>
+      </div>`;
+    }
+  }
+
+  // === 予実相関：案A 累積2ライン（予測 vs 実測）＋ 案B 直近7日ローリング ===
+  {
+    const base = CAL_START_DATE; // 管理開始 5/14
+    const bcFat = dmData.filter(d => d.weight != null && d.fatPct != null)
+      .map(d => ({ date: d.date, fm: +(d.weight * d.fatPct / 100).toFixed(2) }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const fmMAat = (dateStr) => { const w = bcFat.filter(x => x.date <= dateStr).slice(-7); return w.length ? w.reduce((a, b) => a + b.fm, 0) / w.length : null; };
+    const baseFm = fmMAat(base) ?? (bcFat.find(x => x.date >= base) || {}).fm ?? null;
+    const mealsAsc = all.filter(d => d.date >= base); // all は昇順
+    // --- 案A：累積系列 ---
+    let cum = 0; const cLabels = [], cPred = [], cAct = [];
+    for (const d of mealsAsc) {
+      cum += dayDef(d);
+      cLabels.push(d.date);
+      cPred.push(baseFm != null ? +(baseFm - cum / 7200).toFixed(2) : null);
+      const ma = fmMAat(d.date);
+      cAct.push(ma != null ? +ma.toFixed(2) : null);
+    }
+    correlData = (baseFm != null && cLabels.length >= 2) ? { labels: cLabels, pred: cPred, act: cAct } : null;
+    // 現在の予実ギャップ
+    const lastPred = cPred[cPred.length - 1], lastAct = [...cAct].reverse().find(v => v != null);
+    const gap = (lastPred != null && lastAct != null) ? +(lastAct - lastPred).toFixed(2) : null; // 正=実測が予測より脂肪多い(=計算より落ちてない)
+    if (correlData) {
+      html += `<div class="dm-chart-card"><h2>🔗 予実相関：予測 vs 実測（体脂肪量）</h2>
+        <div style="font-size:0.72em;color:#888;margin-bottom:4px;">管理開始(${base.slice(5).replace('-','/')})起点。<span style="color:#6c5ce7;">予測</span>＝起点−累積赤字÷7,200／<span style="color:#c62828;">実測</span>＝体脂肪量7日移動平均。2本が重なれば計算通り。</div>
+        <canvas id="correlChart" style="max-height:260px;"></canvas>
+        ${gap != null ? `<div class="led-note" style="margin-top:6px;">現在のギャップ：実測 ${lastAct.toFixed(1)}kg − 予測 ${lastPred.toFixed(1)}kg ＝ <b style="color:${gap<=0.2?'#2d6a4f':'#c46a00'};">${gap>=0?'+':''}${gap}kg</b>（${gap<=0.2?'ほぼ予測通り／予測より落ちている':'実測が予測ほど落ちていない＝水分/摂取過多の可能性'}）</div>` : ''}
+      </div>`;
+    }
+    // --- 案B：直近7日ローリング ---
+    if (bcFat.length >= 2 && mealsAsc.length >= 3) {
+      const dayNum = s => Math.round(new Date(s + 'T12:00:00').getTime() / 86400000);
+      const last7 = mealsAsc.slice(-7);
+      const roll7Def = last7.reduce((s, d) => s + dayDef(d), 0);
+      const roll7Pred = +(roll7Def / 7200).toFixed(2); // 予測脂肪減(正=減)
+      const latest = bcFat[bcFat.length - 1].date;
+      const prevStr = (() => { const t = dayNum(latest) - 7; const d = new Date(t * 86400000); return d.toISOString().slice(0, 10); })();
+      const maNow = fmMAat(latest), maPrev = fmMAat(prevStr);
+      const roll7Act = (maNow != null && maPrev != null) ? +(maPrev - maNow).toFixed(2) : null; // 実測脂肪減(正=減)
+      let vB = '—', vcolB = '#888';
+      if (roll7Act != null) { const diff = roll7Act - roll7Pred; if (Math.abs(diff) <= 0.15) { vB = '◎ 一致'; vcolB = '#2d6a4f'; } else if (diff > 0.15) { vB = '◯ 実測が上回る'; vcolB = '#1565c0'; } else { vB = '△ 実測が届かず'; vcolB = '#c62828'; } }
+      html += `<div class="dm-section"><h2>📆 直近7日ローリング対比 <span style="font-size:0.6em;color:#888;font-weight:400;">常に等7日窓で公平</span></h2>
+        <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
+          <div class="led-kpi"><div class="lk-l">直近7日 赤字</div><div class="lk-v" style="color:${roll7Def>=0?'#2d6a4f':'#c62828'};">${sgnDef(roll7Def)}<span>kcal</span></div></div>
+          <div class="led-kpi"><div class="lk-l">→ 予測脂肪減</div><div class="lk-v" style="color:#6c5ce7;">${sgnKg(roll7Pred)}</div></div>
+          <div class="led-kpi"><div class="lk-l">実測脂肪減(7日MA)</div><div class="lk-v" style="color:${roll7Act==null?'#888':(roll7Act>=0?'#2d6a4f':'#c62828')};">${roll7Act==null?'—':sgnKg(roll7Act)}</div></div>
+        </div>
+        <div class="led-note">判定：<b style="color:${vcolB};">${vB}</b>。直近7日の赤字合計→予測脂肪減 と、体脂肪量7日MAの7日前差（実測）を比較。月の途中でも常に同じ7日窓なので公平に相関が見られる。</div>
+      </div>`;
+    }
+  }
+
+  // === 月次サマリー（平均体組成 × 月間カロリー赤字を並べて感覚的に照合）===
+  {
+    const dmByMon = {};
+    for (const d of dmData) { const ym = d.date.slice(0, 7); (dmByMon[ym] ||= []).push(d); }
+    const avgOf = (arr, f) => { const v = arr.map(f).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    // カロリー赤字がある管理月（imputedByMonth）を対象に、体組成の月平均と突き合わせる
+    const monKeys = Object.keys(imputedByMonth).sort();
+    const rows = [];
+    let prevFm = null;
+    for (const ym of monKeys) {
+      const md = imputedByMonth[ym];
+      const days = dmByMon[ym] || [];
+      const both = days.filter(d => d.weight != null && d.fatPct != null);
+      const avgW = avgOf(days, d => d.weight);
+      const avgFp = avgOf(days, d => d.fatPct);
+      const avgFm = avgOf(both, d => d.weight * d.fatPct / 100);
+      const avgMus = avgOf(days, d => d.muscle);
+      const calcFat = +(md.impDef / 7200).toFixed(2);
+      const measFatD = (prevFm != null && avgFm != null) ? +(prevFm - avgFm).toFixed(2) : null;
+      rows.push({ label: `${Number(ym.slice(5))}月`, avgW, avgFp, avgFm, avgMus, deficit: md.impDef, calcFat, measFatD, calDays: md.calDays, miss: md.miss, isCurr: md.isCurr });
+      if (avgFm != null) prevFm = avgFm;
+    }
+    if (rows.length) {
+      let tr = '';
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const r = rows[i];
+        // 一致判定：実測脂肪減(measFatD) と 計算脂肪減(calcFat) の差で判定。正=実測の方が多く脂肪減。
+        let match = '—';
+        if (r.measFatD != null) {
+          const diff = r.measFatD - r.calcFat;
+          match = Math.abs(diff) <= 0.3 ? '<span style="color:#2d6a4f;" title="計算通り＝一致">◎</span>'
+            : diff > 0.3 ? '<span style="color:#1565c0;" title="実測が計算を上回る（好調／水分減の可能性）">◯</span>'
+            : '<span style="color:#c62828;" title="実測が計算に届かず（水分増／摂取過多の可能性）">△</span>';
+        }
+        tr += `<tr>
+          <td>${r.label}${r.isCurr ? ' <span style="color:#888;font-size:0.8em;">now</span>' : ''}${r.miss > 0 ? ' <span style="opacity:0.5;font-size:0.8em;" title="'+r.miss+'日を平均補完">*</span>' : ''}</td>
+          <td>${r.avgW != null ? r.avgW.toFixed(1) : '—'}</td>
+          <td>${r.avgFp != null ? r.avgFp.toFixed(1) + '%' : '—'}</td>
+          <td style="color:#c62828;font-weight:700;">${r.avgFm != null ? r.avgFm.toFixed(1) : '—'}</td>
+          <td style="color:#2d6a4f;font-weight:700;">${r.avgMus != null ? r.avgMus.toFixed(1) : '—'}</td>
+          <td>${sgnDef(r.deficit)}<span style="color:#888;font-size:0.82em;"> (${sgnKg(r.calcFat)})</span></td>
+          <td style="font-weight:700;color:${r.measFatD == null ? '#888' : (r.measFatD >= 0 ? '#2d6a4f' : '#c62828')};">${r.measFatD == null ? '—' : sgnKg(r.measFatD)} ${match}</td>
+        </tr>`;
+      }
+      html += `<div class="dm-section"><h2>📅 月次サマリー <span style="font-size:0.6em;color:#888;font-weight:400;">平均体組成 × 月間カロリー赤字</span></h2>
+        <div class="led-scroll"><table class="led-table"><thead><tr><th>月</th><th>平均体重</th><th>体脂肪率</th><th>体脂肪量</th><th>筋肉量</th><th>月間赤字(→脂肪)</th><th>実測脂肪Δ</th></tr></thead><tbody>${tr}</tbody></table></div>
+        <div class="led-note"><b>月間赤字→脂肪</b>＝その月の日次カロリー収支の合計（÷7,200で計算上の脂肪減）。<b>実測脂肪Δ</b>＝平均体脂肪量の前月差（実際の変化）。判定は両者の差で：<b style="color:#2d6a4f;">◎</b>=ほぼ一致（±0.3kg）＝計算が正しい／<b style="color:#1565c0;">◯</b>=実測が計算を上回る（代謝good・水分減）／<b style="color:#c62828;">△</b>=実測が計算に届かず（水分増・摂取過多）。* は未記録日を平均補完。月平均なので日々の水分ノイズはならされます。</div>
       </div>`;
     }
   }
