@@ -8,7 +8,8 @@
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
 <link rel="apple-touch-icon" href="assets/favicon.svg">
 <script src="assets/vendor/chart.umd.js"></script>
-<link rel="stylesheet" href="assets/styles.css">
+<!-- キャッシュ回避：デプロイ後すぐ最新CSSを読む（GitHub Pagesの約10分キャッシュを回避） -->
+<script>document.write('<link rel="stylesheet" href="assets/styles.css?v=' + Date.now() + '">');</script>
 </head>
 <body>
 
@@ -24,6 +25,7 @@
   <div class="loading"><div class="spinner"></div><br>読み込み中...</div>
 </div>
 
-<script src="assets/dashboard.js"></script>
+<!-- キャッシュ回避：デプロイ後すぐ最新JSを読む。#appの後・chart.umd.js読み込み後に同期実行される -->
+<script>document.write('<scr' + 'ipt src="assets/dashboard.js?v=' + Date.now() + '"><\/scr' + 'ipt>');</script>
 </body>
 </html>
