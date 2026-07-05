@@ -321,6 +321,18 @@ canvas { max-height: 260px; margin-top: 8px; }
 .arch-table .arch-good { color: #2d6a4f; font-weight: 700; }
 .arch-table .arch-bad { color: #c62828; font-weight: 700; }
 .arch-badge { font-size: 0.9em; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+/* 月別予実：選択月の日次内訳ドリルダウン（ダークカード内） */
+.arch-daily { margin-top: 10px; }
+.arch-daily > summary { cursor: pointer; font-size: 0.8em; font-weight: 700; color: #cfd3f7; padding: 6px 8px; background: rgba(255,255,255,0.08); border-radius: 8px; list-style: none; }
+.arch-daily > summary::-webkit-details-marker { display: none; }
+.arch-daily > summary::before { content: '▸ '; }
+.arch-daily[open] > summary::before { content: '▾ '; }
+.arch-daily-scroll { max-height: 240px; overflow-y: auto; margin-top: 6px; -webkit-overflow-scrolling: touch; }
+.arch-daily-table { width: 100%; border-collapse: collapse; font-size: 0.72em; color: #e8eaf6; }
+.arch-daily-table th { position: sticky; top: 0; background: #283593; padding: 5px 4px; text-align: right; font-weight: 600; opacity: 0.85; }
+.arch-daily-table th:first-child { text-align: left; }
+.arch-daily-table td { padding: 5px 4px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.arch-daily-table td:first-child { text-align: left; white-space: nowrap; }
 
 /* ===== 同期ステータスバー ===== */
 .sync-status { font-size: 0.72em; color: #777; background: #eef2f7; border: 1px solid #e0e6ee; border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; text-align: center; }

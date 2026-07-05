@@ -1960,6 +1960,34 @@ function render(data, calMap) {
           <div class="roadmap-kpi-item"><div class="rl">実績赤字</div><div class="rv" style="color:#64ffda;">${signed(sel.actual)}</div><div class="rs" style="opacity:0.5;">${sel.isCurr ? sel.calDays + '日時点' : '確定'}${sel.miss>0?`（${sel.miss}日補完）`:''}</div></div>
           <div class="roadmap-kpi-item"><div class="rl">達成率</div><div class="rv" style="color:${early(sel)?'#cfd3f7':v.c};">${early(sel) ? '集計中' : sel.rate + '%'}</div><div class="rs" style="color:${early(sel)?'#cfd3f7':v.c};">${early(sel) ? 'データ蓄積中' : v.t}</div></div>
         </div>
+        ${(() => {
+          // 選択月の日次内訳（月タブ/行クリックでその月の日別データを表示）
+          const bcMap = {};
+          try { for (const x of loadDaily()) bcMap[x.date] = x; } catch (e) {}
+          const monDays = (imputedByMonth[sel.ym] && imputedByMonth[sel.ym].days ? [...imputedByMonth[sel.ym].days] : []).sort((a, b) => a.date.localeCompare(b.date));
+          if (!monDays.length) return '';
+          let dr = '';
+          for (const d of monDays) {
+            const nd = dayDef(d);
+            const dt = new Date(d.date + 'T12:00:00');
+            const bc = bcMap[d.date];
+            const fm = (bc && bc.weight != null && bc.fatPct != null) ? (bc.weight * bc.fatPct / 100).toFixed(1) : '—';
+            dr += `<tr>
+              <td>${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})${d.hasTrain?' 🏋️':''}${d.hasDrink?' 🍺':''}</td>
+              <td>${d.kcal.toLocaleString()}</td>
+              <td style="color:${nd>=0?'#64ffda':'#ff8a80'};font-weight:700;">${nd>=0?'-':'+'}${Math.abs(nd).toLocaleString()}</td>
+              <td>${bc && bc.weight != null ? bc.weight.toFixed(1) : '—'}</td>
+              <td>${fm}</td>
+            </tr>`;
+          }
+          return `<details class="arch-daily" open>
+            <summary>${sel.label}の日次内訳（記録${monDays.length}日）</summary>
+            <div class="arch-daily-scroll"><table class="arch-daily-table">
+              <thead><tr><th>日</th><th>摂取</th><th>ネット赤字</th><th>体重</th><th>体脂肪量</th></tr></thead>
+              <tbody>${dr}</tbody>
+            </table></div>
+          </details>`;
+        })()}
       </div>`;
       let rows = '';
       for (const m of months) {
@@ -1977,7 +2005,7 @@ function render(data, calMap) {
         <h2>📊 月別 予実アーカイブ</h2>
         <div style="font-size:0.7em;color:#999;margin-bottom:10px;">過去の予実を月ごとに保存。上のタブ／下の行タップで詳細を切替。</div>
         <table class="arch-table"><thead><tr><th>月</th><th>目標</th><th>実績</th><th>達成</th><th>脂肪減</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table>
-        <div style="font-size:0.66em;color:#aaa;margin-top:8px;line-height:1.5;">* = 未記録日を平均補完。実績＝日次ネット赤字の月合計（トレ+／酒−込み）。判定：達成80%↑=◎／50〜80%=ほぼ／未満=要改善。</div>
+        <div style="font-size:0.66em;color:#aaa;margin-top:8px;line-height:1.5;">* = 未記録日を平均補完。実績＝日次ネット赤字の月合計（トレ+込み）。月をタップで下に日次内訳が出ます。判定：達成80%↑=◎／50〜80%=ほぼ／未満=要改善。</div>
       </div>`;
     }
   }
