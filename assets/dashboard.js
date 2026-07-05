@@ -43,6 +43,7 @@ const SEED_DATA = [
   { date:'2026-06-21', session:'S20', weight:72.6, muscle:51.3, fatMass:18.2, fatPct:25.1, waist:86.5, inbody:null, note:'★★体脂肪量18.2kg全期間最小値更新！体脂肪率25.1%最良タイ、ウエスト86.5cm最小タイ、ラットプル45kgデビュー' },
   { date:'2026-06-24', session:'S21', weight:72.6, muscle:51.7, fatMass:17.8, fatPct:24.5, waist:null, inbody:74, note:'★★★体脂肪量17.8kg全期間最小値大幅更新（初の17kg台）！体脂肪率24.5%最良更新、ベンチ46kg補助なし10回、InBody74点最高、シックスパック出現' },
   { date:'2026-06-28', session:'S22', weight:72.9, muscle:51.9, fatMass:17.8, fatPct:24.4, waist:86.5, inbody:null, note:'★体脂肪率24.4%最良更新・体脂肪量17.8kg維持（17kg台キープ）。先生「体脂肪は横ばい→落ちるのが理想、今は理想の1周目」。インクライン41kg自力初成功。GLP-1オフで中途覚醒→就寝前プロテイン15g導入。水分増で一時的に体重増も慣れれば落ちる見込み。' },
+  { date:'2026-07-05', session:'S23', weight:73.4, muscle:52.2, fatMass:18.2, fatPct:24.5, waist:87.0, inbody:74, note:'出張多めの週もキープ（トントン）。体重増は水分・誤差で脂肪では増えていない・筋肉は減らない（先生）。約3ヶ月前(4月)比で筋肉量ほぼ同じ・体脂肪約1kg減の好ペース。InBody74点維持（70超＝健康型）。ウエスト+0.5=87.0は出張の内臓/水分で誤差。' },
 ];
 
 function loadBodyComp() {
@@ -208,6 +209,16 @@ const SEED_TRAINING = [
     {name:'モンスターウォーク',weight:null,reps:null,sets:3},
     {name:'腹筋（下腹）',weight:null,reps:15,sets:2}
   ], comment:'★インクラインベンチ（スミス）41kg自力初成功（前回は7回＋5kg補助）！ラットプル45kg×12×2安定（3set目40kg×15）。今日はケーブルフライの日（ダンベルフライなし）。スクワットは重さより深さ＝腿と床が平行を課題に（60kgまでは深さ優先）。体脂肪量17.8kg維持・体脂肪率24.4%最良。先生「横ばいして落ちるのが理想、今は理想の1周目」。GLP-1オフで中途覚醒→就寝前プロテイン15g導入（睡眠優先、1500kcalは維持）。ウエスト86.5維持、健診まで約14日で85目標。' },
+  { date:'2026-07-05', session:'S23', waist:87.0, exercises:[
+    {name:'ロープーリー',weight:45,reps:13,sets:3},
+    {name:'ラットプルダウン',weight:40,reps:12,sets:2},
+    {name:'ベンチプレス（スミス）',weight:46,reps:10,sets:2},
+    {name:'インクラインダンベルフライ',weight:10,reps:15,sets:2},
+    {name:'ショルダープレス',weight:8,reps:12,sets:null},
+    {name:'スクワット',weight:61,reps:null,sets:1},
+    {name:'モンスターウォーク',weight:null,reps:null,sets:3},
+    {name:'ハンズアップクランチ',weight:null,reps:15,sets:3}
+  ], comment:'出張多めの週もキープ（トントン）＝先生「こういう週をキープできるのが今後大事」。体重増は水分・誤差で脂肪では増えず筋肉も減らない。約3ヶ月前(4月)比で筋肉維持・体脂肪約1kg減の好ペース。InBody74点維持（70超＝健康型）。ベンチ46kg×10完遂（出張疲れ・酒の分解ダメージで前回より重く感じるも達成）。ロープーリー45kg×13×3・ラットプル40kg×12×2は余裕。スクワットは深さ重視でベルトスクワット導入（腿と床が平行を目安化）。ショルダープレス8kg・インクラインは次回重量UP予定。ウエスト+0.5=87.0は出張の誤差。' },
 ];
 
 function loadTraining() {
@@ -267,6 +278,7 @@ const SEED_WAIST = [
   { date:'2026-06-14', waist:87.0 },
   { date:'2026-06-21', waist:86.5 },
   { date:'2026-06-28', waist:86.5 },
+  { date:'2026-07-05', waist:87.0 },
 ];
 function loadWaist() {
   let stored = null;
