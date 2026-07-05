@@ -1,6 +1,6 @@
 // === Constants (Updated: S19 2026/06/16) ===
 const CH = 'C0B3VMRH2UR';
-const STRICT = 1500, FREE = 2100, TDEE = 2230;
+const STRICT = 1500, FREE = 2200, TDEE = 2230;
 const STRICT_DAYS = 5, FREE_DAYS_WEEK = 2;
 const WEEKLY_PLAN = STRICT * STRICT_DAYS + FREE * FREE_DAYS_WEEK;
 const DAILY_PLAN_AVG = Math.round(WEEKLY_PLAN / 7);
