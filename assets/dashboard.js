@@ -2322,40 +2322,43 @@ function render(data, calMap) {
     <canvas id="dmComboChart" style="max-height:280px;"></canvas>
   </div>`;
 
-  // === ⑤ 体重・最小値更新ペース（先生メソッド：最小値どうしを結んで減量ペースを算出）===
+  // === ⑤ 体脂肪量・最低値更新ペース（先生メソッド：最低値どうしを結んで減脂ペースを算出）===
+  // リコンプでは体重は横ばいでも体脂肪量は落ちるため、体重ではなく体脂肪量(体重×体脂肪率)の最低値を参照する。
   {
-    const ws = [...dmData].filter(d => d.weight != null).sort((a, b) => a.date.localeCompare(b.date));
+    const fs = [...dmData].filter(d => d.weight != null && d.fatPct != null)
+      .map(d => ({ date: d.date, fm: +(d.weight * d.fatPct / 100).toFixed(1) }))
+      .sort((a, b) => a.date.localeCompare(b.date));
     const mins = []; let recMin = Infinity;
-    for (const d of ws) { if (d.weight < recMin) { mins.push({ date: d.date, w: d.weight }); recMin = d.weight; } }
+    for (const d of fs) { if (d.fm < recMin) { mins.push(d); recMin = d.fm; } }
     const dayNum = s => Math.round(new Date(s + 'T12:00:00').getTime() / 86400000);
     if (mins.length >= 2) {
       let rowsMin = '';
       for (let i = mins.length - 1; i >= 1; i--) {
         const cur = mins[i], prev = mins[i - 1];
         const days = dayNum(cur.date) - dayNum(prev.date);
-        const drop = +(prev.w - cur.w).toFixed(1);
+        const drop = +(prev.fm - cur.fm).toFixed(1);
         const gPerDay = days > 0 ? Math.round(drop * 1000 / days) : 0;
         const kcalPerDay = days > 0 ? Math.round(drop * 7200 / days) : 0;
         const dt = new Date(cur.date + 'T12:00:00');
-        rowsMin += `<tr><td>${dt.getMonth()+1}/${dt.getDate()} <span style="color:#c9a227;">🥇${cur.w}</span></td><td>${days}日</td><td style="color:#2d6a4f;font-weight:700;">-${drop}kg</td><td>-${gPerDay}g/日</td><td>-${kcalPerDay.toLocaleString()}</td></tr>`;
+        rowsMin += `<tr><td>${dt.getMonth()+1}/${dt.getDate()} <span style="color:#c62828;">🔥${cur.fm}</span></td><td>${days}日</td><td style="color:#2d6a4f;font-weight:700;">-${drop}kg</td><td>-${gPerDay}g/日</td><td>-${kcalPerDay.toLocaleString()}</td></tr>`;
       }
       const first = mins[0], last = mins[mins.length - 1];
       const totDays = dayNum(last.date) - dayNum(first.date);
-      const totDrop = +(first.w - last.w).toFixed(1);
+      const totDrop = +(first.fm - last.fm).toFixed(1);
       const avgG = totDays > 0 ? Math.round(totDrop * 1000 / totDays) : 0;
       const daysSinceMin = dayNum(nowDate.toISOString().slice(0,10)) - dayNum(last.date);
-      const staleNote = daysSinceMin > 21
-        ? `<div class="led-note" style="color:#c46a00;background:#fff8e1;padding:6px 8px;border-radius:6px;">※体重の最小値更新が<b>${daysSinceMin}日</b>止まっています。リコンプ（筋肉増→体重は横ばい）だと体重の最小値法は停滞して見えます。今のフェーズは<b>体脂肪量の最低更新（🔥／毎日の記録）</b>で進捗を見るのが実態に合います。</div>`
+      const staleNote = daysSinceMin > 28
+        ? `<div class="led-note" style="color:#c46a00;background:#fff8e1;padding:6px 8px;border-radius:6px;">※体脂肪量の最低更新が<b>${daysSinceMin}日</b>止まっています＝横ばい期。先生「横ばいして落ちるのが理想、今は理想の1周目」。摂取を計画平均（${DAILY_PLAN_AVG.toLocaleString()}kcal）に寄せれば次の最低値更新につながります。</div>`
         : '';
-      html += `<div class="dm-section"><h2>🥇 体重・最小値更新ペース <span style="font-size:0.6em;color:#888;font-weight:400;">先生メソッド：最小値どうしを結ぶ</span></h2>
+      html += `<div class="dm-section"><h2>🔥 体脂肪量・最低値更新ペース <span style="font-size:0.6em;color:#888;font-weight:400;">先生メソッド：最低値どうしを結ぶ</span></h2>
         <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
-          <div class="led-kpi"><div class="lk-l">最小値の推移</div><div class="lk-v" style="color:#1a237e;">${first.w}→${last.w}<span>kg</span></div></div>
+          <div class="led-kpi"><div class="lk-l">最低値の推移</div><div class="lk-v" style="color:#c62828;">${first.fm}→${last.fm}<span>kg</span></div></div>
           <div class="led-kpi"><div class="lk-l">累計 / 期間</div><div class="lk-v" style="color:#2d6a4f;">-${totDrop}<span>kg / ${totDays}日</span></div></div>
           <div class="led-kpi"><div class="lk-l">平均ペース</div><div class="lk-v" style="color:#2d6a4f;">-${avgG}<span>g/日</span></div></div>
         </div>
-        <div class="led-scroll"><table class="led-table"><thead><tr><th>更新日🥇</th><th>前回から</th><th>減少</th><th>ペース</th><th>kcal/日換算</th></tr></thead><tbody>${rowsMin}</tbody></table></div>
+        <div class="led-scroll"><table class="led-table"><thead><tr><th>更新日🔥</th><th>前回から</th><th>減少</th><th>ペース</th><th>kcal/日換算</th></tr></thead><tbody>${rowsMin}</tbody></table></div>
         ${staleNote}
-        <div class="led-note">体重が過去最小を更新した日だけを結び、区間ごとに「何日で何kg落ちたか」を算出（先生メソッド。筋肉維持が前提）。日々の増減＝水分ノイズを無視できる。🥇＝最小値更新日。最新の区間ペースが、実際の減量スピードの目安。</div>
+        <div class="led-note">体脂肪量(体重×体脂肪率)が過去最低を更新した日だけを結び、区間ごとに「何日で何kg落ちたか」を算出（先生メソッド。リコンプでは体重より体脂肪量が本質）。🔥＝最低値更新日。日々の増減＝水分ノイズを無視できる。最新の区間ペースが実際の減脂スピードの目安。</div>
       </div>`;
     }
   }
