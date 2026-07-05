@@ -603,12 +603,14 @@ function predictTDEE(profile, weight) {
   return { bmr: Math.round(bmr), tdee: Math.round(bmr * profile.activity) };
 }
 
-// 実測TDEE（エネルギー収支の逆算）。食事ログの平均摂取＋体重トレンド×7200。
+// 実測TDEE（エネルギー収支の逆算）。食事ログの平均摂取＋体脂肪量トレンド×7200。
+// リコンプ対応：体重ではなく「体脂肪量(体重×体脂肪率)」の減少で較正する。筋肉増で体重が
+// 落ちなくても脂肪減を捉えられるため、実際の脂肪燃焼を正しく反映したTDEEになる。
 function estimateTDEEMeasured() {
   const KCAL_PER_KG = 7200;
   const meals = loadMeals().filter(m => m.kcal);
-  const dm = loadDaily().filter(d => d.weight != null);
-  const out = { confident: false, tdee: null, meanIntake: null, deficitPerDay: null, slopeKgPerMonth: null, nIntake: meals.length, nWeight: 0, start: null, end: null, spanDays: 0 };
+  const dm = loadDaily().filter(d => d.weight != null && d.fatPct != null);
+  const out = { confident: false, tdee: null, meanIntake: null, deficitPerDay: null, slopeKgPerMonth: null, nIntake: meals.length, nWeight: 0, start: null, end: null, spanDays: 0, basis: 'fat' };
   if (meals.length < 14) return out;
   const dates = meals.map(m => m.date).sort();
   const start = dates[0], end = dates[dates.length - 1];
@@ -620,13 +622,13 @@ function estimateTDEEMeasured() {
   const toNum = s => Math.round(new Date(s + 'T12:00:00').getTime() / 86400000);
   const x0 = toNum(win[0].date);
   const xs = win.map(d => toNum(d.date) - x0);
-  const ys = win.map(d => d.weight);
+  const ys = win.map(d => d.weight * d.fatPct / 100); // 体脂肪量(kg)
   out.spanDays = xs[xs.length - 1] + 1;
   if (out.spanDays < 21) return out;
   const n = xs.length, mx = xs.reduce((a, b) => a + b, 0) / n, my = ys.reduce((a, b) => a + b, 0) / n;
   let num = 0, den = 0;
   for (let i = 0; i < n; i++) { num += (xs[i] - mx) * (ys[i] - my); den += (xs[i] - mx) ** 2; }
-  const slope = den ? num / den : 0; // kg/day（減量中は負）
+  const slope = den ? num / den : 0; // kg/day（体脂肪量。減少中は負）
   out.confident = true;
   out.tdee = Math.round(out.meanIntake + (-slope) * KCAL_PER_KG);
   out.deficitPerDay = Math.round(out.tdee - out.meanIntake);
@@ -634,8 +636,7 @@ function estimateTDEEMeasured() {
   return out;
 }
 
-// 1日の推定アルコールkcal（残差法：総kcal − PFC由来kcal）。PFCが無ければ0。
-const ALC_FACTOR = 0.5; // 飲酒日の脂肪燃焼ストップ係数（固定）
+// 1日の推定アルコールkcal（残差法：総kcal − PFC由来kcal）。PFCが無ければ0。表示（酒/深酒バッジ）用。
 function estAlcoholK(d) {
   if (d == null || d.protein == null) return 0;
   const r = d.kcal - (d.protein * 4 + (d.fat || 0) * 9 + (d.carb || 0) * 4);
@@ -1557,7 +1558,7 @@ function tdeeCardHTML(tdeeInfo, effTDEE) {
           ${usingMeasured?'<span class="tdee-badge green">使用中</span>':''}
           <div class="tdee-k">実測 <span>収支逆算</span></div>
           <div class="tdee-v" style="color:#2d6a4f;">${m.confident?m.tdee.toLocaleString():'—'}<span>kcal/日</span></div>
-          <div class="tdee-s">${m.confident?`摂取 ${m.meanIntake.toLocaleString()}／体重 ${m.slopeKgPerMonth>0?'+':''}${m.slopeKgPerMonth}kg/月／${m.spanDays}日`:'データ不足（食事14日・体重21日以上で算出）'}</div>
+          <div class="tdee-s">${m.confident?`摂取 ${m.meanIntake.toLocaleString()}／体脂肪 ${m.slopeKgPerMonth>0?'+':''}${m.slopeKgPerMonth}kg/月／${m.spanDays}日`:'データ不足（食事14日・体組成21日以上で算出）'}</div>
         </div>
       </div>
       ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ15%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
@@ -1641,13 +1642,14 @@ function render(data, calMap) {
 
   // === 日次カロリー収支ロジック（常時ON）===
   // その日のTDEE = 通常日TDEE ＋ トレ日のアフターバーン。平均は選択中TDEE(effTDEE)に一致するよう配分（二重計上回避）。
-  // ネット赤字 = その日のTDEE − 摂取 − お酒ブレーキ(推定アルコールkcal×0.5)。
+  // ネット赤字 = その日のTDEE − 摂取。
+  // ※アルコールブレーキは撤去：実データで飲酒日が多くても体脂肪は落ちており、かつ実測TDEEが
+  //   既に現実の結果を反映しているため、上乗せは二重補正になり脂肪予測を過小評価していた。
   const trainBonus = TRAIN_BURN + Math.round(effTDEE * (AFTERBURN_MULT - 1)); // トレ日の追加消費（直接＋アフターバーン）
   const trainFrac = all.length ? all.filter(d => d.hasTrain).length / all.length : 0;
   const restTDEE = Math.round(effTDEE - trainBonus * trainFrac); // 通常日TDEE（平均をeffTDEEに保つ）
   const dayTDEE = (d) => restTDEE + (d.hasTrain ? trainBonus : 0);
-  const alcBrake = (d) => (d.hasDrink ? Math.round(ALC_FACTOR * estAlcoholK(d)) : 0);
-  const dayDef = (d) => dayTDEE(d) - d.kcal - alcBrake(d); // その日の脂肪燃焼換算ネット赤字
+  const dayDef = (d) => dayTDEE(d) - d.kcal; // その日の脂肪燃焼換算ネット赤字
   // 赤字(deficit,正)=マイナス表記／黒字(超過,負)=プラス表記。脂肪も同様（正=減、負=増）。
   const sgnDef = (n) => `${n >= 0 ? '-' : '+'}${Math.abs(Math.round(n)).toLocaleString()}`;
   const sgnKg = (n) => `${n >= 0 ? '-' : '+'}${Math.abs(n)}kg`;
@@ -2169,13 +2171,12 @@ function render(data, calMap) {
     const ledgerDays = [...all].reverse().slice(0, 14); // 直近14日
     const sumNet = all.reduce((s, d) => s + dayDef(d), 0);
     const avgNet = all.length ? Math.round(sumNet / all.length) : 0;
-    const sumAlc = all.reduce((s, d) => s + alcBrake(d), 0);
     const DRINK_KCAL = 150; // 1杯あたり推定kcal（ビール/ハイボール/ワイン等の平均）
     const pCol = (v) => v == null ? '<span style="color:#bbb;">—</span>'
       : `<span style="color:${v>=PROTEIN_TARGET?'#2d6a4f':v>=PROTEIN_MIN?'#e65100':'#c62828'};font-weight:700;">${Math.round(v)}</span>`;
     let rows = '';
     for (const d of ledgerDays) {
-      const t = dayTDEE(d), a = alcBrake(d), net = dayDef(d);
+      const t = dayTDEE(d), net = dayDef(d);
       const dt = new Date(d.date + 'T12:00:00');
       const dlabel = `${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})`;
       const netCls = net >= 300 ? 'led-good' : net >= 0 ? 'led-ok' : 'led-bad';
@@ -2195,20 +2196,18 @@ function render(data, calMap) {
         <td>${d.fat!=null?Math.round(d.fat):'<span style="color:#bbb;">—</span>'}</td>
         <td>${d.carb!=null?Math.round(d.carb):'<span style="color:#bbb;">—</span>'}</td>
         <td>${t.toLocaleString()}${d.hasTrain?`<span class="led-sub">+${trainBonus}</span>`:''}</td>
-        <td>${a>0?'-'+a.toLocaleString():'—'}</td>
         <td class="${netCls}">${net>=0?'-':'+'}${Math.abs(net).toLocaleString()}</td>
       </tr>`;
     }
     html += `<div class="card">
-      <h2>📒 日次カロリー収支 <span style="font-size:0.66em;color:#888;font-weight:400;">毎日のネット赤字（トレ＋／酒−）</span></h2>
-      <div class="led-kpis">
+      <h2>📒 日次カロリー収支 <span style="font-size:0.66em;color:#888;font-weight:400;">毎日のネット赤字（トレ＋）</span></h2>
+      <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
         <div class="led-kpi"><div class="lk-l">平均ネット赤字</div><div class="lk-v" style="color:${avgNet>=0?'#2d6a4f':'#c62828'};">${avgNet>=0?'-':'+'}${Math.abs(avgNet).toLocaleString()}<span>kcal/日</span></div></div>
         <div class="led-kpi"><div class="lk-l">累計（${all.length}日）</div><div class="lk-v" style="color:#1a237e;">${sumNet>=0?'-':'+'}${Math.abs(sumNet).toLocaleString()}<span>kcal</span></div></div>
         <div class="led-kpi"><div class="lk-l">脂肪換算</div><div class="lk-v" style="color:#1a237e;">${(sumNet/7200).toFixed(1)}<span>kg</span></div></div>
-        <div class="led-kpi"><div class="lk-l">お酒で相殺</div><div class="lk-v" style="color:#e65100;">-${sumAlc.toLocaleString()}<span>kcal</span></div></div>
       </div>
-      <div class="led-scroll"><table class="led-table"><thead><tr><th>日</th><th>摂取</th><th title="タンパク質(g)">P</th><th title="脂質(g)">F</th><th title="炭水化物(g)">C</th><th>TDEE</th><th>酒-</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="led-note">P（緑=${PROTEIN_TARGET}g以上／橙=${PROTEIN_MIN}g以上／赤=不足）・F・C はg。<span class="led-tag dk">酒</span>=3杯相当以内／<span class="led-tag dk-over">深酒</span>=推定${ALCOHOL_CAP}杯超（残差法の推定アルコールkcal÷150kcal/杯で換算）。その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。お酒ブレーキ = 推定アルコールkcal × ${ALC_FACTOR}。直近14日を表示／全${all.length}日を集計。</div>
+      <div class="led-scroll"><table class="led-table"><thead><tr><th>日</th><th>摂取</th><th title="タンパク質(g)">P</th><th title="脂質(g)">F</th><th title="炭水化物(g)">C</th><th>TDEE</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="led-note">P（緑=${PROTEIN_TARGET}g以上／橙=${PROTEIN_MIN}g以上／赤=不足）・F・C はg。<span class="led-tag dk">酒</span>=3杯相当以内／<span class="led-tag dk-over">深酒</span>=推定${ALCOHOL_CAP}杯超（残差法の推定アルコールkcal÷150kcal/杯で換算・表示のみ）。その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。ネット赤字 = TDEE − 摂取（アルコールブレーキは撤去／実測TDEEが飲酒の影響も込みで反映）。直近14日を表示／全${all.length}日を集計。</div>
     </div>`;
   }
 
