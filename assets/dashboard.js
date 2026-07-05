@@ -2363,6 +2363,57 @@ function render(data, calMap) {
     }
   }
 
+  // === 月次サマリー（平均体組成 × 月間カロリー赤字を並べて感覚的に照合）===
+  {
+    const dmByMon = {};
+    for (const d of dmData) { const ym = d.date.slice(0, 7); (dmByMon[ym] ||= []).push(d); }
+    const avgOf = (arr, f) => { const v = arr.map(f).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    // カロリー赤字がある管理月（imputedByMonth）を対象に、体組成の月平均と突き合わせる
+    const monKeys = Object.keys(imputedByMonth).sort();
+    const rows = [];
+    let prevFm = null;
+    for (const ym of monKeys) {
+      const md = imputedByMonth[ym];
+      const days = dmByMon[ym] || [];
+      const both = days.filter(d => d.weight != null && d.fatPct != null);
+      const avgW = avgOf(days, d => d.weight);
+      const avgFp = avgOf(days, d => d.fatPct);
+      const avgFm = avgOf(both, d => d.weight * d.fatPct / 100);
+      const avgMus = avgOf(days, d => d.muscle);
+      const calcFat = +(md.impDef / 7200).toFixed(2);
+      const measFatD = (prevFm != null && avgFm != null) ? +(prevFm - avgFm).toFixed(2) : null;
+      rows.push({ label: `${Number(ym.slice(5))}月`, avgW, avgFp, avgFm, avgMus, deficit: md.impDef, calcFat, measFatD, calDays: md.calDays, miss: md.miss, isCurr: md.isCurr });
+      if (avgFm != null) prevFm = avgFm;
+    }
+    if (rows.length) {
+      let tr = '';
+      for (let i = rows.length - 1; i >= 0; i--) {
+        const r = rows[i];
+        // 一致判定：実測脂肪減(measFatD) と 計算脂肪減(calcFat) の差で判定。正=実測の方が多く脂肪減。
+        let match = '—';
+        if (r.measFatD != null) {
+          const diff = r.measFatD - r.calcFat;
+          match = Math.abs(diff) <= 0.3 ? '<span style="color:#2d6a4f;" title="計算通り＝一致">◎</span>'
+            : diff > 0.3 ? '<span style="color:#1565c0;" title="実測が計算を上回る（好調／水分減の可能性）">◯</span>'
+            : '<span style="color:#c62828;" title="実測が計算に届かず（水分増／摂取過多の可能性）">△</span>';
+        }
+        tr += `<tr>
+          <td>${r.label}${r.isCurr ? ' <span style="color:#888;font-size:0.8em;">now</span>' : ''}${r.miss > 0 ? ' <span style="opacity:0.5;font-size:0.8em;" title="'+r.miss+'日を平均補完">*</span>' : ''}</td>
+          <td>${r.avgW != null ? r.avgW.toFixed(1) : '—'}</td>
+          <td>${r.avgFp != null ? r.avgFp.toFixed(1) + '%' : '—'}</td>
+          <td style="color:#c62828;font-weight:700;">${r.avgFm != null ? r.avgFm.toFixed(1) : '—'}</td>
+          <td style="color:#2d6a4f;font-weight:700;">${r.avgMus != null ? r.avgMus.toFixed(1) : '—'}</td>
+          <td>${sgnDef(r.deficit)}<span style="color:#888;font-size:0.82em;"> (${sgnKg(r.calcFat)})</span></td>
+          <td style="font-weight:700;color:${r.measFatD == null ? '#888' : (r.measFatD >= 0 ? '#2d6a4f' : '#c62828')};">${r.measFatD == null ? '—' : sgnKg(r.measFatD)} ${match}</td>
+        </tr>`;
+      }
+      html += `<div class="dm-section"><h2>📅 月次サマリー <span style="font-size:0.6em;color:#888;font-weight:400;">平均体組成 × 月間カロリー赤字</span></h2>
+        <div class="led-scroll"><table class="led-table"><thead><tr><th>月</th><th>平均体重</th><th>体脂肪率</th><th>体脂肪量</th><th>筋肉量</th><th>月間赤字(→脂肪)</th><th>実測脂肪Δ</th></tr></thead><tbody>${tr}</tbody></table></div>
+        <div class="led-note"><b>月間赤字→脂肪</b>＝その月の日次カロリー収支の合計（÷7,200で計算上の脂肪減）。<b>実測脂肪Δ</b>＝平均体脂肪量の前月差（実際の変化）。判定は両者の差で：<b style="color:#2d6a4f;">◎</b>=ほぼ一致（±0.3kg）＝計算が正しい／<b style="color:#1565c0;">◯</b>=実測が計算を上回る（代謝good・水分減）／<b style="color:#c62828;">△</b>=実測が計算に届かず（水分増・摂取過多）。* は未記録日を平均補完。月平均なので日々の水分ノイズはならされます。</div>
+      </div>`;
+    }
+  }
+
   // --- Daily input form ---
   html += `<div class="dm-section"><h2>⚖️ 毎日の記録 <button class="bc-toggle" id="dm-toggle-btn">＋記録</button></h2>`;
   html += `<div class="dm-form" id="dm-form">
