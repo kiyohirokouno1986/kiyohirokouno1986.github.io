@@ -16,6 +16,8 @@ const PLAN_MONTHS = Math.round(FAT_TO_LOSE / PLAN_MONTHLY);
 const FAT_MIN = 17.8; // 体脂肪量の過去最小値（★★★S21更新 初の17kg台！）
 const FREE_HARD_CAP = 2500; // 飲食日の絶対上限（教訓: 2026/06/11 Slack実績分析）
 const ALCOHOL_CAP = 3; // アルコール杯数上限
+const BMR_FLOOR = 1567; // 基礎代謝の下限（InBody実測ベース／篠澤先生）。これを割る摂取は筋肉リスクで警告
+const KPI_MONTHLY_DEFICIT = 10000; // 先生KPI：月間の目標カロリー赤字（＝脂肪換算 約-1.5kg）
 
 // ===== Body Composition Storage =====
 const BC_KEY = 'calGuide_bodyComp';
@@ -1761,7 +1763,7 @@ function render(data, calMap) {
   } else {
 
   // 各カードを種別バッファに描画し、最後に読みやすい順で結合する（並び替え）
-  let cScore='', cProgress='', cStrip='', cCompare='',
+  let cScore='', cProgress='', cKPI='', cStrip='', cCompare='',
       cOverflow='', cBlowout='', cSchedule='', cTrainreal='', cPfc='',
       cRoadmap='', cArchive='', cTdee='', cVerdict='';
   // 「計画 vs 実績」の実績は日次カロリー収支（全期間）ベース
@@ -1825,6 +1827,38 @@ function render(data, calMap) {
         <div class="roadmap-kpi-item"><div class="rl">月末着地予測</div><div class="rv" style="color:${projEnd<0?'#ff5252':projRate>=80?'#64ffda':projRate>=50?'#ffd740':'#ff5252'};">${sgnDef(projEnd)}<span style="font-size:0.4em;">kcal</span></div><div class="rs" style="color:${projRate>=80?'#64ffda':'#ffd740'};">${projRate}% ― ${projRate>=90?'計画通り！':projRate>=70?'ほぼ計画通り':projRate>=50?'もう少し':'要改善'}</div></div>
       </div>
       <div class="roadmap-info"><span style="color:#64ffda;font-weight:500;">残り${dRemain}日で -${Math.max(0,curRM.tDef-defSoFar).toLocaleString()}kcal（-${neededPerDay}kcal/日）必要</span><span style="opacity:0.5;"> ― 現ペース${sgnDef(dailyPace)}/日${dailyPace>=effDeficitPlan?'。計画以上のペース！':neededPerDay<=effDeficitPlan+100?'。節制日を確保すれば到達':'。爆発日を抑えて'}</span></div>
+    </div>`;
+  }
+
+  // === ④ 先生KPI照合（月-10,000kcal＝脂肪-1.5kg を実測体脂肪減と突合）===
+  if (curRM) {
+    const kpiTgt = KPI_MONTHLY_DEFICIT;
+    const kpiTgtFat = +(kpiTgt / 7200).toFixed(1);
+    const mActDef = curRM.actDef || 0;
+    const mProjDef = curRM.projDef || 0;
+    const kpiRate = Math.round(mProjDef / kpiTgt * 100);
+    const actFatSoFar = +(mActDef / 7200).toFixed(2);
+    // 実測体脂肪減：日次計測の体脂肪量(体重×体脂肪率)の7日平均を、月初アンカー→直近で比較
+    const dsF = loadDaily().filter(d => d.weight != null && d.fatPct != null).sort((a, b) => a.date.localeCompare(b.date));
+    const fmOf = d => d.weight * d.fatPct / 100;
+    const avgLastN = (arr, n) => { const s = arr.slice(-n); return s.length ? s.reduce((a, d) => a + fmOf(d), 0) / s.length : null; };
+    const anchorFat = avgLastN(dsF.filter(d => d.date < currentYM + '-01'), 7);
+    const latestFat = avgLastN(dsF, 7);
+    const measFat = (anchorFat != null && latestFat != null) ? +(anchorFat - latestFat).toFixed(2) : null;
+    const enoughData = curRM.calDays >= 7 && measFat != null;
+    let verdict, vcol;
+    if (!enoughData) { verdict = `照合はデータ蓄積中（今月 ${curRM.calDays}日経過／7日以上で判定）`; vcol = '#ffd740'; }
+    else if (measFat >= actFatSoFar - 0.1) { verdict = '✅ 実測が計算に追随＝計算式は信頼できる（代謝good）'; vcol = '#64ffda'; }
+    else { verdict = '⚠ 実測 < 計算。水分/誤差の可能性、または計算がやや楽観的'; vcol = '#ff8a80'; }
+    cKPI += `<div class="roadmap-card">
+      <h2>🎯 先生KPI照合 ― 月-${kpiTgt.toLocaleString()}kcal（脂肪-${kpiTgtFat}kg）</h2>
+      <div class="roadmap-kpi">
+        <div class="roadmap-kpi-item"><div class="rl">今月の実績赤字</div><div class="rv" style="color:${okColor(mActDef)};">${sgnDef(mActDef)}</div><div class="rs" style="opacity:0.5;">${curRM.calDays}日経過 → 脂肪${sgnKg(actFatSoFar)}</div></div>
+        <div class="roadmap-kpi-item"><div class="rl">月末着地予測</div><div class="rv" style="color:${kpiRate>=90?'#64ffda':kpiRate>=60?'#ffd740':'#ff5252'};">${sgnDef(mProjDef)}</div><div class="rs" style="opacity:0.5;">KPI達成 ${kpiRate}%</div></div>
+        <div class="roadmap-kpi-item"><div class="rl">実測 体脂肪減</div><div class="rv" style="color:${measFat==null?'#888':okColor(measFat)};">${measFat==null?'—':sgnKg(measFat)}</div><div class="rs" style="opacity:0.5;">${measFat==null?'データ蓄積中':'体組成7日平均'}</div></div>
+      </div>
+      <div class="roadmap-info" style="color:${vcol};">${verdict}</div>
+      <div style="margin-top:6px;font-size:0.68em;opacity:0.45;">計算＝日次カロリー収支の脂肪換算（赤字÷7,200）。実測＝体脂肪量(体重×体脂肪率)7日平均の月初→直近差。両者が一致すれば計算式が正しい＝先生「1.5kg落ちてれば1万で合ってる、2kgなら実質-1.4万」。</div>
     </div>`;
   }
 
@@ -2072,7 +2106,7 @@ function render(data, calMap) {
   cVerdict += `<div class="${verdict.cl} risk-box" style="font-size:0.92em;"><strong>${verdict.emoji} ${verdict.text}</strong></div>`;
 
   // ★カードを読みやすい順で結合（A 現在地→B 計画vs実績→C 日次内訳→D 要因分析→E 中長期・設定）
-  html += cScore + cProgress + cStrip + cCompare
+  html += cScore + cProgress + cKPI + cStrip + cCompare
         + cOverflow + cBlowout + cSchedule + cTrainreal + cPfc
         + cRoadmap + cArchive + cTdee
         + cVerdict;
@@ -2194,6 +2228,7 @@ function render(data, calMap) {
     }
     if (td) html += `<div class="day-alerts"><span class="tag tag-info">実質${td.effectiveCal.toLocaleString()}kcal（-${td.totalExtra}消費）→ 赤字-${td.deficit}kcal</span></div>`;
     if (classify(day)==='strict' && day.protein != null && day.protein < PROTEIN_MIN) html += `<div class="day-alerts"><span class="tag tag-bad">⚠ 節制日P${PROTEIN_MIN}g未満 → 1,600kcalまで増やしてP確保を</span></div>`;
+    if (day.kcal < BMR_FLOOR) html += `<div class="day-alerts"><span class="tag tag-bad">⚠ 基礎代謝${BMR_FLOOR.toLocaleString()}未満（${(BMR_FLOOR-day.kcal).toLocaleString()}kcal下）→ 筋肉リスク。ここは死守ライン</span></div>`;
     html += `${day.memo?`<div class="day-memo">${day.memo}</div>`:''}</div>`;
   }
   html += `</div>`; // close 日別レコード card
@@ -2286,6 +2321,47 @@ function render(data, calMap) {
     </div>
     <canvas id="dmComboChart" style="max-height:280px;"></canvas>
   </div>`;
+
+  // === ⑤ 体脂肪量・最低値更新ペース（先生メソッド：最低値どうしを結んで減脂ペースを算出）===
+  // リコンプでは体重は横ばいでも体脂肪量は落ちるため、体重ではなく体脂肪量(体重×体脂肪率)の最低値を参照する。
+  {
+    const fs = [...dmData].filter(d => d.weight != null && d.fatPct != null)
+      .map(d => ({ date: d.date, fm: +(d.weight * d.fatPct / 100).toFixed(1) }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const mins = []; let recMin = Infinity;
+    for (const d of fs) { if (d.fm < recMin) { mins.push(d); recMin = d.fm; } }
+    const dayNum = s => Math.round(new Date(s + 'T12:00:00').getTime() / 86400000);
+    if (mins.length >= 2) {
+      let rowsMin = '';
+      for (let i = mins.length - 1; i >= 1; i--) {
+        const cur = mins[i], prev = mins[i - 1];
+        const days = dayNum(cur.date) - dayNum(prev.date);
+        const drop = +(prev.fm - cur.fm).toFixed(1);
+        const gPerDay = days > 0 ? Math.round(drop * 1000 / days) : 0;
+        const kcalPerDay = days > 0 ? Math.round(drop * 7200 / days) : 0;
+        const dt = new Date(cur.date + 'T12:00:00');
+        rowsMin += `<tr><td>${dt.getMonth()+1}/${dt.getDate()} <span style="color:#c62828;">🔥${cur.fm}</span></td><td>${days}日</td><td style="color:#2d6a4f;font-weight:700;">-${drop}kg</td><td>-${gPerDay}g/日</td><td>-${kcalPerDay.toLocaleString()}</td></tr>`;
+      }
+      const first = mins[0], last = mins[mins.length - 1];
+      const totDays = dayNum(last.date) - dayNum(first.date);
+      const totDrop = +(first.fm - last.fm).toFixed(1);
+      const avgG = totDays > 0 ? Math.round(totDrop * 1000 / totDays) : 0;
+      const daysSinceMin = dayNum(nowDate.toISOString().slice(0,10)) - dayNum(last.date);
+      const staleNote = daysSinceMin > 28
+        ? `<div class="led-note" style="color:#c46a00;background:#fff8e1;padding:6px 8px;border-radius:6px;">※体脂肪量の最低更新が<b>${daysSinceMin}日</b>止まっています＝横ばい期。先生「横ばいして落ちるのが理想、今は理想の1周目」。摂取を計画平均（${DAILY_PLAN_AVG.toLocaleString()}kcal）に寄せれば次の最低値更新につながります。</div>`
+        : '';
+      html += `<div class="dm-section"><h2>🔥 体脂肪量・最低値更新ペース <span style="font-size:0.6em;color:#888;font-weight:400;">先生メソッド：最低値どうしを結ぶ</span></h2>
+        <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
+          <div class="led-kpi"><div class="lk-l">最低値の推移</div><div class="lk-v" style="color:#c62828;">${first.fm}→${last.fm}<span>kg</span></div></div>
+          <div class="led-kpi"><div class="lk-l">累計 / 期間</div><div class="lk-v" style="color:#2d6a4f;">-${totDrop}<span>kg / ${totDays}日</span></div></div>
+          <div class="led-kpi"><div class="lk-l">平均ペース</div><div class="lk-v" style="color:#2d6a4f;">-${avgG}<span>g/日</span></div></div>
+        </div>
+        <div class="led-scroll"><table class="led-table"><thead><tr><th>更新日🔥</th><th>前回から</th><th>減少</th><th>ペース</th><th>kcal/日換算</th></tr></thead><tbody>${rowsMin}</tbody></table></div>
+        ${staleNote}
+        <div class="led-note">体脂肪量(体重×体脂肪率)が過去最低を更新した日だけを結び、区間ごとに「何日で何kg落ちたか」を算出（先生メソッド。リコンプでは体重より体脂肪量が本質）。🔥＝最低値更新日。日々の増減＝水分ノイズを無視できる。最新の区間ペースが実際の減脂スピードの目安。</div>
+      </div>`;
+    }
+  }
 
   // --- Daily input form ---
   html += `<div class="dm-section"><h2>⚖️ 毎日の記録 <button class="bc-toggle" id="dm-toggle-btn">＋記録</button></h2>`;
@@ -2562,6 +2638,7 @@ function render(data, calMap) {
   html += `<div class="rule-card" style="margin-top:14px;"><h3>🥩 タンパク質の優先ルール（S14確定）</h3>
     <div class="rule-item"><strong>原則：</strong>カロリー第一 ＞ PFCバランス</div>
     <div class="rule-item"><strong>節制日（1,500kcal）：</strong>P ${PROTEIN_MIN}g未満 → 1,600kcalまでOK。${PROTEIN_TARGET}gが理想。</div>
+    <div class="rule-item" style="border-left:3px solid #c62828;padding-left:8px;"><strong style="color:#c62828;">下限＝基礎代謝${BMR_FLOOR.toLocaleString()}kcal（S23・先生）：</strong>1,500の日はOKだが、これを下回る摂取はNG。基礎代謝割れは筋肉が落ちるリスク。削りたい日でも${BMR_FLOOR.toLocaleString()}は死守。</div>
     <div class="rule-item"><strong>飲食日（${FREE.toLocaleString()}kcal）：</strong>P不足でも追加プロテイン不要。炭水化物・脂質がカバー。</div>
     <div class="rule-item"><strong>朝プロテイン30g：</strong>寝起きは栄養カラカラで吸収率MAX。ここで稼ぐ。</div>
     <div class="rule-item" style="border-left:3px solid #6c5ce7;padding-left:8px;"><strong>就寝前プロテイン15g（S22・GLP-1オフ対応）：</strong>夜中に空腹で起きるなら就寝前に15gを飲んで寝る（飲むのはOK・睡眠の質を最優先）。1,500kcalは維持し、第二段階で夜の一杯分を確保。起きてしまったら炭酸水/水で空腹をごまかす。</div>
@@ -2570,6 +2647,11 @@ function render(data, calMap) {
   html += `<div class="train-card" style="margin-top:14px;"><h3>🏋️ トレーニング日のカロリールール</h3>
     <div class="train-grid"><div class="train-box"><div class="tv">${TRAIN_BURN}</div><div class="tl">直接消費kcal</div></div><div class="train-box"><div class="tv">×${AFTERBURN_MULT}</div><div class="tl">アフターバーン倍率</div></div><div class="train-box"><div class="tv">${Math.round(TDEE*AFTERBURN_MULT-TDEE)+TRAIN_BURN}</div><div class="tl">追加消費合計kcal</div></div></div>
     <div style="text-align:center;margin-top:10px;font-size:0.82em;opacity:0.9;">トレーニング日でもカロリーは増やさない。「消費が増えるラッキー」でそのまま削る。</div></div>`;
+
+  html += `<div class="rule-card" style="margin-top:14px;border-left-color:#6c5ce7;"><h3 style="color:#6c5ce7;">💊 GLP-1の使いどころ（S23・先生）</h3>
+    <div class="rule-item" style="border-left:3px solid #c62828;padding-left:8px;"><strong style="color:#c62828;">会食・出張日は温存 ✕：</strong>「食べる時は食べる」ので食欲抑制が効きにくく、無駄打ちになりやすい。ここに使っても増える時は増える。</div>
+    <div class="rule-item" style="border-left:3px solid #2d6a4f;padding-left:8px;"><strong style="color:#2d6a4f;">何もない休日に使う ◯：</strong>予定のない日ほど「つい食べちゃう」を抑えられる。100食べるところを60に。→ ここで赤字を稼ぐのが最も費用対効果が高い。</div>
+    <div class="rule-item"><strong>要点：</strong>GLP-1は「会食のブレーキ」ではなく「平常日の食べ過ぎ防止」に回す。会食日は${FREE.toLocaleString()}上限＋3杯ルールで管理し、GLPは休日に集中。</div></div>`;
 
   html += `<div class="card" style="margin-top:14px;"><h2>体脂肪率シミュレーション → 15%</h2><canvas id="simChart"></canvas></div>`;
 
@@ -2723,7 +2805,7 @@ function render(data, calMap) {
     }
     if (wkData.length === 0) wkData = all;
     if (weekChartInstance) weekChartInstance.destroy();
-    const wkTgtPlugin = {id:'tgtLines',afterDraw(chart){const c=chart.ctx,y=chart.scales.y,x=chart.scales.x;c.save();c.setLineDash([5,3]);c.lineWidth=1.5;[{v:STRICT,col:'#1565c0'},{v:FREE,col:'#e65100'}].forEach(l=>{const py=y.getPixelForValue(l.v);c.strokeStyle=l.col;c.beginPath();c.moveTo(x.left,py);c.lineTo(x.right,py);c.stroke();});const pp=y.getPixelForValue(DAILY_PLAN_AVG);c.setLineDash([6,4]);c.lineWidth=2;c.strokeStyle='#6c5ce7';c.beginPath();c.moveTo(x.left,pp);c.lineTo(x.right,pp);c.stroke();c.setLineDash([]);c.fillStyle='#6c5ce7';c.font='bold 9px sans-serif';c.textAlign='left';c.fillText('計画'+DAILY_PLAN_AVG.toLocaleString(),x.left+3,pp-3);c.restore();}};
+    const wkTgtPlugin = {id:'tgtLines',afterDraw(chart){const c=chart.ctx,y=chart.scales.y,x=chart.scales.x;c.save();c.setLineDash([5,3]);c.lineWidth=1.5;[{v:STRICT,col:'#1565c0'},{v:FREE,col:'#e65100'}].forEach(l=>{const py=y.getPixelForValue(l.v);c.strokeStyle=l.col;c.beginPath();c.moveTo(x.left,py);c.lineTo(x.right,py);c.stroke();});const pp=y.getPixelForValue(DAILY_PLAN_AVG);c.setLineDash([6,4]);c.lineWidth=2;c.strokeStyle='#6c5ce7';c.beginPath();c.moveTo(x.left,pp);c.lineTo(x.right,pp);c.stroke();c.setLineDash([]);c.fillStyle='#6c5ce7';c.font='bold 9px sans-serif';c.textAlign='left';c.fillText('計画'+DAILY_PLAN_AVG.toLocaleString(),x.left+3,pp-3);const pb=y.getPixelForValue(BMR_FLOOR);c.setLineDash([2,2]);c.lineWidth=1;c.strokeStyle='#9e9e9e';c.beginPath();c.moveTo(x.left,pb);c.lineTo(x.right,pb);c.stroke();c.setLineDash([]);c.fillStyle='#9e9e9e';c.font='9px sans-serif';c.fillText('基礎代謝'+BMR_FLOOR.toLocaleString(),x.left+3,pb+10);c.restore();}};
     const wkCalAnnotPlugin = {id:'calAnnot',afterDraw(chart){
       if (!calMap || !Object.keys(calMap).length) return;
       const ctx2 = chart.ctx;
