@@ -333,6 +333,9 @@ canvas { max-height: 260px; margin-top: 8px; }
 .arch-daily-table th:first-child { text-align: left; }
 .arch-daily-table td { padding: 5px 4px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.1); }
 .arch-daily-table td:first-child { text-align: left; white-space: nowrap; }
+.arch-daily-table.se-table { font-size: 0.8em; }
+.arch-daily-table.se-table th, .arch-daily-table.se-table td { padding: 7px 4px; }
+.arch-daily-table .ad-dt { display: block; font-size: 0.72em; opacity: 0.45; }
 
 /* ===== 同期ステータスバー ===== */
 .sync-status { font-size: 0.72em; color: #777; background: #eef2f7; border: 1px solid #e0e6ee; border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; text-align: center; }

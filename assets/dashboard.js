@@ -1961,31 +1961,42 @@ function render(data, calMap) {
           <div class="roadmap-kpi-item"><div class="rl">達成率</div><div class="rv" style="color:${early(sel)?'#cfd3f7':v.c};">${early(sel) ? '集計中' : sel.rate + '%'}</div><div class="rs" style="color:${early(sel)?'#cfd3f7':v.c};">${early(sel) ? 'データ蓄積中' : v.t}</div></div>
         </div>
         ${(() => {
-          // 選択月の日次内訳（月タブ/行クリックでその月の日別データを表示）
-          const bcMap = {};
-          try { for (const x of loadDaily()) bcMap[x.date] = x; } catch (e) {}
-          const monDays = (imputedByMonth[sel.ym] && imputedByMonth[sel.ym].days ? [...imputedByMonth[sel.ym].days] : []).sort((a, b) => a.date.localeCompare(b.date));
-          if (!monDays.length) return '';
-          let dr = '';
-          for (const d of monDays) {
-            const nd = dayDef(d);
-            const dt = new Date(d.date + 'T12:00:00');
-            const bc = bcMap[d.date];
-            const fm = (bc && bc.weight != null && bc.fatPct != null) ? (bc.weight * bc.fatPct / 100).toFixed(1) : '—';
-            dr += `<tr>
-              <td>${dt.getMonth()+1}/${dt.getDate()}(${'日月火水木金土'[dt.getDay()]})${d.hasTrain?' 🏋️':''}${d.hasDrink?' 🍺':''}</td>
-              <td>${d.kcal.toLocaleString()}</td>
-              <td style="color:${nd>=0?'#64ffda':'#ff8a80'};font-weight:700;">${nd>=0?'-':'+'}${Math.abs(nd).toLocaleString()}</td>
-              <td>${bc && bc.weight != null ? bc.weight.toFixed(1) : '—'}</td>
-              <td>${fm}</td>
+          // 選択月の体組成「月初 → 月末」と差分（月タブ/行クリックでその月に切替）
+          let monRecs = [];
+          try { monRecs = loadDaily().filter(x => x.date.slice(0, 7) === sel.ym && x.weight != null).sort((a, b) => a.date.localeCompare(b.date)); } catch (e) {}
+          if (monRecs.length < 1) return '';
+          const metrics = [
+            { label: '体重', unit: 'kg', get: d => d.weight, goodDown: true },
+            { label: '体脂肪率', unit: '%', get: d => d.fatPct, goodDown: true },
+            { label: '体脂肪量', unit: 'kg', get: d => (d.weight != null && d.fatPct != null) ? d.weight * d.fatPct / 100 : null, goodDown: true },
+            { label: '筋肉量', unit: 'kg', get: d => d.muscle, goodDown: false },
+          ];
+          const md = (ds) => { const t = new Date(ds + 'T12:00:00'); return `${t.getMonth()+1}/${t.getDate()}`; };
+          const rng = (arr) => arr.length > 1 ? `${md(arr[0].date)}–${md(arr[arr.length-1].date)}` : md(arr[0].date);
+          let rows = '';
+          for (const m of metrics) {
+            const v = monRecs.filter(d => m.get(d) != null);
+            if (!v.length) { rows += `<tr><td>${m.label}</td><td>—</td><td>—</td><td>—</td></tr>`; continue; }
+            const first = v.slice(0, Math.min(7, v.length));            // 月初1週間
+            const last = v.slice(Math.max(0, v.length - 7));            // 月末1週間
+            const avg = arr => arr.reduce((s, d) => s + m.get(d), 0) / arr.length;
+            const sv = avg(first), ev = avg(last), delta = +(ev - sv).toFixed(1);
+            const good = m.goodDown ? delta < 0 : delta > 0;
+            const col = delta === 0 ? '#cfd3f7' : good ? '#64ffda' : '#ff8a80';
+            rows += `<tr>
+              <td>${m.label}</td>
+              <td>${sv.toFixed(1)}${m.unit}<span class="ad-dt">${rng(first)}</span></td>
+              <td>${ev.toFixed(1)}${m.unit}<span class="ad-dt">${rng(last)}</span></td>
+              <td style="color:${col};font-weight:700;">${delta > 0 ? '+' : ''}${delta}${m.unit}</td>
             </tr>`;
           }
           return `<details class="arch-daily" open>
-            <summary>${sel.label}の日次内訳（記録${monDays.length}日）</summary>
-            <div class="arch-daily-scroll"><table class="arch-daily-table">
-              <thead><tr><th>日</th><th>摂取</th><th>ネット赤字</th><th>体重</th><th>体脂肪量</th></tr></thead>
-              <tbody>${dr}</tbody>
-            </table></div>
+            <summary>${sel.label}の体組成 月初1週間 → 月末1週間（平均）</summary>
+            <table class="arch-daily-table se-table">
+              <thead><tr><th>指標</th><th>月初(7日平均)</th><th>月末(7日平均)</th><th>差分</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <div style="font-size:0.62em;opacity:0.45;margin-top:6px;">その月の最初7日／最後7日の平均で比較（単日の水分ノイズをならす）。体脂肪量＝体重×体脂肪率。緑=良い方向（脂肪↓／筋肉↑）。記録が少ない月は前後7日が重なり差が小さくなります。</div>
           </details>`;
         })()}
       </div>`;
@@ -2005,7 +2016,7 @@ function render(data, calMap) {
         <h2>📊 月別 予実アーカイブ</h2>
         <div style="font-size:0.7em;color:#999;margin-bottom:10px;">過去の予実を月ごとに保存。上のタブ／下の行タップで詳細を切替。</div>
         <table class="arch-table"><thead><tr><th>月</th><th>目標</th><th>実績</th><th>達成</th><th>脂肪減</th><th>判定</th></tr></thead><tbody>${rows}</tbody></table>
-        <div style="font-size:0.66em;color:#aaa;margin-top:8px;line-height:1.5;">* = 未記録日を平均補完。実績＝日次ネット赤字の月合計（トレ+込み）。月をタップで下に日次内訳が出ます。判定：達成80%↑=◎／50〜80%=ほぼ／未満=要改善。</div>
+        <div style="font-size:0.66em;color:#aaa;margin-top:8px;line-height:1.5;">* = 未記録日を平均補完。実績＝日次ネット赤字の月合計（トレ+込み）。月をタップで体組成の月初→月末が出ます。判定：達成80%↑=◎／50〜80%=ほぼ／未満=要改善。</div>
       </div>`;
     }
   }
