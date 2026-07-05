@@ -1,7 +1,7 @@
 // === Constants (Updated: S19 2026/06/16) ===
 const CH = 'C0B3VMRH2UR';
-const STRICT = 1500, FREE = 2200, TDEE = 2230;
-const STRICT_DAYS = 4, FREE_DAYS_WEEK = 3;
+const STRICT = 1500, FREE = 2100, TDEE = 2230;
+const STRICT_DAYS = 5, FREE_DAYS_WEEK = 2;
 const WEEKLY_PLAN = STRICT * STRICT_DAYS + FREE * FREE_DAYS_WEEK;
 const DAILY_PLAN_AVG = Math.round(WEEKLY_PLAN / 7);
 const DAILY_DEFICIT_PLAN = TDEE - DAILY_PLAN_AVG;
@@ -838,7 +838,7 @@ function trainDeficit(day) {
 
 // === 溢れた日の要因診断（リコンプ向け） ===
 // 食事kcal = P*4+F*9+C*4。総kcalとの差(残差)を「アルコール＋未記録」とみなす。
-// 超過は飲食上限(FREE=2200)比で算出し、-400赤字の何日分を相殺したかを出す。
+// 超過は飲食上限(FREE=2100)比で算出し、-400赤字の何日分を相殺したかを出す。
 const RECOMP_DEFICIT = 400;     // リコンプの1日あたり目標赤字（バンド中心）
 const OVERFLOW_THRESHOLD = 2500; // この総カロリー以上を「溢れた日」とする（2,200は適正圏）
 function overflowDiagnosis(d) {
@@ -846,7 +846,7 @@ function overflowDiagnosis(d) {
   const pK = Math.round(p * 4), fK = Math.round(f * 9), cK = Math.round(c * 4);
   const foodKcal = pK + fK + cK;
   const alcoholK = Math.max(0, d.kcal - foodKcal); // 残差 ≒ アルコール＋未記録
-  const excess = Math.max(0, d.kcal - FREE);        // 飲食上限(2200)超過分
+  const excess = Math.max(0, d.kcal - FREE);        // 飲食上限(2100)超過分
   const overCap = Math.max(0, d.kcal - FREE_HARD_CAP); // 絶対上限(2500)超過分
   const daysErased = +(excess / RECOMP_DEFICIT).toFixed(1);
   // 主因の判定（アルコール / 脂質 / 炭水化物）
@@ -1916,7 +1916,7 @@ function render(data, calMap) {
   // Weekly summary strip
   cStrip += `<div class="week-strip">
     <div class="ws-item"><div class="ws-l">平均kcal</div><div class="ws-v" style="color:${gapCal<=0?'#2d6a4f':'#e65100'};">${avgCal.toLocaleString()}</div><div class="ws-l">${gapCal<=0?'計画内':'+'+(gapCal)}</div></div>
-    <div class="ws-item"><div class="ws-l">節制日</div><div class="ws-v" style="color:${strictN>=4?'#2d6a4f':'#e65100'};">${strictN}<span style="font-size:0.6em;color:#888;">/${last7.length}日</span></div><div class="ws-l">${strictN>=4?'OK':'目標4日'}</div></div>
+    <div class="ws-item"><div class="ws-l">節制日</div><div class="ws-v" style="color:${strictN>=STRICT_DAYS?'#2d6a4f':'#e65100'};">${strictN}<span style="font-size:0.6em;color:#888;">/${last7.length}日</span></div><div class="ws-l">${strictN>=STRICT_DAYS?'OK':'目標'+STRICT_DAYS+'日'}</div></div>
     <div class="ws-item"><div class="ws-l">P平均</div><div class="ws-v" style="color:${avgP&&avgP>=PROTEIN_TARGET?'#2d6a4f':avgP&&avgP>=PROTEIN_MIN?'#e65100':'#c62828'};">${avgP||'—'}<span style="font-size:0.6em;">g</span></div><div class="ws-l">${PROTEIN_MIN}〜${PROTEIN_TARGET}g</div></div>
     <div class="ws-item"><div class="ws-l">P達成率</div><div class="ws-v" style="color:${pDaysWithData.length&&pAbove140/pDaysWithData.length>=0.5?'#2d6a4f':'#e65100'};">${pDaysWithData.length?Math.round(pAbove140/pDaysWithData.length*100):'—'}<span style="font-size:0.6em;">%</span></div><div class="ws-l">${pAbove140}/${pDaysWithData.length}日</div></div>
     <div class="ws-item"><div class="ws-l">月間脂肪減</div><div class="ws-v" style="color:${actMonthly>=effPlanMonthly?'#2d6a4f':'#c62828'};">${actMonthly>=0?'-':'+'}${Math.abs(actMonthly)}<span style="font-size:0.6em;">kg</span></div><div class="ws-l">計画-${effPlanMonthly}kg</div></div>
@@ -1932,7 +1932,7 @@ function render(data, calMap) {
       <tr><td>15%到達予測</td><td>約${effPlanMonths}ヶ月</td><td>約${actMonthsAll<100?actMonthsAll:'—'}ヶ月</td><td style="color:${actMonthsAll<=effPlanMonths?'#2d6a4f':'#c62828'};font-weight:700;">${actMonthsAll<100?((actMonthsAll-effPlanMonths)>0?'+':'')+(actMonthsAll-effPlanMonths)+'ヶ月':'—'}</td></tr>
       <tr><td>タンパク質/日</td><td><strong>${PROTEIN_TARGET}g</strong></td><td>${avgP||'—'}g</td><td>${avgP?`<span class="tag ${avgP>=PROTEIN_TARGET?'tag-good':avgP>=PROTEIN_MIN?'tag-warn':'tag-bad'}">${avgP>=PROTEIN_TARGET?'◎':avgP>=PROTEIN_MIN?'最低ラインOK':'不足'}</span>`:''}</td></tr>
       <tr><td>P最低100g遵守</td><td>${pDaysWithData.length}/${pDaysWithData.length}日</td><td>${pAbove100}/${pDaysWithData.length}日</td><td>${pBelow100Strict>0?`<span class="tag tag-bad">節制日${pBelow100Strict}日不足</span>`:'<span class="tag tag-good">OK</span>'}</td></tr>
-      <tr><td>節制日 vs 飲食日</td><td>4:3</td><td>${strictN}:${freeN}</td><td>${strictN>=4?'<span class="tag tag-good">OK</span>':'<span class="tag tag-warn">飲食日多め</span>'}</td></tr>
+      <tr><td>節制日 vs 飲食日</td><td>${STRICT_DAYS}:${FREE_DAYS_WEEK}</td><td>${strictN}:${freeN}</td><td>${strictN>=STRICT_DAYS?'<span class="tag tag-good">OK</span>':'<span class="tag tag-warn">飲食日多め</span>'}</td></tr>
     </tbody></table></div>`;
 
   // PFC GAP
@@ -1971,7 +1971,7 @@ function render(data, calMap) {
   if (blowoutDays.length > 0) {
     cBlowout += `<div class="card"><h2 style="color:#c62828;">💥 爆発日インパクト分析</h2>
       <div class="grid-3" style="margin-bottom:12px;">
-        <div class="mini"><div class="v" style="color:#c62828;">${blowoutDays.length}<span style="font-size:0.5em;">日</span></div><div class="l">2,200超の日</div></div>
+        <div class="mini"><div class="v" style="color:#c62828;">${blowoutDays.length}<span style="font-size:0.5em;">日</span></div><div class="l">${FREE.toLocaleString()}超の日</div></div>
         <div class="mini"><div class="v" style="color:#c62828;">+${blowoutExcess.toLocaleString()}<span style="font-size:0.5em;">kcal</span></div><div class="l">超過カロリー合計</div></div>
         <div class="mini"><div class="v" style="color:#c62828;">+${blowoutAvgImpact}<span style="font-size:0.5em;">kcal/日</span></div><div class="l">日割り影響</div></div>
       </div>
@@ -2556,13 +2556,13 @@ function render(data, calMap) {
   html += tdeeCardHTML(tdeeInfo, effTDEE);
 
   html += `<div class="plan-reminder"><h3>Plan C ― メリハリ型カロリー管理</h3>
-    <div class="pr-grid"><div class="pr-box"><div class="pv">1,500</div><div class="pl">節制日 × 週4日</div></div><div class="pr-box"><div class="pv">2,200</div><div class="pl">飲食日 × 週3日</div></div></div>
+    <div class="pr-grid"><div class="pr-box"><div class="pv">${STRICT.toLocaleString()}</div><div class="pl">節制日 × 週${STRICT_DAYS}日</div></div><div class="pr-box"><div class="pv">${FREE.toLocaleString()}</div><div class="pl">飲食日 × 週${FREE_DAYS_WEEK}日</div></div></div>
     <div style="text-align:center;margin-top:10px;font-size:0.82em;opacity:0.9;">週平均 ${DAILY_PLAN_AVG} kcal ／ 赤字 -${effDeficitPlan} kcal/日 ／ 月 -${effPlanMonthly}kg脂肪</div></div>`;
 
   html += `<div class="rule-card" style="margin-top:14px;"><h3>🥩 タンパク質の優先ルール（S14確定）</h3>
     <div class="rule-item"><strong>原則：</strong>カロリー第一 ＞ PFCバランス</div>
     <div class="rule-item"><strong>節制日（1,500kcal）：</strong>P ${PROTEIN_MIN}g未満 → 1,600kcalまでOK。${PROTEIN_TARGET}gが理想。</div>
-    <div class="rule-item"><strong>飲食日（2,200kcal）：</strong>P不足でも追加プロテイン不要。炭水化物・脂質がカバー。</div>
+    <div class="rule-item"><strong>飲食日（${FREE.toLocaleString()}kcal）：</strong>P不足でも追加プロテイン不要。炭水化物・脂質がカバー。</div>
     <div class="rule-item"><strong>朝プロテイン30g：</strong>寝起きは栄養カラカラで吸収率MAX。ここで稼ぐ。</div>
     <div class="rule-item" style="border-left:3px solid #6c5ce7;padding-left:8px;"><strong>就寝前プロテイン15g（S22・GLP-1オフ対応）：</strong>夜中に空腹で起きるなら就寝前に15gを飲んで寝る（飲むのはOK・睡眠の質を最優先）。1,500kcalは維持し、第二段階で夜の一杯分を確保。起きてしまったら炭酸水/水で空腹をごまかす。</div>
     <div class="rule-item"><strong>達成パターン：</strong>プロテイン2回（30g×2=60g）＋食事2回（40g×2=80g）= ${PROTEIN_TARGET}g</div></div>`;
@@ -2595,7 +2595,7 @@ function render(data, calMap) {
 
   html += `<div class="card"><h2 style="color:#e65100;">Plan C 成功ルール（S14更新版）</h2><div style="font-size:0.86em;">
     <p style="margin-bottom:8px;"><strong style="color:#e65100;">1.</strong> 節制日のタンパク質 <strong>${PROTEIN_TARGET}g</strong> が目標。最低<strong>${PROTEIN_MIN}g</strong>は死守（${PROTEIN_MIN}g未満なら1,600kcalまでOK）。</p>
-    <p style="margin-bottom:8px;"><strong style="color:#e65100;">2.</strong> 飲食日は <strong>2,200kcal が天井</strong>。ビール1杯→ハイボールに切替。シメのラーメンで帳消し。</p>
+    <p style="margin-bottom:8px;"><strong style="color:#e65100;">2.</strong> 飲食日は <strong>${FREE.toLocaleString()}kcal が天井</strong>。ビール1杯→ハイボールに切替。シメのラーメンで帳消し。</p>
     <p style="margin-bottom:8px;"><strong style="color:#e65100;">3.</strong> トレーニング日でもカロリーは増やさない。消費+${TRAIN_BURN}kcal+アフターバーンの「赤字ボーナス」をそのまま活かす。</p>
     <p style="margin-bottom:8px;"><strong style="color:#e65100;">4.</strong> 朝プロテイン <strong>30g</strong>。寝起きは吸収率MAX。ここで稼ぐ。</p>
     <p><strong style="color:#e65100;">5.</strong> 飲み会前にプロテインを飲んでおく。暴食防止＋タンパク質確保。飲食日はP追加不要。</p>
@@ -2840,7 +2840,7 @@ function render(data, calMap) {
       type:'line',data:{labels:mo,datasets:[
         {label:'Plan A（1,930均一）',data:pA,borderColor:'#2d6a4f',fill:false,tension:0.3,pointRadius:3,borderWidth:2},
         {label:'Plan B（1,500均一）',data:pB,borderColor:'#1565c0',fill:false,tension:0.3,pointRadius:3,borderWidth:2},
-        {label:'Plan C（1,500/2,200変動）',data:pC,borderColor:'#e65100',backgroundColor:'rgba(230,81,0,0.06)',fill:true,tension:0.3,pointRadius:4,borderWidth:3},
+        {label:`Plan C（${STRICT.toLocaleString()}/${FREE.toLocaleString()}変動）`,data:pC,borderColor:'#e65100',backgroundColor:'rgba(230,81,0,0.06)',fill:true,tension:0.3,pointRadius:4,borderWidth:3},
         {label:'目標 15%',data:Array(mo.length).fill(15),borderColor:'#e63946',borderDash:[6,4],pointRadius:0,borderWidth:1.5,fill:false},
       ]},
       options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:9},usePointStyle:true,padding:8}}},scales:{y:{min:12,max:27,ticks:{font:{size:9}}},x:{ticks:{font:{size:9}}}}}
