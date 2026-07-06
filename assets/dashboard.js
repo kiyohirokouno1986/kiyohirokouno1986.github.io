@@ -2251,7 +2251,7 @@ function render(data, calMap) {
       <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
         <div class="led-kpi"><div class="lk-l">平均ネット赤字</div><div class="lk-v" style="color:${avgNet>=0?'#2d6a4f':'#c62828'};">${avgNet>=0?'-':'+'}${Math.abs(avgNet).toLocaleString()}<span>kcal/日</span></div></div>
         <div class="led-kpi"><div class="lk-l">累計（${cumLabel}）</div><div class="lk-v" style="color:#1a237e;">${sumNet>=0?'-':'+'}${Math.abs(sumNet).toLocaleString()}<span>kcal</span></div></div>
-        <div class="led-kpi"><div class="lk-l">脂肪換算</div><div class="lk-v" style="color:#1a237e;">${(sumNet/7200).toFixed(1)}<span>kg</span></div></div>
+        <div class="led-kpi"><div class="lk-l">脂肪換算</div><div class="lk-v" style="color:#1a237e;">${sumNet>=0?'-':'+'}${Math.abs(sumNet/7200).toFixed(1)}<span>kg</span></div></div>
       </div>
       <div class="led-scroll"><table class="led-table"><thead><tr><th>日</th><th>摂取</th><th title="タンパク質(g)">P</th><th title="脂質(g)">F</th><th title="炭水化物(g)">C</th><th>TDEE</th><th>ネット赤字</th></tr></thead><tbody>${rows}</tbody></table></div>
       <div class="led-note">P（緑=${PROTEIN_TARGET}g以上／橙=${PROTEIN_MIN}g以上／赤=不足）・F・C はg。<span class="led-tag dk">酒</span>=3杯相当以内／<span class="led-tag dk-over">深酒</span>=推定${ALCOHOL_CAP}杯超（残差法の推定アルコールkcal÷150kcal/杯で換算・表示のみ）。その日のTDEE = 通常日${restTDEE.toLocaleString()}kcal ＋ トレ日アフターバーン+${trainBonus}（週${(trainFrac*7).toFixed(1)}回）。平均は選択中TDEE ${effTDEE.toLocaleString()} に一致（二重計上なし）。ネット赤字 = TDEE − 摂取（アルコールブレーキは撤去／実測TDEEが飲酒の影響も込みで反映）。${ledSel ? `${Number(ledSel.slice(5))}月の全${scopeDays.length}日を表示・集計。` : `直近14日を表示／全${all.length}日を集計。`}</div>
