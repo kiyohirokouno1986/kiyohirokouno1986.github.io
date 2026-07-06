@@ -2276,8 +2276,17 @@ function render(data, calMap) {
   }
 
   // Day by day
-  html += `<div class="card"><h2>日別レコード（${all.length}日分）</h2>`;
-  for (const day of [...all].reverse()) {
+  // 月フィルタ：直近14日（recordMonth=null）／各月（YYYY-MM）で切替（表示数が増えて重くなるのを防ぐ）
+  {
+    const recMonths = [...new Set(all.map(d => d.date.slice(0, 7)))].sort().reverse(); // 新しい月が先頭
+    const recSel = (recordMonth && recMonths.includes(recordMonth)) ? recordMonth : null;
+    const recScope = recSel ? all.filter(d => d.date.slice(0, 7) === recSel) : all;
+    const recList = recSel ? [...recScope].reverse() : [...all].reverse().slice(0, 14); // 表示対象
+    const recLabel = recSel ? `${Number(recSel.slice(5))}月・${recScope.length}日` : `直近14日／全${all.length}日`;
+    const recMtabs = `<button class="led-mtab${!recSel ? ' active' : ''}" data-rym="">直近14日</button>`
+      + recMonths.map(ym => `<button class="led-mtab${ym === recSel ? ' active' : ''}" data-rym="${ym}">${Number(ym.slice(5))}月</button>`).join('');
+  html += `<div class="card"><h2>日別レコード（${recLabel}）</h2><div class="led-mtabs">${recMtabs}</div>`;
+  for (const day of recList) {
     const type = classify(day), tgt = target(day), diff2 = day.kcal - tgt;
     let tc, tt;
     if(day.kcal<=tgt){tc='tag-good';tt=`-${Math.abs(diff2)}`;}
@@ -2311,6 +2320,7 @@ function render(data, calMap) {
     html += `${day.memo?`<div class="day-memo">${day.memo}</div>`:''}</div>`;
   }
   html += `</div>`; // close 日別レコード card
+  } // close 月フィルタ block
   } // end else (meals present)
   html += `</div>`; // end tab-tracker
 
@@ -2899,6 +2909,8 @@ function render(data, calMap) {
   attachArchiveHandlers();
   // Attach 日次カロリー収支の月フィルタ handlers
   attachLedgerHandlers();
+  // Attach 日別レコードの月フィルタ handlers
+  attachRecordHandlers();
 
   // ===================== CHARTS =====================
 
@@ -3180,8 +3192,15 @@ function attachArchiveHandlers() {
 // 日次カロリー収支の月フィルタで選択中の月（YYYY-MM。null/''=直近14日）
 let ledgerMonth = null;
 function attachLedgerHandlers() {
-  document.querySelectorAll('.led-mtab').forEach(el => {
+  document.querySelectorAll('.led-mtab[data-lym]').forEach(el => {
     el.onclick = () => { ledgerMonth = el.dataset.lym || null; rerender(); };
+  });
+}
+// 日別レコードの月フィルタで選択中の月（YYYY-MM。null/''=直近14日）
+let recordMonth = null;
+function attachRecordHandlers() {
+  document.querySelectorAll('.led-mtab[data-rym]').forEach(el => {
+    el.onclick = () => { recordMonth = el.dataset.rym || null; rerender(); };
   });
 }
 // 自動同期データ(meals/calendar)の「最終更新時刻」をGitHub APIから取得（GitHub Pagesでのみ・公開APIで認証不要）。
