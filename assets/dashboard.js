@@ -2471,25 +2471,29 @@ function render(data, calMap) {
         ${gap != null ? `<div class="led-note" style="margin-top:6px;">現在のギャップ：実測 ${lastAct.toFixed(1)}kg − 予測 ${lastPred.toFixed(1)}kg ＝ <b style="color:${gap<=0.2?'#2d6a4f':'#c46a00'};">${gap>=0?'+':''}${gap}kg</b>（${gap<=0.2?'ほぼ予測通り／予測より落ちている':'実測が予測ほど落ちていない＝水分/摂取過多の可能性'}）</div>` : ''}
       </div>`;
     }
-    // --- 案B：直近7日ローリング ---
+    // --- 案B：直近14日ローリング（タイムラグ吸収のため平均期間を長めに） ---
     if (bcFat.length >= 2 && mealsAsc.length >= 3) {
+      const ROLL_WIN = 14; // 対比窓（日）
       const dayNum = s => Math.round(new Date(s + 'T12:00:00').getTime() / 86400000);
-      const last7 = mealsAsc.slice(-7);
-      const roll7Def = last7.reduce((s, d) => s + dayDef(d), 0);
-      const roll7Pred = +(roll7Def / 7200).toFixed(2); // 予測脂肪減(正=減)
+      // 案B専用の14日移動平均（案Aの7日MAには影響させない）
+      const fmMA14at = (dateStr) => { const w = bcFat.filter(x => x.date <= dateStr).slice(-ROLL_WIN); return w.length ? w.reduce((a, b) => a + b.fm, 0) / w.length : null; };
+      const last14 = mealsAsc.slice(-ROLL_WIN);
+      const roll14Def = last14.reduce((s, d) => s + dayDef(d), 0);
+      const roll14Pred = +(roll14Def / 7200).toFixed(2); // 予測脂肪減(正=減)
       const latest = bcFat[bcFat.length - 1].date;
-      const prevStr = (() => { const t = dayNum(latest) - 7; const d = new Date(t * 86400000); return d.toISOString().slice(0, 10); })();
-      const maNow = fmMAat(latest), maPrev = fmMAat(prevStr);
-      const roll7Act = (maNow != null && maPrev != null) ? +(maPrev - maNow).toFixed(2) : null; // 実測脂肪減(正=減)
+      const prevStr = (() => { const t = dayNum(latest) - ROLL_WIN; const d = new Date(t * 86400000); return d.toISOString().slice(0, 10); })();
+      const maNow = fmMA14at(latest), maPrev = fmMA14at(prevStr);
+      const roll14Act = (maNow != null && maPrev != null) ? +(maPrev - maNow).toFixed(2) : null; // 実測脂肪減(正=減)
       let vB = '—', vcolB = '#888';
-      if (roll7Act != null) { const diff = roll7Act - roll7Pred; if (Math.abs(diff) <= 0.15) { vB = '◎ 一致'; vcolB = '#2d6a4f'; } else if (diff > 0.15) { vB = '◯ 実測が上回る'; vcolB = '#1565c0'; } else { vB = '△ 実測が届かず'; vcolB = '#c62828'; } }
-      html += `<div class="dm-section"><h2>📆 直近7日ローリング対比 <span style="font-size:0.6em;color:#888;font-weight:400;">常に等7日窓で公平</span></h2>
+      // 窓が2倍になったぶん一致バンドも比例（±0.15→±0.3）
+      if (roll14Act != null) { const diff = roll14Act - roll14Pred; if (Math.abs(diff) <= 0.3) { vB = '◎ 一致'; vcolB = '#2d6a4f'; } else if (diff > 0.3) { vB = '◯ 実測が上回る'; vcolB = '#1565c0'; } else { vB = '△ 実測が届かず'; vcolB = '#c62828'; } }
+      html += `<div class="dm-section"><h2>📆 直近14日ローリング対比 <span style="font-size:0.6em;color:#888;font-weight:400;">常に等14日窓で公平</span></h2>
         <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
-          <div class="led-kpi"><div class="lk-l">直近7日 赤字</div><div class="lk-v" style="color:${roll7Def>=0?'#2d6a4f':'#c62828'};">${sgnDef(roll7Def)}<span>kcal</span></div></div>
-          <div class="led-kpi"><div class="lk-l">→ 予測脂肪減</div><div class="lk-v" style="color:#6c5ce7;">${sgnKg(roll7Pred)}</div></div>
-          <div class="led-kpi"><div class="lk-l">実測脂肪減(7日MA)</div><div class="lk-v" style="color:${roll7Act==null?'#888':(roll7Act>=0?'#2d6a4f':'#c62828')};">${roll7Act==null?'—':sgnKg(roll7Act)}</div></div>
+          <div class="led-kpi"><div class="lk-l">直近14日 赤字</div><div class="lk-v" style="color:${roll14Def>=0?'#2d6a4f':'#c62828'};">${sgnDef(roll14Def)}<span>kcal</span></div></div>
+          <div class="led-kpi"><div class="lk-l">→ 予測脂肪減</div><div class="lk-v" style="color:#6c5ce7;">${sgnKg(roll14Pred)}</div></div>
+          <div class="led-kpi"><div class="lk-l">実測脂肪減(14日MA)</div><div class="lk-v" style="color:${roll14Act==null?'#888':(roll14Act>=0?'#2d6a4f':'#c62828')};">${roll14Act==null?'—':sgnKg(roll14Act)}</div></div>
         </div>
-        <div class="led-note">判定：<b style="color:${vcolB};">${vB}</b>。直近7日の赤字合計→予測脂肪減 と、体脂肪量7日MAの7日前差（実測）を比較。月の途中でも常に同じ7日窓なので公平に相関が見られる。</div>
+        <div class="led-note">判定：<b style="color:${vcolB};">${vB}</b>。直近14日の赤字合計→予測脂肪減 と、体脂肪量14日MAの14日前差（実測）を比較。体組成のタイムラグを吸収するため窓を長め（14日）に取り、常に同じ14日窓なので公平に相関が見られる。</div>
       </div>`;
     }
   }
