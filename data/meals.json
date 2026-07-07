@@ -468,5 +468,15 @@
     "memo": "",
     "hasDrink": true,
     "hasTrain": false
+  },
+  {
+    "date": "2026-07-07",
+    "kcal": 1365,
+    "protein": 119,
+    "fat": 55,
+    "carb": 56,
+    "memo": "タンパク質は良好。総カロリーは1500kcal以内。",
+    "hasDrink": true,
+    "hasTrain": true
   }
 ]
