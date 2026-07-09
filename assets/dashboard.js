@@ -2429,41 +2429,52 @@ function render(data, calMap) {
     const w7 = wmaAt(offDate(7)), w14 = wmaAt(offDate(14));
     const slope7 = w7 != null ? now - w7 : null;              // 直近1週の傾き（負=減）
     const slopePrev = (w7 != null && w14 != null) ? w7 - w14 : null; // その前の1週
-    // 横ばい日数：today から遡り、MAが now±FLAT に収まる連続日数
+    // 評価ウィンドウ＝2週間（14日）。横ばい日数も最大14日でキャップ。
+    const WIN = 14;
     let flatDays = 0;
-    for (let k = 1; k < 28; k++) { const v = wmaAt(offDate(k)); if (v == null) break; if (Math.abs(v - now) <= FLAT + 0.1) flatDays++; else break; }
+    for (let k = 1; k <= WIN; k++) { const v = wmaAt(offDate(k)); if (v == null) break; if (Math.abs(v - now) <= FLAT + 0.1) flatDays++; else break; }
     // 状態判定
     let phase = 'monitor';
     if (slope7 != null && slope7 <= -WOOSH && slopePrev != null && Math.abs(slopePrev) <= FLAT) phase = 'woosh';
     else if (slope7 != null && Math.abs(slope7) <= FLAT && defBetween(Ln - 7, Ln) >= PLATEAU_DEF) phase = 'plateau';
     else if (slope7 != null && slope7 < -FLAT) phase = 'down';
-    // 直近21日を日次リサンプルしてスパークライン用に
-    const N = 21, ser = [];
-    for (let k = N - 1; k >= 0; k--) ser.push(wmaAt(offDate(k)));
+    // 体脂肪量（体重×体脂肪率）の7日移動平均を日付で引く
+    const dmF = dm.filter(d => d.fatPct != null).map(d => ({ date: d.date, fm: d.weight * d.fatPct / 100 }));
+    const fmaAt = (ds) => { const w = dmF.filter(x => x.date <= ds).slice(-7); return w.length ? w.reduce((a, b) => a + b.fm, 0) / w.length : null; };
+    // 直近14日を日次リサンプル（体重MA・体脂肪量MA）
+    const N = WIN, serW = [], serF = [];
+    for (let k = N - 1; k >= 0; k--) { serW.push(wmaAt(offDate(k))); serF.push(fmaAt(offDate(k))); }
     const flatStartIdx = Math.max(0, (N - 1) - flatDays);
-    // SVGスパークライン
-    const spark = (hlFrom) => {
-      const W = 420, H = 104, pl = 6, pr = 6, pt = 12, pb = 14;
-      const vals = ser.filter(v => v != null);
-      if (vals.length < 3) return '';
-      const mn = Math.min(...vals) - 0.15, mx = Math.max(...vals) + 0.15;
+    // SVGスパークライン：体重(青・左)＋体脂肪量(赤・右)の2本ライン
+    const spark = (hlWeight) => {
+      const W = 430, H = 118, pl = 6, pr = 6, pt = 12, pb = 26;
+      const vw = serW.filter(v => v != null);
+      if (vw.length < 3) return '';
+      const wmn = Math.min(...vw) - 0.15, wmx = Math.max(...vw) + 0.15;
       const x = i => pl + (W - pl - pr) * (i / (N - 1));
-      const y = v => pt + (H - pt - pb) * (1 - (v - mn) / (mx - mn || 1));
-      const pts = ser.map((v, i) => v == null ? null : `${x(i).toFixed(1)},${y(v).toFixed(1)}`).filter(Boolean).join(' ');
+      const yw = v => pt + (H - pt - pb) * (1 - (v - wmn) / (wmx - wmn || 1));
+      const vf = serF.filter(v => v != null);
+      const hasFat = vf.length >= 3;
+      const fmn = hasFat ? Math.min(...vf) - 0.1 : 0, fmx = hasFat ? Math.max(...vf) + 0.1 : 1;
+      const yf = v => pt + (H - pt - pb) * (1 - (v - fmn) / (fmx - fmn || 1));
+      const wpts = serW.map((v, i) => v == null ? null : `${x(i).toFixed(1)},${yw(v).toFixed(1)}`).filter(Boolean).join(' ');
+      const fpts = hasFat ? serF.map((v, i) => v == null ? null : `${x(i).toFixed(1)},${yf(v).toFixed(1)}`).filter(Boolean).join(' ') : '';
       let band = '';
       if (flatDays >= 2) {
         const bx1 = x(flatStartIdx), bx2 = x(N - 1);
-        band = `<rect x="${bx1.toFixed(1)}" y="${pt}" width="${(bx2 - bx1).toFixed(1)}" height="${H - pt - pb}" fill="#ffcc80" opacity="0.28" rx="4"/><text x="${((bx1 + bx2) / 2).toFixed(1)}" y="${pt + 11}" font-size="9" fill="#e07800" text-anchor="middle" font-weight="700">横ばい</text>`;
+        band = `<rect x="${bx1.toFixed(1)}" y="${pt}" width="${(bx2 - bx1).toFixed(1)}" height="${H - pt - pb}" fill="#ffcc80" opacity="0.26" rx="4"/><text x="${((bx1 + bx2) / 2).toFixed(1)}" y="${pt + 11}" font-size="9" fill="#e07800" text-anchor="middle" font-weight="700">体重は横ばい</text>`;
       }
+      const fatLine = hasFat ? `<polyline points="${fpts}" fill="none" stroke="#e5533c" stroke-width="2.6"/><text x="${x(N - 1).toFixed(1)}" y="${(yf(serF[N - 1] ?? vf[vf.length - 1]) + 13).toFixed(1)}" font-size="8.5" fill="#e5533c" text-anchor="end" font-weight="700">脂肪量↓</text>` : '';
+      const wLine = `<polyline points="${wpts}" fill="none" stroke="#5c6bc0" stroke-width="2.4"/>`;
       let wo = '';
-      if (hlFrom != null) {
-        const wp = ser.map((v, i) => (i >= hlFrom && v != null) ? `${x(i).toFixed(1)},${y(v).toFixed(1)}` : null).filter(Boolean).join(' ');
+      if (hlWeight && serW[N - 1] != null) {
         const li = N - 1;
-        wo = `<polyline points="${wp}" fill="none" stroke="#0d8f74" stroke-width="3.5" stroke-linecap="round"/><circle cx="${x(li).toFixed(1)}" cy="${y(ser[li]).toFixed(1)}" r="4.5" fill="#0d8f74"/><text x="${x(li).toFixed(1)}" y="${(y(ser[li]) + 13).toFixed(1)}" font-size="9" fill="#0d8f74" text-anchor="end" font-weight="800">💧カクン</text>`;
+        wo = `<circle cx="${x(li).toFixed(1)}" cy="${yw(serW[li]).toFixed(1)}" r="4.5" fill="#3949ab"/><text x="${x(li).toFixed(1)}" y="${(yw(serW[li]) - 7).toFixed(1)}" font-size="9" fill="#3949ab" text-anchor="end" font-weight="800">💧カクン</text>`;
       }
-      const line = `<polyline points="${pts}" fill="none" stroke="#5c6bc0" stroke-width="2.2"/>`;
-      return `<div class="spark-wrap"><svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">${band}${line}${wo}</svg><div class="spark-legend"><span class="lg-flat">横ばい＝水分保持</span>${hlFrom != null ? '<span class="lg-woosh">ウーシュ（水抜け）</span>' : ''}</div></div>`;
+      return `<div class="spark-wrap"><svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;">${band}${fatLine}${wLine}${wo}</svg><div class="spark-legend"><span class="lg-w">体重（7日平均）</span>${hasFat ? '<span class="lg-f">体脂肪量（7日平均）</span>' : ''}<span class="lg-flat">横ばい帯</span></div></div>`;
     };
+    // ウィンドウ内の体脂肪量変化（負＝減）
+    const fatChange = (win) => { const a = fmaAt(offDate(win)), b = fmaAt(L); return (a != null && b != null) ? +(b - a).toFixed(2) : null; };
     const kpi = (l, v, u, c) => `<div class="led-kpi"><div class="lk-l">${l}</div><div class="lk-v" style="color:${c};">${v}<span>${u}</span></div></div>`;
     const head = `<h2>💧 停滞・ウーシュ判定 <span style="font-size:0.66em;color:#888;font-weight:400;">体重が止まる本当の理由</span></h2>`;
     if (phase === 'woosh') {
@@ -2474,8 +2485,8 @@ function render(data, calMap) {
       return `<div class="card">${head}
         <div class="woosh-banner woosh-woosh"><div class="wb-emoji">🎉</div><div>
           <div class="wb-title">ウーシュ発生！水が抜けました 💧</div>
-          <div class="wb-sub">横ばいのあと<b>1週間で -${dropKg}kg</b>。うち約${water}kgは溜まっていた余計な水分。我慢が結果に変わりました。</div></div></div>
-        ${spark(flatStartIdx)}
+          <div class="wb-sub">横ばいのあと<b>1週間で -${dropKg}kg</b>。うち約${water}kgは溜まっていた余計な水分。体脂肪量はその前からずっと下降＝水が一気に抜けて体重が追いつきました。</div></div></div>
+        ${spark(true)}
         <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
           ${kpi('停滞明けの下げ', '-' + dropKg, 'kg', '#2d6a4f')}
           ${kpi('うち水分(推定)', '-' + water, 'kg', '#1565c0')}
@@ -2485,19 +2496,22 @@ function render(data, calMap) {
       </div>`;
     }
     if (phase === 'plateau') {
-      const flatDef = defBetween(Ln - Math.max(flatDays, 7), Ln);
-      const hiddenFat = +(flatDef / 7200).toFixed(2);
+      const win = Math.min(Math.max(flatDays, 7), WIN); // 集計は最大14日
+      const flatDef = defBetween(Ln - win, Ln);
+      const fCh = fatChange(win);                       // 実測の体脂肪量変化（負＝減）
+      const fatTxt = fCh == null ? '—' : `${fCh <= 0 ? '-' : '+'}${Math.abs(fCh)}`;
+      const fatCol = fCh == null ? '#888' : fCh <= 0 ? '#2d6a4f' : '#c62828';
       return `<div class="card">${head}
         <div class="woosh-banner woosh-plateau"><div class="wb-emoji">⏸️</div><div>
           <div class="wb-title">水分保持フェーズ（想定内です）</div>
-          <div class="wb-sub">体重は<b>${flatDays}日横ばい</b>。でも赤字は積み上がっています＝<b>脂肪は抜けて、その穴に水が入った</b>状態。ここで「停滞した」と食べると戻ります。今が我慢どき。</div></div></div>
-        ${spark(null)}
+          <div class="wb-sub">体重は<b>${flatDays}日横ばい</b>${fCh != null && fCh < 0 ? `。でも<b>体脂肪量は ${fatTxt}kg 下降中</b>` : '。でも赤字は積み上がっています'}＝<b>脂肪は抜けて、その穴に水が入った</b>状態。ここで「停滞した」と食べると戻ります。今が我慢どき。</div></div></div>
+        ${spark(false)}
         <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
-          ${kpi('横ばい日数', flatDays, '日', '#fb8c00')}
+          ${kpi('横ばい日数（体重）', flatDays, '日', '#fb8c00')}
+          ${kpi('体脂肪量の変化', fatTxt, 'kg', fatCol)}
           ${kpi('その間の赤字', (flatDef >= 0 ? '-' : '+') + Math.abs(Math.round(flatDef)).toLocaleString(), 'kcal', flatDef >= 0 ? '#c62828' : '#2d6a4f')}
-          ${kpi('隠れて減った脂肪', (hiddenFat >= 0 ? '-' : '+') + Math.abs(hiddenFat), 'kg', '#1a237e')}
         </div>
-        <div class="led-note">先生「脂肪は分解されてるのに数値が動かない<b>横横ゾーン</b>。ここを我慢すれば水が抜けてカクンと落ちる」。計算上は<b>${hiddenFat >= 0 ? '-' : '+'}${Math.abs(hiddenFat)}kg</b>ぶん抜けているので、KPI通り継続すればウーシュが来ます。</div>
+        <div class="led-note">先生「脂肪は分解されてるのに数値（体重）が動かない<b>横横ゾーン</b>。ここを我慢すれば水が抜けてカクンと落ちる」。<b>青の体重は横ばいでも、赤の体脂肪量は落ちている</b>のが動かぬ証拠。KPI通り継続すればウーシュが来ます。</div>
       </div>`;
     }
     if (phase === 'down') {
@@ -2508,7 +2522,7 @@ function render(data, calMap) {
         <div class="woosh-banner woosh-down"><div class="wb-emoji">📉</div><div>
           <div class="wb-title">順調に下降中</div>
           <div class="wb-sub">体重と赤字がきれいに連動しています。この波が止まっても慌てず、「水分保持フェーズ」に切り替わるだけ＝想定内と捉えればOK。</div></div></div>
-        ${spark(null)}
+        ${spark(false)}
         <div class="led-note">7日移動平均で <b>${pace <= 0 ? '' : '+'}${pace}kg/週</b> のペース。計算上の予測（${pred <= 0 ? '' : '+'}${pred}kg）とほぼ一致＝モデル通りに脂肪が落ちています。</div>
       </div>`;
     }
@@ -2517,7 +2531,7 @@ function render(data, calMap) {
       <div class="woosh-banner woosh-down"><div class="wb-emoji">🔍</div><div>
         <div class="wb-title">モニタ中</div>
         <div class="wb-sub">停滞・ウーシュの判定には体重の7日移動平均と赤字の推移が必要です。記録が溜まると「水分保持フェーズ」や「ウーシュ発生」を自動で見分けます。</div></div></div>
-      ${spark(null)}
+      ${spark(false)}
     </div>`;
   })();
 
