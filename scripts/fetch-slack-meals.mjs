@@ -208,6 +208,8 @@ async function main() {
     process.exit(1);
   }
   const messages = await fetchHistory();
+  // [DEBUG] 実Slack書式の確認用：直近3件の原文（本文＋attachments）をダンプ
+  messages.slice(0, 3).forEach((m, i) => console.log(`\n===RAW#${i}===\n` + JSON.stringify(msgText(m))));
   const days = parseDays(messages);
 
   mkdirSync('data', { recursive: true });
