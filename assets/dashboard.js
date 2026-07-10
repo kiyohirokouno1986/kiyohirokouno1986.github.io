@@ -2865,43 +2865,6 @@ function render(data, calMap) {
   </div>`;
 
   // --- Waist section ---
-  const wsLatest = (() => { const ws = loadWaist(); return ws.length ? ws[ws.length-1] : null; })();
-  const wsLatestVal = wsLatest ? wsLatest.waist : null;
-  const wsCleared = wsLatestVal != null && wsLatestVal < 85;
-  const wsRemain = wsLatestVal != null ? +(wsLatestVal - 85).toFixed(1) : null;
-  // Health checkup countdown
-  const checkupDate = new Date('2026-07-09T00:00:00');
-  const today2 = new Date(); today2.setHours(0,0,0,0);
-  const daysLeft = Math.ceil((checkupDate - today2) / (1000*60*60*24));
-  const checkupPast = daysLeft < 0;
-
-  if (wsCleared) {
-    html += `<div style="background:linear-gradient(135deg,#d4edda,#c3e6cb);border-radius:12px;padding:16px;margin-bottom:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
-      <div style="font-size:2em;">🎊🏆🎊</div>
-      <div style="font-size:1.1em;font-weight:800;color:#155724;margin:6px 0;">メタボ基準クリア！ウエスト85cm未満達成！</div>
-      <div style="font-size:0.85em;color:#155724;">最新 ${wsLatestVal}cm（${wsLatest.date}）</div>
-    </div>`;
-  } else if (wsRemain != null) {
-    html += `<div style="background:linear-gradient(135deg,#fff3e0,#ffe0b2);border-radius:12px;padding:14px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <div>
-          <div style="font-size:0.72em;color:#e65100;font-weight:700;">🎯 メタボ基準まで</div>
-          <div style="font-size:1.8em;font-weight:800;color:#e65100;">あと -${wsRemain}cm</div>
-          <div style="font-size:0.75em;color:#bf360c;">現在 ${wsLatestVal}cm → 目標 85.0cm未満</div>
-        </div>
-        <div style="text-align:center;">
-          <div style="font-size:0.72em;color:#1565c0;font-weight:700;">🏥 健康診断まで</div>
-          <div style="font-size:1.8em;font-weight:800;color:#1565c0;">${checkupPast ? '終了' : daysLeft + '日'}</div>
-          <div style="font-size:0.75em;color:#0d47a1;">7月9日（木）</div>
-        </div>
-      </div>
-      <div style="margin-top:10px;background:#fff;border-radius:6px;height:14px;overflow:hidden;position:relative;">
-        <div style="height:100%;border-radius:6px;background:linear-gradient(90deg,#ff6f00,#e65100);width:${Math.min(100, Math.max(5, ((90.5 - wsLatestVal) / (90.5 - 85)) * 100))}%;transition:width 0.5s;"></div>
-        <div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:0.6em;font-weight:700;color:#fff;text-shadow:0 0 2px rgba(0,0,0,0.5);">${Math.round(((90.5 - wsLatestVal) / (90.5 - 85)) * 100)}% 達成</div>
-      </div>
-    </div>`;
-  }
-
   html += `<div class="tl-chart-card"><h2>📏 ウエスト（腹囲）推移</h2>
     <div class="dm-period-filter" id="ws-period-filter">
       <button data-period="90">3M</button>
