@@ -2296,41 +2296,42 @@ function render(data, calMap) {
     const recLabel = recSel ? `${Number(recSel.slice(5))}月・${recScope.length}日` : `直近14日／全${all.length}日`;
     const recMtabs = `<button class="led-mtab${!recSel ? ' active' : ''}" data-rym="">直近14日</button>`
       + recMonths.map(ym => `<button class="led-mtab${ym === recSel ? ' active' : ''}" data-rym="${ym}">${Number(ym.slice(5))}月</button>`).join('');
-  html += `<div class="card"><h2>日別レコード（${recLabel}）</h2><div class="led-mtabs">${recMtabs}</div>`;
+  // 食材の色分け（優先：酒＞発酵＞高タンパク）。先生メソッドの死守項目を一目で。
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const foodClass = (name) => {
+    if (/ビール|ハイボール|ウィスキー|ウイスキー|焼酎|ワイン|サワー|ソーダ|日本酒|レモンサワー|酒/.test(name)) return 'drink';
+    if (/納豆|キムチ|めかぶ|もずく|ヨーグルト|味噌|漬物|ぬか|ザワークラウト/.test(name)) return 'ferm';
+    if (/鶏|胸|もも|ささみ|プロテ|卵|たまご|玉子|豆腐|魚|鮭|さば|サバ|刺身|寿司|海鮮|まぐろ|マグロ|ツナ|チキン|肉|えび|エビ|いか|イカ|たこ|タコ|ブロッコリー|枝豆|ホエイ|しらす|ちくわ|はんぺん/.test(name)) return 'pro';
+    return '';
+  };
+  html += `<div class="card"><h2>🍱 食事メニュー <span style="font-size:0.66em;color:#888;font-weight:400;">その日の献立ログ</span></h2><div class="led-mtabs">${recMtabs}</div>
+    <div class="md-legend">タグ：<b>緑=高タンパク</b>／<i>橙=発酵食品</i>／<u>赤=お酒</u>。カロリー等の数値は「日次カロリー収支」タブに集約。</div>`;
   for (const day of recList) {
-    const type = classify(day), tgt = target(day), diff2 = day.kcal - tgt;
-    let tc, tt;
-    if(day.kcal<=tgt){tc='tag-good';tt=`-${Math.abs(diff2)}`;}
-    else if(day.kcal<=tgt+200){tc='tag-warn';tt=`+${diff2}`;}
-    else{tc='tag-bad';tt=`+${diff2} 超過`;}
-    const dc = type==='over'?'day-over':type==='free'?'day-free':'day-strict';
-    const ps = proteinStatus(day);
-    const td = trainDeficit(day);
-    html += `<div class="day-card ${dc}">
-      <div class="day-header"><span class="day-date">${fmtDate(day.date)} ${day.hasDrink?'🍺':''}${day.hasTrain?'🏋️':''}</span><span class="tag ${tc}">${tt} kcal</span></div>
-      <div class="day-macros"><span class="day-cal" style="color:${type==='over'?'#c62828':type==='free'?'#e65100':'#1565c0'};">${day.kcal.toLocaleString()} kcal</span>
-        ${day.protein?`<span>P:${Math.round(day.protein)}g</span>`:''}${day.fat?`<span>F:${Math.round(day.fat)}g</span>`:''}${day.carb?`<span>C:${Math.round(day.carb)}g</span>`:''}</div>`;
-    if (day.protein != null) {
-      const pPct = Math.min(Math.round(day.protein / PROTEIN_TARGET * 100), 100);
-      const minPct = Math.round(PROTEIN_MIN / PROTEIN_TARGET * 100); // 100/140 ≈ 71%
-      const barCol = day.protein >= PROTEIN_TARGET ? '#43a047' : day.protein >= PROTEIN_MIN ? '#ffb300' : '#e53935';
-      const statusText = day.protein >= PROTEIN_TARGET ? '目標達成 ◎' : day.protein >= PROTEIN_MIN ? `最低OK（あと${Math.round(PROTEIN_TARGET-day.protein)}gで目標）` : `⚠ 最低${PROTEIN_MIN}g未満`;
-      const statusTag = day.protein >= PROTEIN_TARGET ? 'tag-good' : day.protein >= PROTEIN_MIN ? 'tag-warn' : 'tag-bad';
-      html += `<div class="protein-bar-wrap">
-        <div class="protein-bar-bg">
-          <div class="protein-bar-fill" style="width:${pPct}%;background:${barCol};"></div>
-          <div class="protein-bar-marker" style="left:${minPct}%;background:#e65100;" title="最低${PROTEIN_MIN}g"><div class="protein-bar-marker-label" style="color:#e65100;">${PROTEIN_MIN}</div></div>
-          <div class="protein-bar-marker" style="left:100%;background:#2d6a4f;" title="目標${PROTEIN_TARGET}g"><div class="protein-bar-marker-label" style="color:#2d6a4f;">${PROTEIN_TARGET}</div></div>
-        </div>
-        <div class="protein-bar-labels"><span><strong>${Math.round(day.protein)}g</strong></span><span class="tag ${statusTag}" style="font-size:0.65em;">${statusText}</span></div>
-      </div>`;
+    const cls = day.hasTrain ? ' is-train' : day.hasDrink ? ' is-drink' : '';
+    const items = (day.menu && Array.isArray(day.menu.items)) ? day.menu.items : [];
+    let body;
+    if (items.length) {
+      body = `<div class="md-foods">${items.map(it => {
+        const fc = foodClass(it.name);
+        const kc = it.kcal ? `<i>${it.kcal}</i>` : '';
+        return `<span class="md-food${fc ? ' ' + fc : ''}">${esc(it.name)}${kc}</span>`;
+      }).join('')}</div>`;
+    } else if (day.menu && day.menu.raw) {
+      body = `<div class="md-rawfoods">${esc(day.menu.raw)}</div>`;
+    } else {
+      body = `<div class="md-nofood">献立の記録はまだありません</div>`;
     }
-    if (td) html += `<div class="day-alerts"><span class="tag tag-info">実質${td.effectiveCal.toLocaleString()}kcal（-${td.totalExtra}消費）→ 赤字-${td.deficit}kcal</span></div>`;
-    if (classify(day)==='strict' && day.protein != null && day.protein < PROTEIN_MIN) html += `<div class="day-alerts"><span class="tag tag-bad">⚠ 節制日P${PROTEIN_MIN}g未満 → 1,600kcalまで増やしてP確保を</span></div>`;
-    if (day.kcal < BMR_FLOOR) html += `<div class="day-alerts"><span class="tag tag-bad">⚠ 基礎代謝${BMR_FLOOR.toLocaleString()}未満（${(BMR_FLOOR-day.kcal).toLocaleString()}kcal下）→ 筋肉リスク。ここは死守ライン</span></div>`;
-    html += `${day.memo?`<div class="day-memo">${day.memo}</div>`:''}</div>`;
+    html += `<div class="menu-day${cls}">
+      <div class="md-head">
+        <span class="md-date">${fmtDate(day.date)}</span>
+        <span class="md-tags">${day.hasTrain ? '<span class="md-tag tr">🏋️ トレ</span>' : ''}${day.hasDrink ? '<span class="md-tag dk">🍺 酒</span>' : ''}</span>
+        <span class="md-cal"><b>${day.kcal.toLocaleString()}</b> kcal${day.protein ? ` · P${Math.round(day.protein)}` : ''}</span>
+      </div>
+      ${body}
+      ${day.memo ? `<div class="md-memo">💬 ${esc(day.memo)}</div>` : ''}
+    </div>`;
   }
-  html += `</div>`; // close 日別レコード card
+  html += `</div>`; // close 食事メニュー card
   } // close 月フィルタ block
   } // end else (meals present)
   html += `</div>`; // end tab-tracker
