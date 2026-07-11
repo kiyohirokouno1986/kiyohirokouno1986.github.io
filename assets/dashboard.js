@@ -2951,6 +2951,14 @@ function render(data, calMap) {
     <div class="rule-item" style="border-left:3px solid #6c5ce7;padding-left:8px;"><strong>就寝前プロテイン15g（S22・GLP-1オフ対応）：</strong>夜中に空腹で起きるなら就寝前に15gを飲んで寝る（飲むのはOK・睡眠の質を最優先）。1,500kcalは維持し、第二段階で夜の一杯分を確保。起きてしまったら炭酸水/水で空腹をごまかす。</div>
     <div class="rule-item"><strong>達成パターン：</strong>プロテイン2回（30g×2=60g）＋食事2回（40g×2=80g）= ${PROTEIN_TARGET}g</div></div>`;
 
+  html += `<div class="rule-card" style="margin-top:14px;border-left-color:#e65100;"><h3 style="color:#e65100;">🍚 カロリー運用の3段階＋食材Tips（S25・先生）</h3>
+    <div class="rule-item" style="border-left:3px solid #2d6a4f;padding-left:8px;"><strong style="color:#2d6a4f;">① トレなし日（在宅・不動）＝貯金：</strong>無理にカロリーを足さず「貯金」を作る日。会食に備えてアンダーを稼ぐ。※毎日の基礎代謝割れはNGだが、本当に動かない日に限り一時的に割って大きめの赤字を作るのはOK（体調と相談）。</div>
+    <div class="rule-item" style="border-left:3px solid #1565c0;padding-left:8px;"><strong style="color:#1565c0;">② トレーニング日＝${STRICT.toLocaleString()}マスト：</strong>${STRICT.toLocaleString()}kcalを下回らない（パフォーマンス・回復のため）。TDEEに対し自然にアンダー＝ここで着実に赤字を作る。</div>
+    <div class="rule-item" style="border-left:3px solid #e65100;padding-left:8px;"><strong style="color:#e65100;">③ 会食・外出日（週1-2回）＝+300可：</strong>${FREE.toLocaleString()}目安（上限${FREE_HARD_CAP.toLocaleString()}）まではOK。貯金があるので1日くらいの超過は問題なし。</div>
+    <div class="rule-item"><strong>炭水化物はトレのパフォーマンス用：</strong>トレ前後に集中し、デスクワーク日は控えめでOK。トレ前におにぎり/お萩を入れるとスクワットの踏ん張りが段違い。<strong>ローカーボ×高タンパクが理想形</strong>。</div>
+    <div class="rule-item"><strong>タンパク質は常に体重比1.6倍（約150g）：</strong>減量期の筋肉維持に最重要。ここを死守すれば「筋分解せず脂肪だけ落ちる」（先生）。</div>
+    <div class="rule-item"><strong>食材の置き換えで“貯金”：</strong>鶏もも→鶏胸肉（皮の分カロリー減・満足感は同等）。胸は200gパックで量の微調整がしやすい。コンビニのピーマン肉詰め／味噌汁／茶碗蒸しでローカーボにタンパク質を足すのも◯。</div></div>`;
+
   html += `<div class="train-card" style="margin-top:14px;"><h3>🏋️ トレーニング日のカロリールール</h3>
     <div class="train-grid"><div class="train-box"><div class="tv">${TRAIN_BURN}</div><div class="tl">直接消費kcal</div></div><div class="train-box"><div class="tv">×${AFTERBURN_MULT}</div><div class="tl">アフターバーン倍率</div></div><div class="train-box"><div class="tv">${Math.round(TDEE*AFTERBURN_MULT-TDEE)+TRAIN_BURN}</div><div class="tl">追加消費合計kcal</div></div></div>
     <div style="text-align:center;margin-top:10px;font-size:0.82em;opacity:0.9;">トレーニング日でもカロリーは増やさない。「消費が増えるラッキー」でそのまま削る。</div></div>`;
