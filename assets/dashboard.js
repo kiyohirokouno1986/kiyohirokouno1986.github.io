@@ -2942,22 +2942,23 @@ function render(data, calMap) {
     <div class="pr-grid"><div class="pr-box"><div class="pv">${STRICT.toLocaleString()}</div><div class="pl">節制日 × 週${STRICT_DAYS}日</div></div><div class="pr-box"><div class="pv">${FREE.toLocaleString()}</div><div class="pl">飲食日 × 週${FREE_DAYS_WEEK}日</div></div></div>
     <div style="text-align:center;margin-top:10px;font-size:0.82em;opacity:0.9;">週平均 ${DAILY_PLAN_AVG} kcal ／ 赤字 -${effDeficitPlan} kcal/日 ／ 月 -${effPlanMonthly}kg脂肪</div></div>`;
 
-  html += `<div class="rule-card" style="margin-top:14px;"><h3>🥩 タンパク質の優先ルール（S14確定）</h3>
-    <div class="rule-item"><strong>原則：</strong>カロリー第一 ＞ PFCバランス</div>
-    <div class="rule-item"><strong>節制日（1,500kcal）：</strong>P ${PROTEIN_MIN}g未満 → 1,600kcalまでOK。${PROTEIN_TARGET}gが理想。</div>
-    <div class="rule-item" style="border-left:3px solid #c62828;padding-left:8px;"><strong style="color:#c62828;">下限＝基礎代謝${BMR_FLOOR.toLocaleString()}kcal（S23・先生）：</strong>1,500の日はOKだが、これを下回る摂取はNG。基礎代謝割れは筋肉が落ちるリスク。削りたい日でも${BMR_FLOOR.toLocaleString()}は死守。</div>
+  html += `<div class="rule-card" style="margin-top:14px;"><h3>🥩 タンパク質の優先ルール（S14確定・S25更新）</h3>
+    <div class="rule-item"><strong>原則：</strong>カロリー第一 ＞ PFCバランス。ただし<strong>タンパク質だけは常に確保</strong>（筋肉の材料）。</div>
+    <div class="rule-item" style="border-left:3px solid #2d6a4f;padding-left:8px;"><strong style="color:#2d6a4f;">減量期の最重要ライン（S25・先生）：</strong>タンパク質は<strong>体重比1.6倍以上を死守</strong>。ここさえ守れば「筋分解せず脂肪だけ落ちる」。目標${PROTEIN_TARGET}g／実測150gまで取れていれば理想的。</div>
+    <div class="rule-item"><strong>節制日（${STRICT.toLocaleString()}kcal）：</strong>P ${PROTEIN_MIN}g未満のときだけ1,600kcalまでOK。${PROTEIN_TARGET}gが目標。</div>
     <div class="rule-item"><strong>飲食日（${FREE.toLocaleString()}kcal）：</strong>P不足でも追加プロテイン不要。炭水化物・脂質がカバー。</div>
     <div class="rule-item"><strong>朝プロテイン30g：</strong>寝起きは栄養カラカラで吸収率MAX。ここで稼ぐ。</div>
     <div class="rule-item" style="border-left:3px solid #6c5ce7;padding-left:8px;"><strong>就寝前プロテイン15g（S22・GLP-1オフ対応）：</strong>夜中に空腹で起きるなら就寝前に15gを飲んで寝る（飲むのはOK・睡眠の質を最優先）。1,500kcalは維持し、第二段階で夜の一杯分を確保。起きてしまったら炭酸水/水で空腹をごまかす。</div>
-    <div class="rule-item"><strong>達成パターン：</strong>プロテイン2回（30g×2=60g）＋食事2回（40g×2=80g）= ${PROTEIN_TARGET}g</div></div>`;
+    <div class="rule-item"><strong>達成パターン：</strong>プロテイン2回（30g×2=60g）＋食事2回（40g×2=80g）= ${PROTEIN_TARGET}g（＋α で150g）</div>
+    <div class="rule-item" style="font-size:0.9em;opacity:0.82;">※ カロリーの下限（基礎代謝${BMR_FLOOR.toLocaleString()}kcal）と日別のカロリー運用は下の「🍚 カロリー運用の3段階」に集約。</div></div>`;
 
   html += `<div class="rule-card" style="margin-top:14px;border-left-color:#e65100;"><h3 style="color:#e65100;">🍚 カロリー運用の3段階＋食材Tips（S25・先生）</h3>
-    <div class="rule-item" style="border-left:3px solid #2d6a4f;padding-left:8px;"><strong style="color:#2d6a4f;">① トレなし日（在宅・不動）＝貯金：</strong>無理にカロリーを足さず「貯金」を作る日。会食に備えてアンダーを稼ぐ。※毎日の基礎代謝割れはNGだが、本当に動かない日に限り一時的に割って大きめの赤字を作るのはOK（体調と相談）。</div>
+    <div class="rule-item" style="border-left:3px solid #2d6a4f;padding-left:8px;"><strong style="color:#2d6a4f;">① トレなし日（在宅・不動）＝貯金：</strong>無理にカロリーを足さず「貯金」を作る日。会食に備えてアンダーを稼ぐ。</div>
     <div class="rule-item" style="border-left:3px solid #1565c0;padding-left:8px;"><strong style="color:#1565c0;">② トレーニング日＝${STRICT.toLocaleString()}マスト：</strong>${STRICT.toLocaleString()}kcalを下回らない（パフォーマンス・回復のため）。TDEEに対し自然にアンダー＝ここで着実に赤字を作る。</div>
     <div class="rule-item" style="border-left:3px solid #e65100;padding-left:8px;"><strong style="color:#e65100;">③ 会食・外出日（週1-2回）＝+300可：</strong>${FREE.toLocaleString()}目安（上限${FREE_HARD_CAP.toLocaleString()}）まではOK。貯金があるので1日くらいの超過は問題なし。</div>
+    <div class="rule-item" style="border-left:3px solid #c62828;padding-left:8px;"><strong style="color:#c62828;">下限＝基礎代謝${BMR_FLOOR.toLocaleString()}kcal（S23→S25で更新）：</strong>${BMR_FLOOR.toLocaleString()}kcalを日常的に下回るのはNG（毎日割ると筋肉が落ちるリスク）。トレ日は最低${STRICT.toLocaleString()}を確保。ただし<strong>本当に動かない日に限り</strong>、たまに一時的に${BMR_FLOOR.toLocaleString()}を割って大きめの赤字を作るのは可（体調と相談）。</div>
     <div class="rule-item"><strong>炭水化物はトレのパフォーマンス用：</strong>トレ前後に集中し、デスクワーク日は控えめでOK。トレ前におにぎり/お萩を入れるとスクワットの踏ん張りが段違い。<strong>ローカーボ×高タンパクが理想形</strong>。</div>
-    <div class="rule-item"><strong>タンパク質は常に体重比1.6倍（約150g）：</strong>減量期の筋肉維持に最重要。ここを死守すれば「筋分解せず脂肪だけ落ちる」（先生）。</div>
-    <div class="rule-item"><strong>食材の置き換えで“貯金”：</strong>鶏もも→鶏胸肉（皮の分カロリー減・満足感は同等）。胸は200gパックで量の微調整がしやすい。コンビニのピーマン肉詰め／味噌汁／茶碗蒸しでローカーボにタンパク質を足すのも◯。</div></div>`;
+    <div class="rule-item"><strong>食材の置き換えで“貯金”：</strong>鶏もも→鶏胸肉（皮の分カロリー減・満足感は同等）。胸は200gパックで量の微調整がしやすい。コンビニのピーマン肉詰め／味噌汁／茶碗蒸しでローカーボにタンパク質を足すのも◯。<span style="opacity:0.82;">（タンパク質量は上の🥩優先ルール参照）</span></div></div>`;
 
   html += `<div class="train-card" style="margin-top:14px;"><h3>🏋️ トレーニング日のカロリールール</h3>
     <div class="train-grid"><div class="train-box"><div class="tv">${TRAIN_BURN}</div><div class="tl">直接消費kcal</div></div><div class="train-box"><div class="tv">×${AFTERBURN_MULT}</div><div class="tl">アフターバーン倍率</div></div><div class="train-box"><div class="tv">${Math.round(TDEE*AFTERBURN_MULT-TDEE)+TRAIN_BURN}</div><div class="tl">追加消費合計kcal</div></div></div>
