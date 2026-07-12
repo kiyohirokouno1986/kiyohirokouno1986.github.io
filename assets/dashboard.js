@@ -8,7 +8,7 @@ const DAILY_DEFICIT_PLAN = TDEE - DAILY_PLAN_AVG;
 const PROTEIN_TARGET = 140, PROTEIN_MIN = 100;
 const TRAIN_BURN = 200, AFTERBURN_MULT = 1.15;
 const TRAIN_TDEE = Math.round(TDEE * AFTERBURN_MULT);
-const TGT_BF = 15.0, CUR_BF = 25.7, CUR_FAT = 18.4, LEAN = 53.2;
+const TGT_BF = 10.0, CUR_BF = 25.7, CUR_FAT = 18.4, LEAN = 53.2; // 目標体脂肪率＝10%（腹筋が割れるライン）
 const TGT_FAT = +(LEAN * TGT_BF / (100 - TGT_BF)).toFixed(1);
 const FAT_TO_LOSE = +(CUR_FAT - TGT_FAT).toFixed(1);
 const PLAN_MONTHLY = +(DAILY_DEFICIT_PLAN * 30 / 7200).toFixed(1);
@@ -1585,7 +1585,7 @@ function tdeeCardHTML(tdeeInfo, effTDEE) {
           <div class="tdee-s">${m.confident?`摂取 ${m.meanIntake.toLocaleString()}／体脂肪 ${m.slopeKgPerMonth>0?'+':''}${m.slopeKgPerMonth}kg/月／${m.spanDays}日`:'データ不足（食事14日・体組成21日以上で算出）'}</div>
         </div>
       </div>
-      ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ15%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
+      ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ${TGT_BF}%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
       <div class="tdee-use">シミュレーションに使用中　<b>${effTDEE.toLocaleString()} kcal/日</b><span>（${modeLabel}）</span></div>
       <div class="dm-period-filter tdee-modes" data-tdee-mode>
         <button data-mode="measured" class="${prof.tdeeMode==='measured'?'active':''}">実測</button>
@@ -1920,7 +1920,7 @@ function render(data, calMap) {
   let simFat = liveFat;
   let rmTotalLost = 0;
   let rmY = nowDate.getFullYear(), rmM = nowDate.getMonth() + 1;
-  while (simFat > liveTgtFat + 0.3 && roadmap.length < 12) {
+  while (simFat > liveTgtFat + 0.3 && roadmap.length < 18) {
     const ym = `${rmY}-${String(rmM).padStart(2,'0')}`;
     const dim = new Date(rmY, rmM, 0).getDate();
     const adjTDEE = effTDEE - Math.round(rmTotalLost * TDEE_DROP_PER_KG);
@@ -2020,7 +2020,7 @@ function render(data, calMap) {
   // === TDEE推定 ＆ シミュレーション基準 ===
   cTdee += tdeeCardHTML(tdeeInfo, effTDEE);
 
-  // === 15% Roadmap - Current Month Progress (TOP) ===
+  // === 10% Roadmap - Current Month Progress (TOP) ===
   if (curRM) {
     const progressToGoal = Math.min(100, Math.max(0, Math.round((totalDeficit / 7200) / liveFatToLose * 100)));
     const dElapsed = curRM.calDays;
@@ -2035,7 +2035,7 @@ function render(data, calMap) {
     const fatProjThisMonth = +(projEnd / 7200).toFixed(2);
 
     cProgress += `<div class="roadmap-card">
-      <h2>🎯 15%ロードマップ ― 今月の進捗</h2>
+      <h2>🎯 ${TGT_BF}%ロードマップ ― 今月の進捗</h2>
       <div style="text-align:center;margin-bottom:14px;padding:10px 0;background:rgba(255,255,255,0.06);border-radius:10px;">
         <div style="font-size:0.72em;opacity:0.6;">今月の実績ベース脂肪減</div>
         <div style="font-size:2em;font-weight:800;color:${okColor(fatLostThisMonth)};line-height:1.1;">${sgnKg(fatLostThisMonth)}</div>
@@ -3135,7 +3135,7 @@ function render(data, calMap) {
     <div class="rule-item" style="border-left:3px solid #2d6a4f;padding-left:8px;"><strong style="color:#2d6a4f;">何もない休日に使う ◯：</strong>予定のない日ほど「つい食べちゃう」を抑えられる。100食べるところを60に。→ ここで赤字を稼ぐのが最も費用対効果が高い。</div>
     <div class="rule-item"><strong>要点：</strong>GLP-1は「会食のブレーキ」ではなく「平常日の食べ過ぎ防止」に回す。会食日は${FREE.toLocaleString()}上限＋3杯ルールで管理し、GLPは休日に集中。</div></div>`;
 
-  html += `<div class="card" style="margin-top:14px;"><h2>体脂肪率シミュレーション → 15%</h2><canvas id="simChart"></canvas></div>`;
+  html += `<div class="card" style="margin-top:14px;"><h2>体脂肪率シミュレーション → ${TGT_BF}%（腹筋が割れるライン）</h2><canvas id="simChart"></canvas></div>`;
 
   html += `<div class="card"><h2>Plan C 月別推移予測</h2>
     <div style="font-size:0.74em;color:#888;margin-bottom:6px;">日次計測の直近7日平均（${bc2.date||'—'}時点）の体脂肪量 ${liveFat}kg・除脂肪 ${liveLBM}kg を起点に、TDEE ${effTDEE}（${tdeeInfo.source==='measured'?'実測':tdeeInfo.source==='manual'?'手動':'予測式'}）×Plan C平均${DAILY_PLAN_AVG}kcalで試算。6月は実測アンカー、上の月別ロードマップと同一エンジン。</div>
@@ -3147,11 +3147,13 @@ function render(data, calMap) {
   }
   html += `</tbody></table><p class="note">TDEE調整モデル（体重1kg減→TDEE約8kcal減）。除脂肪量（筋肉）維持前提。トレーニング日のアフターバーンは含めない保守的試算。</p></div>`;
 
+  const monthsA = liveFatToLose > 0 ? Math.round(liveFatToLose / 1.2) : 0; // Aプラン(-1.2kg/月)で目標到達までの月数
+  const monthsB = liveFatToLose > 0 ? Math.round(liveFatToLose / 3.0) : 0; // Bプラン(-3.0kg/月)
   html += `<div class="card"><h2>3プラン比較</h2><table class="cmp-table"><thead><tr><th></th><th style="color:#2d6a4f;">A<br>1,930</th><th style="color:#1565c0;">B<br>1,500</th><th style="color:#e65100;">C<br>変動制</th></tr></thead><tbody>
     <tr><td>日平均</td><td>1,930</td><td>1,500</td><td>${DAILY_PLAN_AVG}</td></tr>
     <tr><td>日平均赤字</td><td>-300</td><td>-730</td><td>-${effDeficitPlan}</td></tr>
     <tr><td>月間脂肪減</td><td>-1.2kg</td><td>-3.0kg</td><td>-${effPlanMonthly}kg</td></tr>
-    <tr><td>15%到達</td><td>約9ヶ月</td><td>約4ヶ月</td><td>約${effPlanMonths}ヶ月</td></tr>
+    <tr><td>${TGT_BF}%到達</td><td>約${monthsA}ヶ月</td><td>約${monthsB}ヶ月</td><td>約${effPlanMonths}ヶ月</td></tr>
     <tr><td>筋肉維持</td><td><span class="tag tag-good">◎</span></td><td><span class="tag tag-warn">△</span></td><td><span class="tag tag-good">○</span></td></tr>
     <tr><td>飲み会対応</td><td><span class="tag tag-good">◎</span></td><td><span class="tag tag-bad">✕</span></td><td><span class="tag tag-good">◎</span></td></tr>
     <tr><td>続けやすさ</td><td><span class="tag tag-good">◎</span></td><td><span class="tag tag-warn">△</span></td><td><span class="tag tag-good">○</span></td></tr>
@@ -3409,7 +3411,7 @@ function render(data, calMap) {
         {label:'Plan A（1,930均一）',data:pA,borderColor:'#2d6a4f',fill:false,tension:0.3,pointRadius:3,borderWidth:2},
         {label:'Plan B（1,500均一）',data:pB,borderColor:'#1565c0',fill:false,tension:0.3,pointRadius:3,borderWidth:2},
         {label:`Plan C（${STRICT.toLocaleString()}/${FREE.toLocaleString()}変動）`,data:pC,borderColor:'#e65100',backgroundColor:'rgba(230,81,0,0.06)',fill:true,tension:0.3,pointRadius:4,borderWidth:3},
-        {label:'目標 15%',data:Array(mo.length).fill(15),borderColor:'#e63946',borderDash:[6,4],pointRadius:0,borderWidth:1.5,fill:false},
+        {label:`目標 ${TGT_BF}%`,data:Array(mo.length).fill(TGT_BF),borderColor:'#e63946',borderDash:[6,4],pointRadius:0,borderWidth:1.5,fill:false},
       ]},
       options:{responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{font:{size:9},usePointStyle:true,padding:8}}},scales:{y:{min:12,max:27,ticks:{font:{size:9}}},x:{ticks:{font:{size:9}}}}}
     });
