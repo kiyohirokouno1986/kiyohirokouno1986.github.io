@@ -3090,9 +3090,9 @@
   {
     "date": "2026-07-12",
     "kcal": 1417,
-    "protein": null,
-    "fat": null,
-    "carb": null,
+    "protein": 149.2,
+    "fat": 42,
+    "carb": 82.5,
     "memo": "",
     "hasDrink": true,
     "hasTrain": true,
