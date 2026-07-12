@@ -18,6 +18,7 @@ const FREE_HARD_CAP = 2500; // 飲食日の絶対上限（教訓: 2026/06/11 Sla
 const ALCOHOL_CAP = 3; // アルコール杯数上限
 const BMR_FLOOR = 1567; // 基礎代謝の下限（InBody実測ベース／篠澤先生）。これを割る摂取は筋肉リスクで警告
 const KPI_MONTHLY_DEFICIT = 10000; // 先生KPI：月間の目標カロリー赤字（＝脂肪換算 約-1.5kg）
+const WEEKLY_DEFICIT_TARGET = 3000; // 週の目標アンダー（赤字）。より強いアンダー狙い＝月-1.8kg相当。ここを変えると予算・週末の目安摂取が連動
 
 // ===== Body Composition Storage =====
 const BC_KEY = 'calGuide_bodyComp';
@@ -1644,6 +1645,167 @@ function attachMealHandlers() {
 }
 
 // === Render ===
+// ===== 週次アンダー ＆ 週末の目安摂取カード（カレンダー週：月〜日） =====
+// 週の摂取予算（＝7×TDEE−目標アンダー）から平日実績を差し引き、残りを未来日で割って
+// 「土日はいくらに収めればいいか」を逆算。会食が入る前提の配分例も提示する。
+function weeklyDeficitCardHTML(meals, effTDEE) {
+  const DOWJ = '日月火水木金土';
+  const PLANNER_FLOOR = 1000; // 会食配分でもう片方を絞る際の実用下限
+  const wkTDEE = Math.round(effTDEE || 2000);
+  const target = WEEKLY_DEFICIT_TARGET;
+  const budget = wkTDEE * 7 - target; // 週の摂取予算（この範囲に収めれば目標アンダー達成）
+
+  const today = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const todayStr = iso(today);
+  const monOffset = (today.getDay() + 6) % 7; // 月曜=0
+  const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - monOffset);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const weekDates = [];
+  for (let i = 0; i < 7; i++) { const d = new Date(monday); d.setDate(monday.getDate()+i); weekDates.push(iso(d)); }
+
+  const byDate = {}; for (const m of meals) byDate[m.date] = m;
+
+  let usedIntake = 0, doneCount = 0, weekDef = 0;
+  const cells = weekDates.map((ds, i) => {
+    const m = byDate[ds];
+    const dt = new Date(ds + 'T12:00:00');
+    const isToday = ds === todayStr, isFuture = ds > todayStr, isWeekend = i >= 5;
+    let state, intake = null, def = null;
+    if (m) { state = 'done'; intake = m.kcal; def = wkTDEE - m.kcal; usedIntake += intake; doneCount++; weekDef += def; }
+    else if (isFuture || isToday) state = 'remaining';
+    else state = 'missed'; // 過去の未記録日
+    return { ds, i, isWeekend, isToday, state, intake, def, hasTrain: !!(m && m.hasTrain), dow: DOWJ[dt.getDay()], dom: dt.getDate() };
+  });
+
+  const remainingCells = cells.filter(c => c.state === 'remaining');
+  const remainingDays = remainingCells.length;
+  const missedCells = cells.filter(c => c.state === 'missed');
+  const neededDef = target - weekDef; // 目標到達に残りで作るべき赤字
+  // 残り各日の目安摂取＝TDEE−(必要赤字÷残り日数)。未記録の過去日は赤字ゼロ扱い（保守的）。
+  // ※未記録日が無ければ「(予算−平日実績)÷残り日数」と一致する。
+  const allowance = remainingDays > 0 ? Math.round(wkTDEE - neededDef / remainingDays) : null;
+  const remainAllowTotal = allowance != null ? allowance * remainingDays : 0;
+  const infeasible = allowance != null && allowance < 0; // 食べられる量がマイナス＝今週は達成困難
+  const lowAllowance = allowance != null && allowance >= 0 && allowance < BMR_FLOOR;
+
+  const paceTarget = Math.round(target * doneCount / 7);
+  const paceAhead = Math.round(weekDef - paceTarget);
+  const avgDef = doneCount ? weekDef / doneCount : 0;
+  const projDef = Math.round(avgDef * 7);
+  const projPct = target ? Math.round(projDef / target * 100) : 0;
+  const progPct = Math.max(0, Math.min(100, Math.round(weekDef / target * 100)));
+  const pacePct = Math.round(doneCount / 7 * 100);
+
+  const fmtDef = n => (n >= 0 ? '−' : '+') + Math.abs(Math.round(n)).toLocaleString(); // 赤字=マイナス表記
+  const rangeStr = `${monday.getMonth()+1}/${monday.getDate()}（月）〜 ${sunday.getMonth()+1}/${sunday.getDate()}（日）`;
+
+  // --- HERO: 週末（残り日）の目安摂取 ---
+  let hero;
+  if (remainingDays === 0) {
+    hero = `<div class="wkd-hero"><div class="wkd-hero-cap">✓ 今週の着地</div>
+      <div class="wkd-single"><div class="big">${fmtDef(weekDef)}<span class="le" style="margin-left:3px;">kcal</span></div>
+      <div class="u">週目標 ${fmtDef(target)}／達成 ${projPct}%・脂肪 −${(weekDef/7200).toFixed(2)}kg</div></div></div>`;
+  } else if (infeasible) {
+    hero = `<div class="wkd-hero warn"><div class="wkd-hero-cap">⚠ 今週は達成が厳しい</div>
+      <div class="wkd-hero-sub">残り${remainingDays}日を最小限に抑えても <b>${fmtDef(target)}</b> に届きにくい状況。基礎代謝(${BMR_FLOOR.toLocaleString()})を目安に抑えつつ、不足分は翌週 or 平日で作りましょう。</div></div>`;
+  } else {
+    const cap = `<div class="wkd-hero-cap">◎ ${remainingDays <= 2 ? '週末' : '残り'}の目安摂取</div>
+      <div class="wkd-hero-sub">この範囲に収めれば <b>週${fmtDef(target)}kcal（脂肪 −${(target/7200).toFixed(2)}kg）</b> 達成${lowAllowance ? '　<span style="color:#ff8a80;">※基礎代謝を下回る目安。無理は禁物</span>' : ''}</div>`;
+    let daysHtml;
+    if (remainingDays <= 2) {
+      daysHtml = `<div class="wkd-wdays" style="grid-template-columns:repeat(${remainingDays},1fr);">` +
+        remainingCells.map(c => `<div class="wkd-wk"><div class="d">${c.dow} ${c.dom}日</div>
+          <div class="big"><span class="le">≤</span><span class="wkd-num">${allowance.toLocaleString()}</span></div>
+          <div class="u">kcal</div></div>`).join('') + `</div>`;
+    } else {
+      daysHtml = `<div class="wkd-single"><div class="big"><span class="le">残り${remainingDays}日 各 ≤ </span>${allowance.toLocaleString()}</div><div class="u">kcal/日</div></div>`;
+    }
+    hero = `<div class="wkd-hero${lowAllowance ? ' warn' : ''}">${cap}${daysHtml}</div>`;
+  }
+
+  // --- 予算バー（消化 / 残り目安 / 未記録 の3セグメント）---
+  const pctOf = v => budget > 0 ? Math.max(0, Math.min(100, Math.round(v / budget * 100))) : 0;
+  const missedBudget = Math.max(0, budget - usedIntake - Math.max(0, remainAllowTotal));
+  const usedPct = pctOf(usedIntake);
+  const remainPct = pctOf(Math.max(0, remainAllowTotal));
+  const missedPct = pctOf(missedBudget);
+  let segs = `<div class="wkd-bused" style="width:${usedPct}%">${usedIntake > 0 ? '消化 '+usedIntake.toLocaleString() : ''}</div>`;
+  if (infeasible) {
+    segs += `<div class="wkd-bleft over" style="width:${Math.max(0,100-usedPct)}%">予算超過</div>`;
+  } else {
+    segs += `<div class="wkd-bleft" style="width:${remainPct}%">${remainAllowTotal > 0 ? '残り '+remainAllowTotal.toLocaleString() : ''}</div>`;
+    if (missedPct > 0) segs += `<div class="wkd-bmiss" style="width:${missedPct}%">未記録</div>`;
+  }
+  const budgetBar = `<div class="wkd-budget">
+    <div class="wkd-blab"><span>週の摂取予算</span><span class="wkd-num">${budget.toLocaleString()} kcal</span></div>
+    <div class="wkd-bbar">${segs}</div>
+    <div class="wkd-bcap"><span>記録済み ${doneCount}日</span><span>${remainingDays > 0 && !infeasible ? '→ 残り'+remainingDays+'日 各 ≤'+allowance.toLocaleString()+'/日' : '→ 週末で調整'}</span></div>
+    ${missedCells.length > 0 ? `<div class="wkd-plan-note" style="margin-top:6px;">※ ${missedCells.map(c=>c.dow).join('・')}曜は未記録。この分を除いて残り日の目安を算出（記録すると再計算）。</div>` : ''}
+  </div>`;
+
+  // --- 週末プランナー（会食対応：合計が残り予算に合えば達成） ---
+  let planner = '';
+  if (remainingDays === 2 && !infeasible && allowance != null) {
+    const c0 = remainingCells[0], c1 = remainingCells[1];
+    const hi = Math.min(FREE_HARD_CAP, remainAllowTotal - PLANNER_FLOOR);
+    const lo = remainAllowTotal - hi;
+    let rows = `<div class="wkd-prow"><div class="nm">バランス型</div>
+      <div class="cl"><span class="k">${c0.dow}</span>${allowance.toLocaleString()}</div>
+      <div class="cl"><span class="k">${c1.dow}</span>${allowance.toLocaleString()}</div><div class="cl">◎</div></div>`;
+    if (hi >= allowance + 150 && lo >= PLANNER_FLOOR) {
+      rows += `<div class="wkd-prow"><div class="nm">${c0.dow}に会食 🍶</div>
+        <div class="cl hot"><span class="k">${c0.dow}</span>${hi.toLocaleString()}</div>
+        <div class="cl"><span class="k">${c1.dow}</span>${lo.toLocaleString()}</div><div class="cl">◎</div></div>
+        <div class="wkd-prow"><div class="nm">${c1.dow}に会食 🍶</div>
+        <div class="cl"><span class="k">${c0.dow}</span>${lo.toLocaleString()}</div>
+        <div class="cl hot"><span class="k">${c1.dow}</span>${hi.toLocaleString()}</div><div class="cl">◎</div></div>`;
+    }
+    planner = `<div class="wkd-plan"><div class="wkd-plan-t">🔀 ${c0.dow}${c1.dow}の使い方（合計 ${remainAllowTotal.toLocaleString()}kcal ならどれでも達成）</div>${rows}
+      <div class="wkd-plan-note">※ 平日に会食が入って予算を多く使うほど、残りが減って上の目安も自動で下がります。</div></div>`;
+  }
+
+  // --- アンダー積み上げ（サブ） ---
+  const chipCls = doneCount === 0 ? 'late' : (paceAhead >= 0 ? 'ok' : 'late');
+  const chipTxt = doneCount === 0 ? '記録待ち' : (paceAhead >= 0 ? `▼ 順調 +${Math.abs(paceAhead).toLocaleString()}` : `△ 遅れ −${Math.abs(paceAhead).toLocaleString()}`);
+  const defStrip = `<div class="wkd-defrow"><div class="g">
+    <div class="wkd-deftop"><span>アンダー積み上げ</span><span class="v wkd-num">${fmtDef(weekDef)} / ${fmtDef(target)}</span></div>
+    <div class="wkd-mbar"><div class="wkd-mfill" style="width:${progPct}%"></div><div class="wkd-mpace" style="left:${pacePct}%"></div></div>
+    </div><span class="wkd-chip ${chipCls}">${chipTxt}</span></div>`;
+
+  // --- 日別バー（下向き＝アンダー） ---
+  const tgtDef = (allowance != null && !infeasible) ? Math.max(0, wkTDEE - allowance) : 0; // 目安摂取で作る赤字（超過ゼロはフラット）
+  const scaleMax = Math.max(700, ...cells.map(c => Math.abs(c.def || 0)), tgtDef);
+  const barH = v => Math.max(4, Math.min(84, Math.round(Math.abs(v) / scaleMax * 80)));
+  const days7 = cells.map(c => {
+    let bcls, h, intakeHtml;
+    if (c.state === 'done') {
+      bcls = c.isToday ? 'today' : 'real'; h = barH(c.def);
+      intakeHtml = `<div class="wkd-intake wkd-num">${c.intake.toLocaleString()}</div>`;
+    } else if (c.state === 'remaining') {
+      bcls = 'ghost'; h = barH(tgtDef);
+      intakeHtml = `<div class="wkd-intake ghost wkd-num">${(allowance != null && !infeasible) ? '≤'+allowance.toLocaleString() : '—'}</div>`;
+    } else {
+      bcls = 'miss'; h = 4;
+      intakeHtml = `<div class="wkd-intake miss">—</div>`;
+    }
+    return `<div class="wkd-day"><div class="wkd-col"><div class="wkd-b ${bcls}" style="height:${h}px"></div></div>
+      ${intakeHtml}<div class="wkd-dl ${c.isWeekend ? 'wend' : ''}"><span class="dow">${c.dow}</span>${c.dom}${c.hasTrain ? '🏋️' : ''}</div></div>`;
+  }).join('');
+
+  const foot = `<div class="wkd-foot"><b>平日は貯金＆会食で消化 → 週末で微調整して着地</b>。金色が「これくらいに収めればOK」の目安摂取。トレなし日は貯金、トレ日は${STRICT.toLocaleString()}マストでアンダー、会食は片方を締めて相殺。</div>`;
+
+  return `<div class="wkd-card">
+    <div class="wkd-head"><div><h2>🍽️ 今週のカロリー配分（月 → 日）</h2>
+      <div class="wkd-range">${rangeStr}・記録 ${doneCount}/7日</div></div></div>
+    ${hero}${budgetBar}${planner}${defStrip}
+    <div class="wkd-dayslbl">日別 ― 摂取（下段）／ 🏋️＝トレ日・金色＝目安</div>
+    <div class="wkd-days">${days7}</div>
+    ${foot}
+  </div>`;
+}
+
 function render(data, calMap) {
   calMap = calMap || {};
   const app = document.getElementById('app');
@@ -2351,6 +2513,10 @@ function render(data, calMap) {
   // ===================== TAB 3: 毎日計測 =====================
   const dmData = loadDaily();
   html += `<div id="tab-daily" class="tab-content">`;
+
+  // ===== 週次アンダー ＆ 週末の目安摂取カード =====
+  // 「摂取を絞る→アンダーが積み上がる」を週単位で。平日で使った残り予算から、週末の目安摂取を逆算して提示。
+  html += weeklyDeficitCardHTML(all, effTDEE);
 
   // --- Daily KPI strip ---
   const dmLatest = dmData.length ? dmData[dmData.length - 1] : null;
