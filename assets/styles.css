@@ -499,3 +499,13 @@ canvas { max-height: 260px; margin-top: 8px; }
 .wkd-foot { font-size: 0.64em; color: rgba(255,255,255,.6); margin-top: 14px; padding-top: 11px; border-top: 1px solid rgba(255,255,255,.14); line-height: 1.7; }
 .wkd-foot b { color: rgba(255,255,255,.85); }
 .wkd-bmiss { background: repeating-linear-gradient(135deg, rgba(255,255,255,.14) 0 6px, rgba(255,255,255,.05) 6px 12px); display: flex; align-items: center; justify-content: center; font-size: 0.56em; font-weight: 800; color: rgba(255,255,255,.55); min-width: 0; white-space: nowrap; overflow: hidden; }
+
+/* 週次カード：Googleカレンダー予定タグ＆オーバー予測アラート */
+.wkd-alert { background: rgba(255,107,107,0.14); border: 1px solid rgba(255,107,107,0.4); border-radius: 10px; padding: 9px 11px; margin-bottom: 13px; font-size: 0.72em; color: #ffd9d9; line-height: 1.6; }
+.wkd-alert b { color: #fff; }
+.wkd-cal { margin-top: 4px; font-size: 0.52em; font-weight: 800; line-height: 1.35; border-radius: 5px; padding: 1px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wkd-cal.empty { visibility: hidden; }
+.wkd-cal.over { background: rgba(255,107,107,0.25); color: #ffb3b3; border: 1px solid rgba(255,107,107,0.5); }
+.wkd-cal.travel { background: rgba(255,184,77,0.2); color: #ffce80; border: 1px solid rgba(255,184,77,0.4); }
+.wkd-cal.train { background: rgba(100,255,218,0.15); color: #64ffda; border: 1px solid rgba(100,255,218,0.35); }
+.wkd-cal.work { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.72); }
