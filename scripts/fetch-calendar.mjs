@@ -7,7 +7,7 @@ import { createSign } from 'node:crypto';
 const SA_RAW = process.env.GOOGLE_SA_KEY;
 const CAL_ID = process.env.GOOGLE_CALENDAR_ID || 'primary';
 const OUT = 'data/calendar.json';
-const DAYS_BACK = 160, DAYS_FWD = 3; // 取得範囲（食事データの範囲をカバー）
+const DAYS_BACK = 160, DAYS_FWD = 21; // 取得範囲：過去=食事データ、未来=先読み（今週+2週の会食/支援を事前察知）
 
 if (!SA_RAW) { console.error('GOOGLE_SA_KEY が未設定です。GitHub Secrets に登録してください。'); process.exit(1); }
 let sa;
