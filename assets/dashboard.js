@@ -1914,18 +1914,16 @@ function render(data, calMap) {
     Object.assign(md, { ym, dim, rec, avg, isPast, isCurr, calDays, miss, impDef, impFatKg: +(impDef/7200).toFixed(2), fullDef, fullFatKg: +(fullDef/7200).toFixed(2) });
   }
 
-  // === Roadmap: monthly simulation targets vs imputed actuals (TDEE-adjusted) ===
-  const TDEE_DROP_PER_KG = 8; // TDEE drops ~8kcal per kg weight lost
+  // === Roadmap: monthly simulation targets vs imputed actuals ===
+  // 固定赤字モデル：赤字は effDeficitPlan（= TDEE − Plan C平均 ≒ -325kcal/日）を毎月維持する前提。
+  // （体重減でTDEEが下がる調整は行わない＝後半でアンダーが縮まないようにする）
   const roadmap = [];
   let simFat = liveFat;
-  let rmTotalLost = 0;
   let rmY = nowDate.getFullYear(), rmM = nowDate.getMonth() + 1;
   while (simFat > liveTgtFat + 0.3 && roadmap.length < 18) {
     const ym = `${rmY}-${String(rmM).padStart(2,'0')}`;
     const dim = new Date(rmY, rmM, 0).getDate();
-    const adjTDEE = effTDEE - Math.round(rmTotalLost * TDEE_DROP_PER_KG);
-    const adjDeficit = adjTDEE - DAILY_PLAN_AVG;
-    const tDef = adjDeficit * dim;
+    const tDef = effDeficitPlan * dim; // 固定日次赤字 × 日数
     const tFat = +(tDef / 7200).toFixed(2);
     const act = imputedByMonth[ym];
     const isPast = ym < currentYM, isCurr = ym === currentYM, isFut = !isPast && !isCurr;
@@ -1941,7 +1939,6 @@ function render(data, calMap) {
       endBF = Math.max(TGT_BF, +(simFat / (simFat + liveLBM) * 100).toFixed(1));
       endFat = +(liveLBM * endBF / (100 - endBF)).toFixed(1);
       endWeight = +(liveLBM + endFat).toFixed(1);
-      rmTotalLost += tFat;
     }
     roadmap.push({
       ym, label: `${rmM}月`, dim, startBF, endBF, endFat, endWeight, tDef, tFat,
@@ -3158,7 +3155,7 @@ function render(data, calMap) {
     html += `<tr class="${isGoal?'goal-row':''}"><td>${lbl}</td><td>${rm.endBF}%${bfSub}</td><td>${rm.endFat}kg</td><td>${rm.endWeight}kg${kgSub}</td><td>${defCell}</td><td>${rateCell}</td></tr>`;
     prevBF = rm.endBF; prevW = rm.endWeight;
   }
-  html += `</tbody></table><p class="note">TDEE調整モデル（体重1kg減→TDEE約8kcal減）。除脂肪量（筋肉）維持前提。トレーニング日のアフターバーンは含めない保守的試算。<br><b>月間アンダー</b>＝その月に想定する総赤字kcal（÷7,200＝脂肪kg）。<b>体重減少率</b>は前月比で、健全な目安は月<b>3%以内</b>（超で<span style="color:#c62828;">⚠赤字</span>＝速すぎ・筋肉ロス/リバウンドのリスク）。体脂肪率・推定体重の下の小さな数字は前月差。</p></div>`;
+  html += `</tbody></table><p class="note">固定赤字モデル：赤字 <b>-${effDeficitPlan}kcal/日</b>（＝TDEE ${effTDEE} − Plan C平均 ${DAILY_PLAN_AVG}）を毎月維持する前提。体重減によるTDEE低下は織り込まない。除脂肪量（筋肉）維持前提・トレ日アフターバーンは含めない。<br><b>月間アンダー</b>＝その月に想定する総赤字kcal（÷7,200＝脂肪kg）。<b>体重減少率</b>は前月比で、健全な目安は月<b>3%以内</b>（超で<span style="color:#c62828;">⚠赤字</span>＝速すぎ・筋肉ロス/リバウンドのリスク）。体脂肪率・推定体重の下の小さな数字は前月差。</p></div>`;
 
   const monthsA = liveFatToLose > 0 ? Math.round(liveFatToLose / 1.2) : 0; // Aプラン(-1.2kg/月)で目標到達までの月数
   const monthsB = liveFatToLose > 0 ? Math.round(liveFatToLose / 3.0) : 0; // Bプラン(-3.0kg/月)
