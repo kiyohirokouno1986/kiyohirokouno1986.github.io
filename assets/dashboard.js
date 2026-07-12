@@ -1648,9 +1648,19 @@ function attachMealHandlers() {
 // ===== 週次アンダー ＆ 週末の目安摂取カード（カレンダー週：月〜日） =====
 // 週の摂取予算（＝7×TDEE−目標アンダー）から平日実績を差し引き、残りを未来日で割って
 // 「土日はいくらに収めればいいか」を逆算。会食が入る前提の配分例も提示する。
-function weeklyDeficitCardHTML(meals, effTDEE) {
+function weeklyDeficitCardHTML(meals, effTDEE, calMap) {
+  calMap = calMap || {};
   const DOWJ = '日月火水木金土';
   const PLANNER_FLOOR = 1000; // 会食配分でもう片方を絞る際の実用下限
+  // カレンダー予定をオーバー危険度で分類。飲食系＝要注意、出張/海外＝外食リスク、トレ、業務(支援等)。
+  const calTag = ann => {
+    if (!ann || !ann.short) return null;
+    const s = ann.short;
+    if (/会食|懇親|食事会|飲み|飲会|パーティ/.test(s)) return { label: s, cls: 'over', icon: '🍽' };
+    if (/出張|海外|遠征/.test(s)) return { label: s, cls: 'travel', icon: '✈️' };
+    if (/トレ|ジム/.test(s)) return { label: s, cls: 'train', icon: '🏋️' };
+    return { label: s, cls: 'work', icon: '' }; // 支援・訪問など
+  };
   const wkTDEE = Math.round(effTDEE || 2000);
   const target = WEEKLY_DEFICIT_TARGET;
   const budget = wkTDEE * 7 - target; // 週の摂取予算（この範囲に収めれば目標アンダー達成）
@@ -1676,7 +1686,7 @@ function weeklyDeficitCardHTML(meals, effTDEE) {
     if (m) { state = 'done'; intake = m.kcal; def = wkTDEE - m.kcal; usedIntake += intake; doneCount++; weekDef += def; }
     else if (isFuture || isToday) state = 'remaining';
     else state = 'missed'; // 過去の未記録日
-    return { ds, i, isWeekend, isToday, state, intake, def, hasTrain: !!(m && m.hasTrain), dow: DOWJ[dt.getDay()], dom: dt.getDate() };
+    return { ds, i, isWeekend, isToday, state, intake, def, hasTrain: !!(m && m.hasTrain), dow: DOWJ[dt.getDay()], dom: dt.getDate(), ann: calMap[ds] || null };
   });
 
   const remainingCells = cells.filter(c => c.state === 'remaining');
@@ -1790,17 +1800,32 @@ function weeklyDeficitCardHTML(meals, effTDEE) {
       bcls = 'miss'; h = 4;
       intakeHtml = `<div class="wkd-intake miss">—</div>`;
     }
+    const t = calTag(c.ann);
+    const title = c.ann ? ` title="${String(c.ann.full || c.ann.short).replace(/["\n]/g, ' ').slice(0, 80)}"` : '';
+    const tagHtml = t ? `<div class="wkd-cal ${t.cls}"${title}>${t.icon}${t.label}</div>` : '<div class="wkd-cal empty"></div>';
     return `<div class="wkd-day"><div class="wkd-col"><div class="wkd-b ${bcls}" style="height:${h}px"></div></div>
-      ${intakeHtml}<div class="wkd-dl ${c.isWeekend ? 'wend' : ''}"><span class="dow">${c.dow}</span>${c.dom}${c.hasTrain ? '🏋️' : ''}</div></div>`;
+      ${intakeHtml}<div class="wkd-dl ${c.isWeekend ? 'wend' : ''}"><span class="dow">${c.dow}</span>${c.dom}${c.hasTrain ? '🏋️' : ''}</div>${tagHtml}</div>`;
   }).join('');
 
-  const foot = `<div class="wkd-foot"><b>平日は貯金＆会食で消化 → 週末で微調整して着地</b>。金色が「これくらいに収めればOK」の目安摂取。トレなし日は貯金、トレ日は${STRICT.toLocaleString()}マストでアンダー、会食は片方を締めて相殺。</div>`;
+  // --- オーバー予測（これから来る会食系/出張の予定を事前に知らせる） ---
+  const riskUpcoming = cells.filter(c => {
+    if (c.ds < todayStr) return false; // 今日以降の予定のみ（事前察知）
+    const t = calTag(c.ann); return t && (t.cls === 'over' || t.cls === 'travel');
+  });
+  let headsup = '';
+  if (riskUpcoming.length) {
+    const parts = riskUpcoming.map(c => `${c.dow}（${c.ann.short}）`).join('・');
+    const hasOver = riskUpcoming.some(c => { const t = calTag(c.ann); return t && t.cls === 'over'; });
+    headsup = `<div class="wkd-alert">⚠ 今週の要注意日：<b>${parts}</b><br>${hasOver ? 'オーバーしやすい日。前半のトレなし日で貯金を作り、当日はもう片方を締めて相殺を。' : '外食が増えがち。低カロリー・高タンパクの選択を意識。'}</div>`;
+  }
+
+  const foot = `<div class="wkd-foot"><b>平日は貯金＆会食で消化 → 週末で微調整して着地</b>。金色が「これくらいに収めればOK」の目安摂取。トレなし日は貯金、トレ日は${STRICT.toLocaleString()}マストでアンダー、会食は片方を締めて相殺。予定タグはGoogleカレンダー連携。</div>`;
 
   return `<div class="wkd-card">
     <div class="wkd-head"><div><h2>🍽️ 今週のカロリー配分（月 → 日）</h2>
       <div class="wkd-range">${rangeStr}・記録 ${doneCount}/7日</div></div></div>
-    ${hero}${budgetBar}${planner}${defStrip}
-    <div class="wkd-dayslbl">日別 ― 摂取（下段）／ 🏋️＝トレ日・金色＝目安</div>
+    ${headsup}${hero}${budgetBar}${planner}${defStrip}
+    <div class="wkd-dayslbl">日別 ― 摂取（下段）・予定タグ ／ <span style="color:#ffb3b3;">🍽会食=注意</span> <span style="color:#ffce80;">✈出張</span> 🏋️トレ 支援</div>
     <div class="wkd-days">${days7}</div>
     ${foot}
   </div>`;
@@ -2379,7 +2404,7 @@ function render(data, calMap) {
 
   // ===== 週次アンダー ＆ 週末の目安摂取カード =====
   // 「摂取を絞る→アンダーが積み上がる」を週単位で。平日で使った残り予算から、週末の目安摂取を逆算して提示。
-  html += weeklyDeficitCardHTML(all, effTDEE);
+  html += weeklyDeficitCardHTML(all, effTDEE, calMap);
 
   // Calorie chart
   html += `<div class="card"><h2>カロリー推移</h2>
