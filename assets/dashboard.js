@@ -2380,6 +2380,10 @@ function render(data, calMap) {
     html += mealEmptyNotice('食事実績');
   } else {
 
+  // ===== 週次アンダー ＆ 週末の目安摂取カード =====
+  // 「摂取を絞る→アンダーが積み上がる」を週単位で。平日で使った残り予算から、週末の目安摂取を逆算して提示。
+  html += weeklyDeficitCardHTML(all, effTDEE);
+
   // Calorie chart
   html += `<div class="card"><h2>カロリー推移</h2>
     <div class="dm-period-filter" id="wk-period-filter">
@@ -2513,10 +2517,6 @@ function render(data, calMap) {
   // ===================== TAB 3: 毎日計測 =====================
   const dmData = loadDaily();
   html += `<div id="tab-daily" class="tab-content">`;
-
-  // ===== 週次アンダー ＆ 週末の目安摂取カード =====
-  // 「摂取を絞る→アンダーが積み上がる」を週単位で。平日で使った残り予算から、週末の目安摂取を逆算して提示。
-  html += weeklyDeficitCardHTML(all, effTDEE);
 
   // --- Daily KPI strip ---
   const dmLatest = dmData.length ? dmData[dmData.length - 1] : null;
