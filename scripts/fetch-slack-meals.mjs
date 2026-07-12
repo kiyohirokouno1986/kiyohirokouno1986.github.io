@@ -33,6 +33,7 @@ function summaryBlock(text) {
 }
 // kcal を取得。範囲（2,258〜2,948kcal）は平均、それ以外は合計優先で先頭一致。
 function kcalFromBlock(block) {
+  block = block.replace(/[*_`]/g, ''); // マークダウン装飾を除去してから解析
   const rng = block.match(/約?([\d,]+)\s*[〜~～\-]\s*([\d,]+)\s*kcal/i);
   if (rng) { const v = Math.round((parseInt(rng[1].replace(/,/g, '')) + parseInt(rng[2].replace(/,/g, ''))) / 2); if (v > 200 && v < 10000) return v; }
   for (const cp of [/総カロリー[^\d]*約?\s*([\d,]+)\s*kcal/i, /合計[^\d]*約?\s*([\d,]+)\s*kcal/i, /カロリー[^\d]*約?\s*([\d,]+)\s*kcal/i, /([\d,]+)\s*kcal/i]) {
@@ -42,9 +43,11 @@ function kcalFromBlock(block) {
   return null;
 }
 // P/F/C を取得。範囲（158〜187g）は平均。コロンは任意。
+// ※値がマークダウン太字（例 "P: *149.2g*"）だと * が挟まって取れないため、先に装飾を除去する。
 function macroFromBlock(block, letter) {
+  const clean = block.replace(/[*_`]/g, '');
   const re = new RegExp(letter + '\\s*[：:]?\\s*約?\\s*([\\d.]+)(?:\\s*[〜~～\\-]\\s*([\\d.]+))?', 'i');
-  const m = block.match(re);
+  const m = clean.match(re);
   if (!m) return null;
   let v = parseFloat(m[1]);
   if (m[2]) v = (v + parseFloat(m[2])) / 2;
