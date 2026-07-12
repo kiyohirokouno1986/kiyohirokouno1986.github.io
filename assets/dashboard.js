@@ -3139,13 +3139,26 @@ function render(data, calMap) {
 
   html += `<div class="card"><h2>Plan C 月別推移予測</h2>
     <div style="font-size:0.74em;color:#888;margin-bottom:6px;">日次計測の直近7日平均（${bc2.date||'—'}時点）の体脂肪量 ${liveFat}kg・除脂肪 ${liveLBM}kg を起点に、TDEE ${effTDEE}（${tdeeInfo.source==='measured'?'実測':tdeeInfo.source==='manual'?'手動':'予測式'}）×Plan C平均${DAILY_PLAN_AVG}kcalで試算。6月は実測アンカー、上の月別ロードマップと同一エンジン。</div>
-    <table class="proj-table"><thead><tr><th>月</th><th>体脂肪率</th><th>体脂肪量</th><th>推定体重</th></tr></thead><tbody>`;
+    <table class="proj-table"><thead><tr><th>月</th><th>体脂肪率</th><th>体脂肪量</th><th>推定体重</th><th>月間<br>アンダー</th><th>体重<br>減少率</th></tr></thead><tbody>`;
+  let prevBF = null, prevW = null;
   for (const rm of roadmap) {
     const isGoal = rm.isGoal;
     const lbl = `${rm.label}${isGoal?' ★':rm.isCurr?'（現在）':''}`;
-    html += `<tr class="${isGoal?'goal-row':''}"><td>${lbl}</td><td>${rm.endBF}%</td><td>${rm.endFat}kg</td><td>${rm.endWeight}kg</td></tr>`;
+    const sub = s => `<br><span style="font-size:0.78em;color:#999;font-weight:400;">${s}</span>`;
+    const bfSub = prevBF != null ? sub(`${rm.endBF - prevBF > 0 ? '+' : ''}${+(rm.endBF - prevBF).toFixed(1)}pt`) : '';
+    let kgSub = '', defCell = '—', rateCell = '—';
+    if (prevW != null && prevW > 0) {
+      const dw = +(rm.endWeight - prevW).toFixed(1); // 前月からの実kg
+      kgSub = sub(`${dw > 0 ? '+' : ''}${dw}kg`);
+      const dwPct = (rm.endWeight - prevW) / prevW * 100;
+      const over = Math.abs(dwPct) > 3; // 月-3%超は減量ペースが速すぎ（筋肉ロスのリスク）
+      rateCell = `<span style="color:${over ? '#c62828' : '#2d6a4f'};font-weight:${over ? '700' : '400'};">${dwPct > 0 ? '+' : ''}${dwPct.toFixed(1)}%${over ? ' ⚠' : ''}</span>`;
+      if (rm.tDef != null) defCell = `−${Math.round(rm.tDef).toLocaleString()}`; // その月に想定する総赤字kcal
+    }
+    html += `<tr class="${isGoal?'goal-row':''}"><td>${lbl}</td><td>${rm.endBF}%${bfSub}</td><td>${rm.endFat}kg</td><td>${rm.endWeight}kg${kgSub}</td><td>${defCell}</td><td>${rateCell}</td></tr>`;
+    prevBF = rm.endBF; prevW = rm.endWeight;
   }
-  html += `</tbody></table><p class="note">TDEE調整モデル（体重1kg減→TDEE約8kcal減）。除脂肪量（筋肉）維持前提。トレーニング日のアフターバーンは含めない保守的試算。</p></div>`;
+  html += `</tbody></table><p class="note">TDEE調整モデル（体重1kg減→TDEE約8kcal減）。除脂肪量（筋肉）維持前提。トレーニング日のアフターバーンは含めない保守的試算。<br><b>月間アンダー</b>＝その月に想定する総赤字kcal（÷7,200＝脂肪kg）。<b>体重減少率</b>は前月比で、健全な目安は月<b>3%以内</b>（超で<span style="color:#c62828;">⚠赤字</span>＝速すぎ・筋肉ロス/リバウンドのリスク）。体脂肪率・推定体重の下の小さな数字は前月差。</p></div>`;
 
   const monthsA = liveFatToLose > 0 ? Math.round(liveFatToLose / 1.2) : 0; // Aプラン(-1.2kg/月)で目標到達までの月数
   const monthsB = liveFatToLose > 0 ? Math.round(liveFatToLose / 3.0) : 0; // Bプラン(-3.0kg/月)
