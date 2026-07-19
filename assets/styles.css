@@ -5,7 +5,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 /* Tabs */
 .main-tabs { display: flex; gap: 0; margin-bottom: 16px; background: #fff; border-radius: 12px; padding: 4px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .main-tab { flex: 1; padding: 10px 4px; border: none; border-radius: 10px; font-size: 0.85em; font-weight: 700; cursor: pointer; background: transparent; color: #888; transition: all 0.2s; }
-.main-tab.active { background: #1a1a2e; color: #fff; }
+.main-tab.active { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
@@ -160,6 +160,7 @@ canvas { max-height: 260px; margin-top: 8px; }
 .bc-section h2 { font-size: 0.95em; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 2px solid #eee; color: #333; display: flex; justify-content: space-between; align-items: center; }
 .bc-toggle { background: none; border: 1px solid #ddd; border-radius: 6px; padding: 3px 10px; font-size: 0.8em; cursor: pointer; color: #6c5ce7; font-weight: 600; }
 .bc-toggle:hover { background: #f3f0ff; }
+.bc-toggle:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(100,255,218,0.35); }
 
 .bc-form { display: none; margin-bottom: 14px; }
 .bc-form.open { display: block; }
@@ -172,8 +173,9 @@ canvas { max-height: 260px; margin-top: 8px; }
 .bc-field input::placeholder { color: #ccc; }
 .bc-actions { display: flex; gap: 8px; margin-top: 10px; }
 .bc-btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 0.82em; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-.bc-btn-primary { background: #6c5ce7; color: #fff; }
+.bc-btn-primary { background: linear-gradient(135deg, #6c5ce7, #8b7cf0); color: #fff; }
 .bc-btn-primary:hover { background: #5a4bd1; }
+.bc-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(100,255,218,0.35); }
 .bc-btn-secondary { background: #f0f0f0; color: #666; }
 .bc-btn-secondary:hover { background: #e0e0e0; }
 
@@ -277,7 +279,7 @@ canvas { max-height: 260px; margin-top: 8px; }
 .dm-filter button.active { background: #e65100; color: #fff; }
 .dm-period-filter { display: flex; gap: 4px; margin-bottom: 10px; }
 .dm-period-filter button { background: #f5f5f5; border: 1px solid #ddd; border-radius: 6px; padding: 4px 12px; font-size: 0.72em; font-weight: 600; cursor: pointer; transition: all 0.2s; color: #666; }
-.dm-period-filter button.active { background: #1a1a2e; color: #fff; border-color: #1a1a2e; }
+.dm-period-filter button.active { background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; border-color: #6c5ce7; }
 
 /* ===== TDEE推定カード ===== */
 .tdee-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
