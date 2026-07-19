@@ -1595,7 +1595,7 @@ function tdeeCardHTML(tdeeInfo, effTDEE) {
           <div class="tdee-s">${m.confident?`摂取 ${m.meanIntake.toLocaleString()}／体脂肪 ${m.slopeKgPerMonth>0?'+':''}${m.slopeKgPerMonth}kg/月／${m.spanDays}日`:'データ不足（食事14日・体組成21日以上で算出）'}</div>
         </div>
       </div>
-      ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?'。食事ログの過少申告か測定誤差の可能性。「いつ${TGT_BF}%に届くか」は実測ベースの方が当たります。':'。両者はよく一致しています。'}</div>`:''}
+      ${gap!=null?`<div class="tdee-note${Math.abs(gap)>=120?' warn':''}">予測式と実測の差 <b>${gap>0?'+':''}${gap} kcal/日</b>${Math.abs(gap)>=120?`。食事ログの過少申告か測定誤差の可能性。「いつ${TGT_BF}%に届くか」は実測ベースの方が当たります。`:'。両者はよく一致しています。'}</div>`:''}
       <div class="tdee-use">シミュレーションに使用中　<b>${effTDEE.toLocaleString()} kcal/日</b><span>（${modeLabel}）</span></div>
       <div class="dm-period-filter tdee-modes" data-tdee-mode>
         <button data-mode="measured" class="${prof.tdeeMode==='measured'?'active':''}">実測</button>
@@ -3136,7 +3136,7 @@ function render(data, calMap) {
   // TDEE推定カード（目標設計タブにも配置。GAP分析と同期）
   html += tdeeCardHTML(tdeeInfo, effTDEE);
 
-  html += `<div class="plan-reminder"><h3>Plan C ― メリハリ型カロリー管理</h3>
+  html += `<div class="plan-reminder"><h3><svg width="15" height="15" viewBox="0 0 64 64" style="vertical-align:-2px;margin-right:4px;" aria-hidden="true"><path d="M32,9 C24,19 20,25 20,33 C20,43.5 25.8,50 32,50 C38.2,50 44,43.5 44,33 C44,27 41,23 38,17 C38,23 34,25 33,21 C32,17 34,13 32,9 Z" fill="#ffffff" opacity="0.9"/><path d="M32,25 C28,31 26,35 26,39 C26,44.2 28.8,47.5 32,47.5 C35.2,47.5 38,44.2 38,39 C38,36 36,34 34,30 C34,33 32,34 32,31 C31.5,29 32,27 32,25 Z" fill="#64ffda"/></svg>Plan C ― メリハリ型カロリー管理</h3>
     <div class="pr-grid"><div class="pr-box"><div class="pv">${STRICT.toLocaleString()}</div><div class="pl">節制日 × 週${STRICT_DAYS}日</div></div><div class="pr-box"><div class="pv">${FREE.toLocaleString()}</div><div class="pl">飲食日 × 週${FREE_DAYS_WEEK}日</div></div></div>
     <div style="text-align:center;margin-top:10px;font-size:0.82em;opacity:0.9;">週平均 ${DAILY_PLAN_AVG} kcal ／ 赤字 -${effDeficitPlan} kcal/日 ／ 月 -${effPlanMonthly}kg脂肪</div></div>`;
 
