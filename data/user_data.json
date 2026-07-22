@@ -1,7 +1,2705 @@
 {
-  "dailyMeasure": [],
-  "bodyComp": [],
-  "trainingLog": [],
-  "waist": [],
-  "updatedAt": null
+  "dailyMeasure": [
+    {
+      "date": "2025-07-01",
+      "weight": 71.2,
+      "fatPct": 25.6,
+      "muscle": 50.3
+    },
+    {
+      "date": "2025-07-06",
+      "weight": 71.4,
+      "fatPct": 24.7,
+      "muscle": 51
+    },
+    {
+      "date": "2025-07-08",
+      "weight": 70.8,
+      "fatPct": 24.6,
+      "muscle": 50.6
+    },
+    {
+      "date": "2025-07-09",
+      "weight": 71.7,
+      "fatPct": 25.3,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-07-10",
+      "weight": 72.5,
+      "fatPct": 25.1,
+      "muscle": 51.5
+    },
+    {
+      "date": "2025-07-11",
+      "weight": 72.1,
+      "fatPct": 24.8,
+      "muscle": 51.4
+    },
+    {
+      "date": "2025-07-15",
+      "weight": 72.2,
+      "fatPct": 25.2,
+      "muscle": 51.2
+    },
+    {
+      "date": "2025-07-22",
+      "weight": 73.5,
+      "fatPct": 25.3,
+      "muscle": 52.1
+    },
+    {
+      "date": "2025-07-31",
+      "weight": 72.8,
+      "fatPct": 25.7,
+      "muscle": 51.3
+    },
+    {
+      "date": "2025-08-01",
+      "weight": 73.1,
+      "fatPct": 25.9,
+      "muscle": 51.4
+    },
+    {
+      "date": "2025-08-04",
+      "weight": 74.2,
+      "fatPct": 26,
+      "muscle": 52.1
+    },
+    {
+      "date": "2025-08-18",
+      "weight": 74.4,
+      "fatPct": 26.2,
+      "muscle": 52
+    },
+    {
+      "date": "2025-08-19",
+      "weight": 73.8,
+      "fatPct": 25.4,
+      "muscle": 52.2
+    },
+    {
+      "date": "2025-08-23",
+      "weight": 73,
+      "fatPct": 25.7,
+      "muscle": 51.4
+    },
+    {
+      "date": "2025-08-25",
+      "weight": 73,
+      "fatPct": 25.3,
+      "muscle": 51.7
+    },
+    {
+      "date": "2025-08-28",
+      "weight": 71.9,
+      "fatPct": 25,
+      "muscle": 51.1
+    },
+    {
+      "date": "2025-09-01",
+      "weight": 74.3,
+      "fatPct": 25.8,
+      "muscle": 52.3
+    },
+    {
+      "date": "2025-09-04",
+      "weight": 72.2,
+      "fatPct": 25.6,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-09-05",
+      "weight": 73.2,
+      "fatPct": 25.5,
+      "muscle": 51.7
+    },
+    {
+      "date": "2025-09-08",
+      "weight": 74.4,
+      "fatPct": 25.8,
+      "muscle": 52.3
+    },
+    {
+      "date": "2025-09-10",
+      "weight": 73.7,
+      "fatPct": 25.9,
+      "muscle": 51.8
+    },
+    {
+      "date": "2025-09-11",
+      "weight": 72.9,
+      "fatPct": 25.4,
+      "muscle": 51.6
+    },
+    {
+      "date": "2025-09-12",
+      "weight": 73.8,
+      "fatPct": 25.3,
+      "muscle": 52.2
+    },
+    {
+      "date": "2025-09-15",
+      "weight": 74.1,
+      "fatPct": 26.5,
+      "muscle": 51.6
+    },
+    {
+      "date": "2025-09-28",
+      "weight": 72.5,
+      "fatPct": 25.6,
+      "muscle": 51.1
+    },
+    {
+      "date": "2025-09-30",
+      "weight": 72.3,
+      "fatPct": 25.3,
+      "muscle": 51.2
+    },
+    {
+      "date": "2025-10-07",
+      "weight": 71.3,
+      "fatPct": 25.2,
+      "muscle": 50.5
+    },
+    {
+      "date": "2025-10-08",
+      "weight": 71.8,
+      "fatPct": 25.2,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-10-09",
+      "weight": 71.6,
+      "fatPct": 25.3,
+      "muscle": 50.7
+    },
+    {
+      "date": "2025-10-10",
+      "weight": 73.3,
+      "fatPct": 24.6,
+      "muscle": 52.5
+    },
+    {
+      "date": "2025-10-13",
+      "weight": 73.8,
+      "fatPct": 24.6,
+      "muscle": 52.7
+    },
+    {
+      "date": "2025-10-14",
+      "weight": 73.2,
+      "fatPct": 24.9,
+      "muscle": 52.1
+    },
+    {
+      "date": "2025-10-15",
+      "weight": 74.1,
+      "fatPct": 25.7,
+      "muscle": 52.2
+    },
+    {
+      "date": "2025-10-21",
+      "weight": 72,
+      "fatPct": 24.9,
+      "muscle": 51.3
+    },
+    {
+      "date": "2025-10-22",
+      "weight": 71.3,
+      "fatPct": 24.6,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-10-23",
+      "weight": 71.5,
+      "fatPct": 25.1,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-10-25",
+      "weight": 72.6,
+      "fatPct": 25,
+      "muscle": 51.6
+    },
+    {
+      "date": "2025-10-26",
+      "weight": 72.4,
+      "fatPct": 26,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-10-27",
+      "weight": 71.1,
+      "fatPct": 24.5,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-10-28",
+      "weight": 70.8,
+      "fatPct": 24.6,
+      "muscle": 50.6
+    },
+    {
+      "date": "2025-10-30",
+      "weight": 70.9,
+      "fatPct": 24.4,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-10-31",
+      "weight": 70.6,
+      "fatPct": 23.9,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-11-01",
+      "weight": 70.3,
+      "fatPct": 25,
+      "muscle": 50
+    },
+    {
+      "date": "2025-11-02",
+      "weight": 70.2,
+      "fatPct": 24.1,
+      "muscle": 50.5
+    },
+    {
+      "date": "2025-11-03",
+      "weight": 70.8,
+      "fatPct": 24.2,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-11-04",
+      "weight": 70.8,
+      "fatPct": 24.1,
+      "muscle": 51
+    },
+    {
+      "date": "2025-11-05",
+      "weight": 70.5,
+      "fatPct": 23.9,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-11-06",
+      "weight": 71,
+      "fatPct": 25.2,
+      "muscle": 50.3
+    },
+    {
+      "date": "2025-11-07",
+      "weight": 70.5,
+      "fatPct": 24.4,
+      "muscle": 50.5
+    },
+    {
+      "date": "2025-11-08",
+      "weight": 70.5,
+      "fatPct": 24.7,
+      "muscle": 50.3
+    },
+    {
+      "date": "2025-11-09",
+      "weight": 70.8,
+      "fatPct": 24.2,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-11-10",
+      "weight": 70.6,
+      "fatPct": 24.4,
+      "muscle": 50.6
+    },
+    {
+      "date": "2025-11-11",
+      "weight": 70.8,
+      "fatPct": 24.4,
+      "muscle": 50.7
+    },
+    {
+      "date": "2025-11-12",
+      "weight": 70.6,
+      "fatPct": 24.1,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-11-14",
+      "weight": 69.6,
+      "fatPct": 23.9,
+      "muscle": 50.2
+    },
+    {
+      "date": "2025-11-15",
+      "weight": 70.8,
+      "fatPct": 24.2,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-11-16",
+      "weight": 70.8,
+      "fatPct": 24.1,
+      "muscle": 51
+    },
+    {
+      "date": "2025-11-17",
+      "weight": 70.8,
+      "fatPct": 24.3,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-11-21",
+      "weight": 70.5,
+      "fatPct": 23.9,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-11-22",
+      "weight": 70.6,
+      "fatPct": 24.4,
+      "muscle": 50.6
+    },
+    {
+      "date": "2025-11-23",
+      "weight": 70.6,
+      "fatPct": 24.2,
+      "muscle": 50.7
+    },
+    {
+      "date": "2025-11-24",
+      "weight": 70.8,
+      "fatPct": 24.9,
+      "muscle": 50.4
+    },
+    {
+      "date": "2025-11-25",
+      "weight": 70.3,
+      "fatPct": 24.1,
+      "muscle": 50.5
+    },
+    {
+      "date": "2025-11-26",
+      "weight": 70.9,
+      "fatPct": 23.4,
+      "muscle": 51.5
+    },
+    {
+      "date": "2025-11-27",
+      "weight": 71.1,
+      "fatPct": 24,
+      "muscle": 51.2
+    },
+    {
+      "date": "2025-11-28",
+      "weight": 71,
+      "fatPct": 25.1,
+      "muscle": 50.4
+    },
+    {
+      "date": "2025-11-29",
+      "weight": 71,
+      "fatPct": 24.4,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-12-01",
+      "weight": 71.9,
+      "fatPct": 24.7,
+      "muscle": 51.3
+    },
+    {
+      "date": "2025-12-02",
+      "weight": 71,
+      "fatPct": 24.8,
+      "muscle": 50.6
+    },
+    {
+      "date": "2025-12-03",
+      "weight": 70.7,
+      "fatPct": 24.4,
+      "muscle": 50.7
+    },
+    {
+      "date": "2025-12-04",
+      "weight": 70.4,
+      "fatPct": 24.3,
+      "muscle": 50.5
+    },
+    {
+      "date": "2025-12-05",
+      "weight": 70.8,
+      "fatPct": 24.7,
+      "muscle": 50.5
+    },
+    {
+      "date": "2025-12-08",
+      "weight": 71.1,
+      "fatPct": 24.4,
+      "muscle": 51
+    },
+    {
+      "date": "2025-12-10",
+      "weight": 70.9,
+      "fatPct": 25,
+      "muscle": 50.5
+    },
+    {
+      "date": "2025-12-11",
+      "weight": 71.6,
+      "fatPct": 24.6,
+      "muscle": 51.2
+    },
+    {
+      "date": "2025-12-12",
+      "weight": 72,
+      "fatPct": 24.3,
+      "muscle": 51.7
+    },
+    {
+      "date": "2025-12-13",
+      "weight": 71.6,
+      "fatPct": 24.8,
+      "muscle": 51
+    },
+    {
+      "date": "2025-12-14",
+      "weight": 72.1,
+      "fatPct": 25.5,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-12-16",
+      "weight": 71.3,
+      "fatPct": 24.9,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-12-17",
+      "weight": 72.6,
+      "fatPct": 24.4,
+      "muscle": 52
+    },
+    {
+      "date": "2025-12-18",
+      "weight": 71.8,
+      "fatPct": 24.5,
+      "muscle": 51.4
+    },
+    {
+      "date": "2025-12-21",
+      "weight": 72,
+      "fatPct": 25.4,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-12-22",
+      "weight": 72.7,
+      "fatPct": 24.7,
+      "muscle": 51.9
+    },
+    {
+      "date": "2025-12-23",
+      "weight": 72.2,
+      "fatPct": 24.9,
+      "muscle": 51.4
+    },
+    {
+      "date": "2025-12-24",
+      "weight": 70.9,
+      "fatPct": 24.2,
+      "muscle": 50.9
+    },
+    {
+      "date": "2025-12-25",
+      "weight": 71.4,
+      "fatPct": 24.5,
+      "muscle": 51.1
+    },
+    {
+      "date": "2025-12-26",
+      "weight": 71,
+      "fatPct": 24.6,
+      "muscle": 50.8
+    },
+    {
+      "date": "2025-12-27",
+      "weight": 73.2,
+      "fatPct": 25.3,
+      "muscle": 51.8
+    },
+    {
+      "date": "2025-12-31",
+      "weight": 73.3,
+      "fatPct": 25.2,
+      "muscle": 52
+    },
+    {
+      "date": "2026-01-07",
+      "weight": 73.8,
+      "fatPct": 26.7,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-01-08",
+      "weight": 72.9,
+      "fatPct": 25,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-01-09",
+      "weight": 73.7,
+      "fatPct": 25.5,
+      "muscle": 52
+    },
+    {
+      "date": "2026-01-10",
+      "weight": 73,
+      "fatPct": 25.2,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-01-12",
+      "weight": 72.6,
+      "fatPct": 24.6,
+      "muscle": 51.9
+    },
+    {
+      "date": "2026-01-13",
+      "weight": 72.5,
+      "fatPct": 24.7,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-01-14",
+      "weight": 73.3,
+      "fatPct": 24.9,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-01-15",
+      "weight": 73.4,
+      "fatPct": 24.6,
+      "muscle": 52.5
+    },
+    {
+      "date": "2026-01-16",
+      "weight": 72.8,
+      "fatPct": 24.7,
+      "muscle": 51.9
+    },
+    {
+      "date": "2026-01-21",
+      "weight": 72.8,
+      "fatPct": 24.5,
+      "muscle": 52.1
+    },
+    {
+      "date": "2026-01-22",
+      "weight": 72.3,
+      "fatPct": 25.3,
+      "muscle": 51.2
+    },
+    {
+      "date": "2026-01-23",
+      "weight": 72.5,
+      "fatPct": 24.5,
+      "muscle": 51.9
+    },
+    {
+      "date": "2026-01-24",
+      "weight": 72.5,
+      "fatPct": 24,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-01-25",
+      "weight": 73.1,
+      "fatPct": 24.6,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-01-26",
+      "weight": 72.2,
+      "fatPct": 24.7,
+      "muscle": 51.5
+    },
+    {
+      "date": "2026-01-27",
+      "weight": 71.4,
+      "fatPct": 24.1,
+      "muscle": 51.4
+    },
+    {
+      "date": "2026-01-29",
+      "weight": 71.6,
+      "fatPct": 24.3,
+      "muscle": 51.4
+    },
+    {
+      "date": "2026-01-31",
+      "weight": 71.7,
+      "fatPct": 24,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-02-02",
+      "weight": 71.9,
+      "fatPct": 24.1,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-02-03",
+      "weight": 71.3,
+      "fatPct": 24.2,
+      "muscle": 51.2
+    },
+    {
+      "date": "2026-02-04",
+      "weight": 71.3,
+      "fatPct": 25.2,
+      "muscle": 50.6
+    },
+    {
+      "date": "2026-02-05",
+      "weight": 71,
+      "fatPct": 24,
+      "muscle": 51.2
+    },
+    {
+      "date": "2026-02-06",
+      "weight": 71.1,
+      "fatPct": 24.3,
+      "muscle": 51
+    },
+    {
+      "date": "2026-02-08",
+      "weight": 71.1,
+      "fatPct": 24.4,
+      "muscle": 51
+    },
+    {
+      "date": "2026-02-09",
+      "weight": 71.1,
+      "fatPct": 24.1,
+      "muscle": 51.1
+    },
+    {
+      "date": "2026-02-10",
+      "weight": 71.5,
+      "fatPct": 24.2,
+      "muscle": 51.4
+    },
+    {
+      "date": "2026-02-11",
+      "weight": 70.7,
+      "fatPct": 24.2,
+      "muscle": 50.8
+    },
+    {
+      "date": "2026-02-13",
+      "weight": 71.2,
+      "fatPct": 23.9,
+      "muscle": 51.4
+    },
+    {
+      "date": "2026-02-14",
+      "weight": 70.9,
+      "fatPct": 24,
+      "muscle": 51
+    },
+    {
+      "date": "2026-02-16",
+      "weight": 71.5,
+      "fatPct": 25.1,
+      "muscle": 50.8
+    },
+    {
+      "date": "2026-02-17",
+      "weight": 70.8,
+      "fatPct": 23.8,
+      "muscle": 51.2
+    },
+    {
+      "date": "2026-02-18",
+      "weight": 70.3,
+      "fatPct": 24.3,
+      "muscle": 50.4
+    },
+    {
+      "date": "2026-02-19",
+      "weight": 71,
+      "fatPct": 24.2,
+      "muscle": 51
+    },
+    {
+      "date": "2026-02-20",
+      "weight": 71.8,
+      "fatPct": 23.5,
+      "muscle": 52.1
+    },
+    {
+      "date": "2026-02-22",
+      "weight": 71,
+      "fatPct": 25.4,
+      "muscle": 50.2
+    },
+    {
+      "date": "2026-02-23",
+      "weight": 71.4,
+      "fatPct": 24,
+      "muscle": 51.4
+    },
+    {
+      "date": "2026-02-24",
+      "weight": 70.3,
+      "fatPct": 23.8,
+      "muscle": 50.8
+    },
+    {
+      "date": "2026-02-26",
+      "weight": 71.9,
+      "fatPct": 24.1,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-02-27",
+      "weight": 70.6,
+      "fatPct": 23.9,
+      "muscle": 51
+    },
+    {
+      "date": "2026-02-28",
+      "weight": 71.4,
+      "fatPct": 23.8,
+      "muscle": 51.6
+    },
+    {
+      "date": "2026-03-01",
+      "weight": 70.6,
+      "fatPct": 24.1,
+      "muscle": 50.8
+    },
+    {
+      "date": "2026-03-02",
+      "weight": 71.1,
+      "fatPct": 23.9,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-03-03",
+      "weight": 70.3,
+      "fatPct": 24,
+      "muscle": 50.7
+    },
+    {
+      "date": "2026-03-04",
+      "weight": 70.1,
+      "fatPct": 24,
+      "muscle": 50.5
+    },
+    {
+      "date": "2026-03-05",
+      "weight": 70.1,
+      "fatPct": 23.6,
+      "muscle": 50.8
+    },
+    {
+      "date": "2026-03-06",
+      "weight": 70.4,
+      "fatPct": 23.9,
+      "muscle": 50.8
+    },
+    {
+      "date": "2026-03-07",
+      "weight": 70.6,
+      "fatPct": 23.4,
+      "muscle": 51.2
+    },
+    {
+      "date": "2026-03-09",
+      "weight": 70.9,
+      "fatPct": 24.2,
+      "muscle": 51
+    },
+    {
+      "date": "2026-03-10",
+      "weight": 71,
+      "fatPct": 24.4,
+      "muscle": 50.9
+    },
+    {
+      "date": "2026-03-11",
+      "weight": 70.6,
+      "fatPct": 23.7,
+      "muscle": 51.1
+    },
+    {
+      "date": "2026-03-14",
+      "weight": 72,
+      "fatPct": 23.9,
+      "muscle": 52
+    },
+    {
+      "date": "2026-03-15",
+      "weight": 71.3,
+      "fatPct": 24.3,
+      "muscle": 51.1
+    },
+    {
+      "date": "2026-03-16",
+      "weight": 71.4,
+      "fatPct": 24.8,
+      "muscle": 50.9
+    },
+    {
+      "date": "2026-03-17",
+      "weight": 70.5,
+      "fatPct": 23.9,
+      "muscle": 50.8
+    },
+    {
+      "date": "2026-03-18",
+      "weight": 70.5,
+      "fatPct": 23.9,
+      "muscle": 50.8
+    },
+    {
+      "date": "2026-03-19",
+      "weight": 70.1,
+      "fatPct": 23.3,
+      "muscle": 51
+    },
+    {
+      "date": "2026-03-20",
+      "weight": 71.1,
+      "fatPct": 23.7,
+      "muscle": 51.5
+    },
+    {
+      "date": "2026-03-23",
+      "weight": 71,
+      "fatPct": 24.3,
+      "muscle": 51
+    },
+    {
+      "date": "2026-03-24",
+      "weight": 70.7,
+      "fatPct": 23.5,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-03-25",
+      "weight": 70.6,
+      "fatPct": 24,
+      "muscle": 50.9
+    },
+    {
+      "date": "2026-03-26",
+      "weight": 70.6,
+      "fatPct": 24.4,
+      "muscle": 50.6
+    },
+    {
+      "date": "2026-03-28",
+      "weight": 72.8,
+      "fatPct": 24.8,
+      "muscle": 51.9
+    },
+    {
+      "date": "2026-03-29",
+      "weight": 70.7,
+      "fatPct": 23.8,
+      "muscle": 51.1
+    },
+    {
+      "date": "2026-03-30",
+      "weight": 71.4,
+      "fatPct": 23.9,
+      "muscle": 51.5
+    },
+    {
+      "date": "2026-03-31",
+      "weight": 71.2,
+      "fatPct": 24.5,
+      "muscle": 51
+    },
+    {
+      "date": "2026-04-01",
+      "weight": 71.5,
+      "fatPct": 23.9,
+      "muscle": 51.6
+    },
+    {
+      "date": "2026-04-02",
+      "weight": 71.1,
+      "fatPct": 23.8,
+      "muscle": 51.4
+    },
+    {
+      "date": "2026-04-06",
+      "weight": 72.2,
+      "fatPct": 23.8,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-04-07",
+      "weight": 72,
+      "fatPct": 24.1,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-04-08",
+      "weight": 71.4,
+      "fatPct": 24.8,
+      "muscle": 50.9
+    },
+    {
+      "date": "2026-04-09",
+      "weight": 71.3,
+      "fatPct": 24,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-04-11",
+      "weight": 72.4,
+      "fatPct": 24.2,
+      "muscle": 52
+    },
+    {
+      "date": "2026-04-13",
+      "weight": 71.9,
+      "fatPct": 24,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-04-21",
+      "weight": 72.5,
+      "fatPct": 24.5,
+      "muscle": 51.9
+    },
+    {
+      "date": "2026-04-22",
+      "weight": 72.6,
+      "fatPct": 25.2,
+      "muscle": 51.5
+    },
+    {
+      "date": "2026-04-24",
+      "weight": 71.9,
+      "fatPct": 24.8,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-04-25",
+      "weight": 72.4,
+      "fatPct": 24,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-04-26",
+      "weight": 72.5,
+      "fatPct": 23.9,
+      "muscle": 52.3
+    },
+    {
+      "date": "2026-04-27",
+      "weight": 72.5,
+      "fatPct": 23.7,
+      "muscle": 52.4
+    },
+    {
+      "date": "2026-04-29",
+      "weight": 72.3,
+      "fatPct": 24.4,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-05-01",
+      "weight": 72.1,
+      "fatPct": 25.5,
+      "muscle": 50.9
+    },
+    {
+      "date": "2026-05-02",
+      "weight": 72.1,
+      "fatPct": 25.2,
+      "muscle": 51.1
+    },
+    {
+      "date": "2026-05-07",
+      "weight": 73.8,
+      "fatPct": 24,
+      "muscle": 53.2
+    },
+    {
+      "date": "2026-05-08",
+      "weight": 72.2,
+      "fatPct": 25.1,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-05-09",
+      "weight": 72.4,
+      "fatPct": 25.5,
+      "muscle": 51.1
+    },
+    {
+      "date": "2026-05-11",
+      "weight": 73,
+      "fatPct": 24.4,
+      "muscle": 52.3
+    },
+    {
+      "date": "2026-05-12",
+      "weight": 73.3,
+      "fatPct": 24.5,
+      "muscle": 52.5
+    },
+    {
+      "date": "2026-05-14",
+      "weight": 73.6,
+      "fatPct": 25.1,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-05-15",
+      "weight": 72.4,
+      "fatPct": 24,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-05-16",
+      "weight": 72.9,
+      "fatPct": 24.3,
+      "muscle": 52.3
+    },
+    {
+      "date": "2026-05-19",
+      "weight": 72.6,
+      "fatPct": 24.2,
+      "muscle": 52.1
+    },
+    {
+      "date": "2026-05-20",
+      "weight": 73,
+      "fatPct": 24,
+      "muscle": 52.6
+    },
+    {
+      "date": "2026-05-21",
+      "weight": 72.3,
+      "fatPct": 24.9,
+      "muscle": 51.5
+    },
+    {
+      "date": "2026-05-24",
+      "weight": 73,
+      "fatPct": 24.2,
+      "muscle": 52.5
+    },
+    {
+      "date": "2026-05-25",
+      "weight": 72.3,
+      "fatPct": 24.5,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-05-26",
+      "weight": 72.1,
+      "fatPct": 24.3,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-05-27",
+      "weight": 72.1,
+      "fatPct": 24,
+      "muscle": 52
+    },
+    {
+      "date": "2026-05-28",
+      "weight": 72.5,
+      "fatPct": 24.4,
+      "muscle": 52
+    },
+    {
+      "date": "2026-05-29",
+      "weight": 72.2,
+      "fatPct": 23.8,
+      "muscle": 52.1
+    },
+    {
+      "date": "2026-05-31",
+      "weight": 72.3,
+      "fatPct": 23.7,
+      "muscle": 52.3
+    },
+    {
+      "date": "2026-06-01",
+      "weight": 71.2,
+      "fatPct": 23.6,
+      "muscle": 51.6
+    },
+    {
+      "date": "2026-06-02",
+      "weight": 71.2,
+      "fatPct": 24,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-06-03",
+      "weight": 70.9,
+      "fatPct": 23.8,
+      "muscle": 51.2
+    },
+    {
+      "date": "2026-06-04",
+      "weight": 71.6,
+      "fatPct": 24,
+      "muscle": 51.6
+    },
+    {
+      "date": "2026-06-05",
+      "weight": 71.8,
+      "fatPct": 23.7,
+      "muscle": 51.9
+    },
+    {
+      "date": "2026-06-08",
+      "weight": 72,
+      "fatPct": 24.3,
+      "muscle": 51.6
+    },
+    {
+      "date": "2026-06-09",
+      "weight": 71.3,
+      "fatPct": 23.7,
+      "muscle": 51.6
+    },
+    {
+      "date": "2026-06-10",
+      "weight": 71.4,
+      "fatPct": 24.7,
+      "muscle": 50.9
+    },
+    {
+      "date": "2026-06-11",
+      "weight": 71.8,
+      "fatPct": 23.9,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-06-12",
+      "weight": 72.7,
+      "fatPct": 23.9,
+      "muscle": 52.4
+    },
+    {
+      "date": "2026-06-14",
+      "weight": 72.6,
+      "fatPct": 25,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-06-15",
+      "weight": 72.1,
+      "fatPct": 23.9,
+      "muscle": 52
+    },
+    {
+      "date": "2026-06-16",
+      "weight": 71.8,
+      "fatPct": 23.5,
+      "muscle": 52.1
+    },
+    {
+      "date": "2026-06-17",
+      "weight": 71,
+      "fatPct": 23.4,
+      "muscle": 51.6
+    },
+    {
+      "date": "2026-06-18",
+      "weight": 71.3,
+      "fatPct": 23.6,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-06-19",
+      "weight": 71.7,
+      "fatPct": 23.9,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-06-21",
+      "weight": 71.8,
+      "fatPct": 23.3,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-06-22",
+      "weight": 71.8,
+      "fatPct": 23.3,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-06-23",
+      "weight": 71.7,
+      "fatPct": 23.6,
+      "muscle": 51.9
+    },
+    {
+      "date": "2026-06-24",
+      "weight": 72.3,
+      "fatPct": 23.8,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-06-25",
+      "weight": 71.8,
+      "fatPct": 23.5,
+      "muscle": 52.1
+    },
+    {
+      "date": "2026-06-27",
+      "weight": 72,
+      "fatPct": 23.6,
+      "muscle": 52.1
+    },
+    {
+      "date": "2026-06-28",
+      "weight": 72.2,
+      "fatPct": 23.4,
+      "muscle": 52.4
+    },
+    {
+      "date": "2026-06-29",
+      "weight": 71.4,
+      "fatPct": 23.4,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-06-30",
+      "weight": 71.3,
+      "fatPct": 23.4,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-07-03",
+      "weight": 72.5,
+      "fatPct": 22.7,
+      "muscle": 53.2
+    },
+    {
+      "date": "2026-07-04",
+      "weight": 72.8,
+      "fatPct": 22.7,
+      "muscle": 53.4
+    },
+    {
+      "date": "2026-07-06",
+      "weight": 72,
+      "fatPct": 22.8,
+      "muscle": 52.7
+    },
+    {
+      "date": "2026-07-07",
+      "weight": 71.1,
+      "fatPct": 22.8,
+      "muscle": 52
+    },
+    {
+      "date": "2026-07-08",
+      "weight": 70.6,
+      "fatPct": 23.3,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-07-09",
+      "weight": 71.3,
+      "fatPct": 22.8,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-07-10",
+      "weight": 71.7,
+      "fatPct": 23.2,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-07-11",
+      "weight": 71.1,
+      "fatPct": 23.3,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-07-12",
+      "weight": 71,
+      "fatPct": 22.5,
+      "muscle": 52.2
+    },
+    {
+      "date": "2026-07-13",
+      "weight": 71.4,
+      "fatPct": 23.2,
+      "muscle": 52
+    },
+    {
+      "date": "2026-07-14",
+      "weight": 70.6,
+      "fatPct": 22.7,
+      "muscle": 51.7
+    },
+    {
+      "date": "2026-07-15",
+      "weight": 70.2,
+      "fatPct": 23,
+      "muscle": 51.2
+    },
+    {
+      "date": "2026-07-17",
+      "weight": 70.9,
+      "fatPct": 23,
+      "muscle": 51.8
+    },
+    {
+      "date": "2026-07-18",
+      "weight": 70.6,
+      "fatPct": 23.3,
+      "muscle": 51.4
+    },
+    {
+      "date": "2026-07-19",
+      "weight": 69.9,
+      "fatPct": 22.9,
+      "muscle": 51.1
+    },
+    {
+      "date": "2026-07-21",
+      "weight": 70.5,
+      "fatPct": 22.3,
+      "muscle": 51.9
+    },
+    {
+      "date": "2026-07-22",
+      "weight": 69.6,
+      "fatPct": 22.3,
+      "muscle": 51.3
+    }
+  ],
+  "bodyComp": [
+    {
+      "date": "2025-05-01",
+      "session": "初回",
+      "weight": 71.7,
+      "muscle": null,
+      "fatMass": 21.2,
+      "fatPct": 30.1,
+      "waist": 89,
+      "inbody": null,
+      "note": "骨格筋量25.4kg, 基礎代謝1472kcal"
+    },
+    {
+      "date": "2025-05-20",
+      "session": "S1",
+      "weight": 72,
+      "muscle": null,
+      "fatMass": 21,
+      "fatPct": 29.5,
+      "waist": null,
+      "inbody": null,
+      "note": ""
+    },
+    {
+      "date": "2025-06-18",
+      "session": "S2",
+      "weight": 72.5,
+      "muscle": null,
+      "fatMass": 20.5,
+      "fatPct": 28.5,
+      "waist": null,
+      "inbody": null,
+      "note": "フォーム矯正開始"
+    },
+    {
+      "date": "2025-07-19",
+      "session": "S3",
+      "weight": 73,
+      "muscle": null,
+      "fatMass": 20.8,
+      "fatPct": 28.8,
+      "waist": null,
+      "inbody": null,
+      "note": "MCTオイル再開"
+    },
+    {
+      "date": "2025-10-15",
+      "session": "S4",
+      "weight": 73,
+      "muscle": null,
+      "fatMass": 21,
+      "fatPct": 29,
+      "waist": null,
+      "inbody": null,
+      "note": "隠れカロリー特定"
+    },
+    {
+      "date": "2025-11-22",
+      "session": "S5",
+      "weight": 71.5,
+      "muscle": null,
+      "fatMass": 19,
+      "fatPct": 26.8,
+      "waist": null,
+      "inbody": null,
+      "note": "最大改善回"
+    },
+    {
+      "date": "2026-02-01",
+      "session": "S6",
+      "weight": 71,
+      "muscle": null,
+      "fatMass": 18.8,
+      "fatPct": 26.5,
+      "waist": null,
+      "inbody": null,
+      "note": "食事管理強化"
+    },
+    {
+      "date": "2026-02-07",
+      "session": "S7",
+      "weight": null,
+      "muscle": null,
+      "fatMass": null,
+      "fatPct": null,
+      "waist": 88,
+      "inbody": null,
+      "note": "ウエスト改善"
+    },
+    {
+      "date": "2026-03-26",
+      "session": "測定",
+      "weight": 72.6,
+      "muscle": null,
+      "fatMass": 18.5,
+      "fatPct": 25.5,
+      "waist": null,
+      "inbody": null,
+      "note": "骨格筋量25.7kg, 基礎代謝1539kcal"
+    },
+    {
+      "date": "2026-04-11",
+      "session": "S9",
+      "weight": 72.8,
+      "muscle": 50.9,
+      "fatMass": 18.7,
+      "fatPct": 25.7,
+      "waist": 86.5,
+      "inbody": 72,
+      "note": "ウエスト最小値更新"
+    },
+    {
+      "date": "2026-04-18",
+      "session": "S10",
+      "weight": 73.8,
+      "muscle": 52.1,
+      "fatMass": 18.5,
+      "fatPct": 25.1,
+      "waist": 87.5,
+      "inbody": null,
+      "note": "体脂肪量 過去最小タイ"
+    },
+    {
+      "date": "2026-04-26",
+      "session": "S11",
+      "weight": 73.3,
+      "muscle": 50.2,
+      "fatMass": 20,
+      "fatPct": 27.2,
+      "waist": 87,
+      "inbody": null,
+      "note": "前日飲み会の影響"
+    },
+    {
+      "date": "2026-05-10",
+      "session": "S12",
+      "weight": 73.5,
+      "muscle": 51.5,
+      "fatMass": 18.9,
+      "fatPct": 25.7,
+      "waist": 87.5,
+      "inbody": null,
+      "note": "家トレ開始1週目"
+    },
+    {
+      "date": "2026-05-12",
+      "session": "S13",
+      "weight": 72.7,
+      "muscle": 50.3,
+      "fatMass": 19.3,
+      "fatPct": 26.6,
+      "waist": null,
+      "inbody": null,
+      "note": "前日会食もコントロール成功"
+    },
+    {
+      "date": "2026-05-20",
+      "session": "S14",
+      "weight": 73.2,
+      "muscle": 51.4,
+      "fatMass": 18.7,
+      "fatPct": 25.5,
+      "waist": null,
+      "inbody": 73,
+      "note": "カロリー管理アプリ開始"
+    },
+    {
+      "date": "2026-05-24",
+      "session": "S15",
+      "weight": 73.2,
+      "muscle": 50.8,
+      "fatMass": 19.3,
+      "fatPct": 26.3,
+      "waist": 87.5,
+      "inbody": null,
+      "note": "出張後リカバリー回、ベンチ43.5kgクリア"
+    },
+    {
+      "date": "2026-05-31",
+      "session": "S16",
+      "weight": 72.9,
+      "muscle": 51.3,
+      "fatMass": 18.5,
+      "fatPct": 25.4,
+      "waist": 87,
+      "inbody": null,
+      "note": "★体脂肪量18.5kg＝過去最小タイ"
+    },
+    {
+      "date": "2026-06-07",
+      "session": "S17",
+      "weight": 72.3,
+      "muscle": 50.5,
+      "fatMass": 18.7,
+      "fatPct": 25.9,
+      "waist": 87,
+      "inbody": 71,
+      "note": "台湾出張後、ベンチ46kg達成、GLP-1検討中"
+    },
+    {
+      "date": "2026-06-14",
+      "session": "S18",
+      "weight": 72.5,
+      "muscle": 50.9,
+      "fatMass": 18.6,
+      "fatPct": 25.6,
+      "waist": 87,
+      "inbody": null,
+      "note": "懇親会連戦もキープ、インクライン41kg新記録、食事管理定着"
+    },
+    {
+      "date": "2026-06-16",
+      "session": "S19",
+      "weight": 71.6,
+      "muscle": 50.2,
+      "fatMass": 18.4,
+      "fatPct": 25.7,
+      "waist": null,
+      "inbody": null,
+      "note": "★体脂肪量18.4kg全期間最小値更新！体重71.6kgも最小、ロープーリー45kg、ラットプル筋肥大セット移行"
+    },
+    {
+      "date": "2026-06-21",
+      "session": "S20",
+      "weight": 72.6,
+      "muscle": 51.3,
+      "fatMass": 18.2,
+      "fatPct": 25.1,
+      "waist": 86.5,
+      "inbody": null,
+      "note": "★★体脂肪量18.2kg全期間最小値更新！体脂肪率25.1%最良タイ、ウエスト86.5cm最小タイ、ラットプル45kgデビュー"
+    },
+    {
+      "date": "2026-06-24",
+      "session": "S21",
+      "weight": 72.6,
+      "muscle": 51.7,
+      "fatMass": 17.8,
+      "fatPct": 24.5,
+      "waist": null,
+      "inbody": 74,
+      "note": "★★★体脂肪量17.8kg全期間最小値大幅更新（初の17kg台）！体脂肪率24.5%最良更新、ベンチ46kg補助なし10回、InBody74点最高、シックスパック出現"
+    },
+    {
+      "date": "2026-06-28",
+      "session": "S22",
+      "weight": 72.9,
+      "muscle": 51.9,
+      "fatMass": 17.8,
+      "fatPct": 24.4,
+      "waist": 86.5,
+      "inbody": null,
+      "note": "★体脂肪率24.4%最良更新・体脂肪量17.8kg維持（17kg台キープ）。先生「体脂肪は横ばい→落ちるのが理想、今は理想の1周目」。インクライン41kg自力初成功。GLP-1オフで中途覚醒→就寝前プロテイン15g導入。水分増で一時的に体重増も慣れれば落ちる見込み。"
+    },
+    {
+      "date": "2026-07-05",
+      "session": "S23",
+      "weight": 73.4,
+      "muscle": 52.2,
+      "fatMass": 18.2,
+      "fatPct": 24.5,
+      "waist": 87,
+      "inbody": 74,
+      "note": "出張多めの週もキープ（トントン）。体重増は水分・誤差で脂肪では増えていない・筋肉は減らない（先生）。約3ヶ月前(4月)比で筋肉量ほぼ同じ・体脂肪約1kg減の好ペース。InBody74点維持（70超＝健康型）。ウエスト+0.5=87.0は出張の内臓/水分で誤差。"
+    },
+    {
+      "date": "2026-07-08",
+      "session": "S24",
+      "weight": 71.1,
+      "muscle": 51.1,
+      "fatMass": 16.9,
+      "fatPct": 23.8,
+      "waist": 86,
+      "inbody": null,
+      "note": "★★★体脂肪量16.9kg全期間最小値大幅更新（初の16kg台）！体脂肪率23.8%も最良更新（過去最高30%→23.8%）。体重71.1kg最小・ウエスト86.0cm(-0.5)最小更新。直近数日で2.3kg減はむくみ（余計な水分）が抜けたもので筋肉は維持（先生「筋肉は全く落ちてない」）。TDEE=2000で確定（1500基準-500・会食+300・運動微調整の逆算が実測とぴったり／6月-約7,000kcal≒脂肪1kg減と一致）。GLP-1オフ・発酵食品（キムチ/納豆/めかぶ）で便通改善。健康診断前に自己ベスト。約3ヶ月ぶりの最小値更新。先生「ロジックが見えた、KPI通りやれば落ちる」。"
+    },
+    {
+      "date": "2026-07-11",
+      "session": "S25",
+      "weight": 71.7,
+      "muscle": 51.2,
+      "fatMass": 17.4,
+      "fatPct": 24.3,
+      "waist": 85.5,
+      "inbody": 74,
+      "note": "★ウエスト85.5cm全期間最小値更新（2回連続・S24 86.0→85.5）。★ショルダープレス9kg自己ベスト更新（前回8kg）。ロープーリー45kg×15回（13→15回に回数更新）。体重71.7kg・体脂肪量17.4kg（S24比+0.6/+0.5）は急降下後の水分戻りによる誤差で脂肪増ではない（先生「0.6kgで一気に脂肪は増えない、ほぼ水分、筋肉が水分で戻ってるはず、脂肪増量は絶対ない」）。InBody74点維持（S24と同点）。身長170cm計測＝伸びていた（タンパク質摂取の効果か）。ジム計測（最も細い位置）で85.5、健診/病院は上腹部で高めに出る→ジムで82-83を狙い健診85以下へ。タンパク質約150g/日（体重比1.6倍超）で筋分解なく脂肪だけ減（先生）。鶏もも→胸肉でカロリー貯金。TDEE2000確定・GLP-1週1-2回。"
+    },
+    {
+      "date": "2026-07-18",
+      "session": "S26",
+      "weight": 70.8,
+      "muscle": 51.3,
+      "fatMass": 16.4,
+      "fatPct": 23.1,
+      "waist": 85.5,
+      "inbody": 75,
+      "note": "★★全項目自己ベスト更新の日！体脂肪量16.4kg全期間最小更新（16.9→16.4）・体脂肪率23.1%最良更新（過去最高30.2%→23.1%）・InBody75点で初の最高（74→75）・内臓脂肪レベル6へ初低下（7→6）・体重70.8kg最小。ウエスト85.5維持（85.3付近＝85目前）。右肩下がりで綺麗に減少。7月出張・実家の誘惑ありもコントロール（会食は2200に収め締めのラーメン回避・酒3〜4杯上限、朝昼ほぼプロテイン）。基本メニュー固定（卵・米・鶏胸肉・プロテイン・キムチ・ブロッコリー）で体が異常を起こさない。減量ペース月約1kg（目標1.5kg／今月折返しで-0.5〜1kg進捗）。先生「120点。筋肉ほぼ落ちず、むしろ増えてる可能性＝トレの重量が軽く感じる＝減量成功パターン。アプリ管理で再現性あり」。年内に目標体脂肪-6.8kg完了ペース。GLP-1飲み忘れは胃が空なら昼でもOK（プロテイン液体では満腹の膜が張れず効果薄）。"
+    },
+    {
+      "date": "2026-07-22",
+      "session": "S27",
+      "weight": 69.7,
+      "muscle": 51,
+      "fatMass": 15.7,
+      "fatPct": 22.5,
+      "waist": 84.5,
+      "inbody": 75,
+      "note": "★★★全項目自己ベスト大幅更新！体脂肪量15.7kg（初の15kg台・16.4→15.7）・体脂肪率22.5%最良更新（23.1→22.5）・体重69.7kg最小（初の69kg台）・ウエスト84.5cm最小（-1.0cm・85.5→84.5）・InBody75点維持。内臓脂肪レベル6を維持（7/18に7→6へ初低下）。わずか4日でこの改善に先生も驚き「筋肉量は変わらず体脂肪だけで削れている」。ベンチ（スミス）46kg×10を体重激減下でも重量維持（相対的な筋力はむしろ向上）。★ショルダープレス10kg自己ベスト更新（前回9kg）。スクワット61kg×12「いつも通り」で筋肉が落ちていないことを確認。減量ペースは月1kg強、TDEE=1500の仮説が最大値/最小値からもほぼ一致。鶏もも→胸肉に変えて浮いた分をお酒・フルーツに充当し1500kcal以内でも会食を楽しむ運用が定着（先生「我慢じゃなく再現性のあるダイエット」）。塩分不足に注意（発汗期は味噌汁等で1日16g目安）。先生「体脂肪率9〜14%が最も筋肉がつきやすいゾーン、今は絞る局面を継続」。ウエストは半年前87〜88cmから劇的に減少、スーツも緩くなりLサイズ→Mサイズへ。"
+    }
+  ],
+  "trainingLog": [
+    {
+      "date": "2025-05-20",
+      "session": "S1",
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 25,
+          "reps": null,
+          "sets": null
+        }
+      ],
+      "comment": "初回チャレンジ。フォーム学習が中心。"
+    },
+    {
+      "date": "2025-07-19",
+      "session": "S3",
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 32.5,
+          "reps": 10,
+          "sets": 3
+        }
+      ],
+      "comment": "フォーム修正中。脂質不足発見→MCTオイル再開。"
+    },
+    {
+      "date": "2025-10-15",
+      "session": "S4",
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 32.5,
+          "reps": null,
+          "sets": null
+        }
+      ],
+      "comment": "フォーム維持。隠れカロリー特定。"
+    },
+    {
+      "date": "2025-11-22",
+      "session": "S5",
+      "exercises": [
+        {
+          "name": "スクワット",
+          "weight": 32.5,
+          "reps": 10,
+          "sets": null
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": 4,
+          "reps": 15,
+          "sets": null
+        }
+      ],
+      "comment": "★最大改善回。スクワット→次回35kgチャレンジへ。"
+    },
+    {
+      "date": "2026-02-07",
+      "session": "S7",
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 27.5,
+          "reps": null,
+          "sets": null
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": 15,
+          "reps": null,
+          "sets": null
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": null,
+          "reps": null,
+          "sets": null
+        }
+      ],
+      "comment": "体重減少中のキープ。ケーブルフライ10→15kgに増加。"
+    },
+    {
+      "date": "2026-04-05",
+      "session": "S8",
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 43.9,
+          "reps": null,
+          "sets": null
+        }
+      ],
+      "comment": "★5kgプレート使用、ベンチ重量更新！"
+    },
+    {
+      "date": "2026-04-11",
+      "session": "S9",
+      "waist": 86.5,
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 43.5,
+          "reps": 10,
+          "sets": 3
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": null,
+          "reps": 13,
+          "sets": null
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 35,
+          "reps": 15,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 56,
+          "reps": null,
+          "sets": null
+        }
+      ],
+      "comment": "ベンチ2セット目8→10回に改善。ウエスト最小値更新。"
+    },
+    {
+      "date": "2026-04-18",
+      "session": "S10",
+      "waist": 87.5,
+      "exercises": [
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 32.5,
+          "reps": 10,
+          "sets": null
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": null,
+          "reps": 15,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 56,
+          "reps": null,
+          "sets": null
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": 4,
+          "reps": null,
+          "sets": null
+        }
+      ],
+      "comment": "インクライン中心。ケーブルフライ過去最高15回。平日空腹でもインクライン上がった。"
+    },
+    {
+      "date": "2026-04-26",
+      "session": "S11",
+      "waist": 87,
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 38.5,
+          "reps": 11,
+          "sets": null
+        },
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 32.5,
+          "reps": 10,
+          "sets": null
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": null,
+          "reps": 15,
+          "sets": null
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 15,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 56,
+          "reps": 12,
+          "sets": null
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": 4,
+          "reps": null,
+          "sets": null
+        }
+      ],
+      "comment": "体重-500gで回数キープ=100点（篠澤先生）。ラットプルダウン重量UP。"
+    },
+    {
+      "date": "2026-05-10",
+      "session": "S12",
+      "waist": 87.5,
+      "exercises": [
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 38.5,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 20,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 58.5,
+          "reps": 12,
+          "sets": null
+        }
+      ],
+      "comment": "★インクライン2セット目初の10回達成。ラットプル回数20回へ引上げ。スクワット+2.5kg。家トレ開始1週目。"
+    },
+    {
+      "date": "2026-05-12",
+      "session": "S13",
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 42.5,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": 58.5,
+          "reps": 12,
+          "sets": null
+        }
+      ],
+      "comment": "ベンチ10回が安定して上がるように。連続セッションでもスクワット維持。"
+    },
+    {
+      "date": "2026-05-20",
+      "session": "S14",
+      "exercises": [
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 38.5,
+          "reps": 10,
+          "sets": null
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": 15,
+          "reps": 15,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 58.5,
+          "reps": 12,
+          "sets": null
+        }
+      ],
+      "comment": "インクラインピークタイ・フォーム過去一。カロリー管理アプリ開始。"
+    },
+    {
+      "date": "2026-05-24",
+      "session": "S15",
+      "waist": 87.5,
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 43.5,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "インクラインダンベルフライ",
+          "weight": null,
+          "reps": 15,
+          "sets": null
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 20,
+          "sets": 3
+        },
+        {
+          "name": "スクワット",
+          "weight": 58.5,
+          "reps": 12,
+          "sets": null
+        }
+      ],
+      "comment": "★ベンチ43.5kg余裕クリア→次回46kgへ。ダンベルフライ13→15回記録更新（家トレ効果）。ラットプル3セット安定。"
+    },
+    {
+      "date": "2026-05-31",
+      "session": "S16",
+      "waist": 87,
+      "exercises": [
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 38.5,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": null,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 17,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 58.5,
+          "reps": 12,
+          "sets": null
+        }
+      ],
+      "comment": "出張後もパワー維持。ウエスト87.0cm改善。体脂肪量18.5kg過去最小タイ。"
+    },
+    {
+      "date": "2026-06-07",
+      "session": "S17",
+      "waist": 87,
+      "exercises": [
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 46,
+          "reps": 10,
+          "sets": null
+        },
+        {
+          "name": "インクラインダンベルフライ",
+          "weight": null,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 20,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": 12,
+          "sets": null
+        }
+      ],
+      "comment": "★ベンチ46kg自己ベスト更新！台湾出張疲れで粘り不足も完遂。スクワット58.5→61kgへ重量UP。"
+    },
+    {
+      "date": "2026-06-14",
+      "session": "S18",
+      "waist": 87,
+      "exercises": [
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 41,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": null,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "ロープーリー",
+          "weight": 40,
+          "reps": 15,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": 12,
+          "sets": null
+        }
+      ],
+      "comment": "★インクライン41kg自己ベスト更新（+2.5kg）。ラットプル「今日が一番パワフル」（篠澤先生）。スクワット61kg定着。ロープーリー40kg×15回（従来35kg×20回から重量UP）。次回ロープーリー筋肥大セットへ。"
+    },
+    {
+      "date": "2026-06-16",
+      "session": "S19",
+      "exercises": [
+        {
+          "name": "ロープーリー",
+          "weight": 45,
+          "reps": 13,
+          "sets": 3
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 46,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "インクラインダンベルフライ",
+          "weight": 10,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": null,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": 12,
+          "sets": 1
+        },
+        {
+          "name": "モンスターウォーク",
+          "weight": null,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "ハンズアップクランチ",
+          "weight": null,
+          "reps": 15,
+          "sets": 3
+        }
+      ],
+      "comment": "★体脂肪量18.4kg全期間最小値更新！ロープーリー40→45kgへ重量UP。ラットプル筋肥大セット移行（12回×2）。ベンチ46kgキープ、二の腕強化が課題。炭水化物はトレ前後に集中。篠澤先生「今までで一番いい日、おめでとうございます」"
+    },
+    {
+      "date": "2026-06-21",
+      "session": "S20",
+      "waist": 86.5,
+      "exercises": [
+        {
+          "name": "ラットプルダウン",
+          "weight": 45,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "ロープーリー",
+          "weight": 40,
+          "reps": 15,
+          "sets": 1
+        },
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 41,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "ケーブルフライ/デックフライ",
+          "weight": 15,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": 4,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": 17,
+          "sets": 1
+        },
+        {
+          "name": "モンスターウォーク",
+          "weight": null,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "腹筋（下腹）",
+          "weight": null,
+          "reps": 17,
+          "sets": 3
+        }
+      ],
+      "comment": "★★体脂肪量18.2kg全期間最小値再更新！ラットプル45kgデビュー！ケーブルデックフライ「ついに脳と筋肉がつながった」MMC成立。肩のカット出てきた「河野さんの肩じゃないみたい」。スクワット61kg×17回（12→17回UP）。ウエスト86.5cm最小タイ。「この半年楽しみですよ」"
+    },
+    {
+      "date": "2026-06-24",
+      "session": "S21",
+      "exercises": [
+        {
+          "name": "ロープーリー",
+          "weight": 45,
+          "reps": 13,
+          "sets": 3
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 46,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "インクラインダンベルフライ",
+          "weight": 10,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "ショルダープレス",
+          "weight": 8,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": 12,
+          "sets": 1
+        },
+        {
+          "name": "モンスターウォーク",
+          "weight": null,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "ハンズアップクランチ",
+          "weight": null,
+          "reps": 15,
+          "sets": 3
+        }
+      ],
+      "comment": "★★★体脂肪量17.8kg全期間最小値大幅更新（初の17kg台）！ベンチ46kg補助なし10回達成！フォーム改善（足→尻→アーチ→全身）。InBody74点最高。シックスパック出現。ショルダープレス8kg初記録。「ついにブレイク」"
+    },
+    {
+      "date": "2026-06-28",
+      "session": "S22",
+      "waist": 86.5,
+      "exercises": [
+        {
+          "name": "ラットプルダウン",
+          "weight": 45,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "ロープーリー",
+          "weight": 40,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 41,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": 15,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": 12,
+          "sets": 1
+        },
+        {
+          "name": "モンスターウォーク",
+          "weight": null,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "腹筋（下腹）",
+          "weight": null,
+          "reps": 15,
+          "sets": 2
+        }
+      ],
+      "comment": "★インクラインベンチ（スミス）41kg自力初成功（前回は7回＋5kg補助）！ラットプル45kg×12×2安定（3set目40kg×15）。今日はケーブルフライの日（ダンベルフライなし）。スクワットは重さより深さ＝腿と床が平行を課題に（60kgまでは深さ優先）。体脂肪量17.8kg維持・体脂肪率24.4%最良。先生「横ばいして落ちるのが理想、今は理想の1周目」。GLP-1オフで中途覚醒→就寝前プロテイン15g導入（睡眠優先、1500kcalは維持）。ウエスト86.5維持、健診まで約14日で85目標。"
+    },
+    {
+      "date": "2026-07-05",
+      "session": "S23",
+      "waist": 87,
+      "exercises": [
+        {
+          "name": "ロープーリー",
+          "weight": 45,
+          "reps": 13,
+          "sets": 3
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 46,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "インクラインダンベルフライ",
+          "weight": 10,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "ショルダープレス",
+          "weight": 8,
+          "reps": 12,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": null,
+          "sets": 1
+        },
+        {
+          "name": "モンスターウォーク",
+          "weight": null,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "ハンズアップクランチ",
+          "weight": null,
+          "reps": 15,
+          "sets": 3
+        }
+      ],
+      "comment": "出張多めの週もキープ（トントン）＝先生「こういう週をキープできるのが今後大事」。体重増は水分・誤差で脂肪では増えず筋肉も減らない。約3ヶ月前(4月)比で筋肉維持・体脂肪約1kg減の好ペース。InBody74点維持（70超＝健康型）。ベンチ46kg×10完遂（出張疲れ・酒の分解ダメージで前回より重く感じるも達成）。ロープーリー45kg×13×3・ラットプル40kg×12×2は余裕。スクワットは深さ重視でベルトスクワット導入（腿と床が平行を目安化）。ショルダープレス8kg・インクラインは次回重量UP予定。ウエスト+0.5=87.0は出張の誤差。"
+    },
+    {
+      "date": "2026-07-08",
+      "session": "S24",
+      "waist": 86,
+      "exercises": [
+        {
+          "name": "ラットプルダウン",
+          "weight": 45,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 41,
+          "reps": 10,
+          "sets": null
+        },
+        {
+          "name": "ケーブルフライ/チェストフライ",
+          "weight": 15,
+          "reps": 15,
+          "sets": null
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": 4,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": null,
+          "reps": null,
+          "sets": 1
+        },
+        {
+          "name": "モンスターウォーク",
+          "weight": null,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "腹筋（下腹）",
+          "weight": null,
+          "reps": 15,
+          "sets": 2
+        }
+      ],
+      "comment": "★★★体脂肪量16.9kg（初の16kg台）・体脂肪率23.8%・体重71.1kg・ウエスト86.0cm 全て全期間最小値更新の日！健診前に自己ベスト。約3ヶ月ぶりの最小値更新。ラットプル45kg×12×2（3set目49kg→4set40kg×15）。インクライン41kg×10自力（重量より維持＝フォーム精度を上げるフェーズへ）。ケーブルデックフライ15kg×15。スクワットは重さより深さ重視（腿と床が平行・箱/ベルトで深度管理）。モンスターウォーク→下腹腹筋で締め。TDEE=2000で確定（逆算が実測とぴったり）。直近2.3kg減はむくみが抜けたもので筋肉は維持（先生「筋肉は全く落ちてない」）。今日は一番ガクッと落ちた分だけ出力は出づらいが正常な減量反応。先生「ロジックが見えた、KPI通りやれば落ちる／停滞が来ても継続」。"
+    },
+    {
+      "date": "2026-07-11",
+      "session": "S25",
+      "waist": 85.5,
+      "exercises": [
+        {
+          "name": "ロープーリー",
+          "weight": 45,
+          "reps": 15,
+          "sets": 3
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 46,
+          "reps": 10,
+          "sets": null
+        },
+        {
+          "name": "インクラインダンベルフライ",
+          "weight": 10,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "ショルダープレス",
+          "weight": 9,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": null,
+          "reps": 12,
+          "sets": 1
+        },
+        {
+          "name": "モンスターウォーク",
+          "weight": null,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "ハンズアップクランチ",
+          "weight": null,
+          "reps": 15,
+          "sets": 3
+        }
+      ],
+      "comment": "★ショルダープレス9kg自己ベスト更新（前回8kg／背中・押す力の成長が効いた）。★ウエスト85.5cm全期間最小値更新（2回連続）。ロープーリー45kg×15回（従来13→15回に回数UP）。フラットのスミスベンチ46kg×10（26→36→46でウォームアップ、最後31kgに落として収縮ドロップ×10）。インクラインダンベルフライ10kg×15×2。スクワットは重さより深さ重視（腿と床が平行）で維持＝「ちゃんと沈められた」。モンスターウォーク→ハンズアップクランチ（手を上げるバージョン）で締め。体脂肪量17.4kg・体重71.7kgは水分戻りによる誤差で脂肪増なし（先生「ほぼ水分、脂肪増量は絶対ない」）。InBody74点維持。身長170cm計測＝伸びていた。食事：鶏もも→胸肉でカロリー貯金・タンパク質約150g維持で筋分解なく脂肪だけ減。トレ前におにぎり/お萩の炭水化物でスクワットの踏ん張りUPを実感。TDEE2000確定・3段階運用（トレなし日はカロリー貯金／トレ日1500マストでアンダー／会食・外出日は+300可）、基礎代謝1567は死守。"
+    },
+    {
+      "date": "2026-07-18",
+      "session": "S26",
+      "waist": 85.5,
+      "exercises": [
+        {
+          "name": "ラットプルダウン",
+          "weight": 45,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "ロープーリー",
+          "weight": 40,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "インクラインベンチ（スミス）",
+          "weight": 41,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "サイドレイズ",
+          "weight": 4,
+          "reps": 15,
+          "sets": 2
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": 12,
+          "sets": 1
+        },
+        {
+          "name": "腹筋（下腹）",
+          "weight": null,
+          "reps": 10,
+          "sets": 3
+        }
+      ],
+      "comment": "★★全項目自己ベスト更新日（体脂肪量16.4kg・体脂肪率23.1%・InBody75点・内臓脂肪6・体重70.8kg）。ラットプル45kg×12×2で初めて2セットとも胸につけて（フル可動）完遂＋3set目40kg×15。ロープーリー40kg×15（肩甲骨を寄せる意識）。インクライン（スミス）41kg×10×2自力成功（25→31→41ウォームアップ、3set目31kg×10でフォーム重視）。サイドレイズ4kg×15×2。スクワット61kg×12いつも通り。下腹腹筋で締め。全種目「今日は軽い／スムーズ」＝可動域も広がり出力低下なし→先生「筋肉が減っていない、むしろ増えてる可能性。減量なのに重量が軽く感じるのは大成功パターン」。脂肪が落ちて筋の境目・関節可動域がクリアに。重量更新より絞りが目的、フォーム精度フェーズ継続。"
+    },
+    {
+      "date": "2026-07-22",
+      "session": "S27",
+      "waist": 84.5,
+      "exercises": [
+        {
+          "name": "ロープーリー",
+          "weight": null,
+          "reps": 15,
+          "sets": 3
+        },
+        {
+          "name": "ラットプルダウン",
+          "weight": 40,
+          "reps": 12,
+          "sets": 2
+        },
+        {
+          "name": "ベンチプレス（スミス）",
+          "weight": 46,
+          "reps": 10,
+          "sets": 2
+        },
+        {
+          "name": "ショルダープレス",
+          "weight": 10,
+          "reps": 10,
+          "sets": null
+        },
+        {
+          "name": "スクワット",
+          "weight": 61,
+          "reps": 12,
+          "sets": 1
+        },
+        {
+          "name": "モンスターウォーク",
+          "weight": null,
+          "reps": null,
+          "sets": 3
+        },
+        {
+          "name": "ハンズアップクランチ",
+          "weight": null,
+          "reps": 15,
+          "sets": 2
+        }
+      ],
+      "comment": "★★★全項目自己ベスト大幅更新（体脂肪量15.7kg初の15kg台・体脂肪率22.5%・体重69.7kg初の69kg台・ウエスト84.5cm-1.0cm・InBody75点維持）。ロープーリー15回×3（重量据え置き）。ラットプル40kg×12×2。ベンチ（スミス）46kg×10×2は26→36ウォームアップ経由、体重激減下でも重量維持し最後31kgに落として収縮ドロップ×10。★ショルダープレス10kg自己ベスト更新（前回9kg、わずか+1kgでも体感差大）。スクワット61kg×12「いつも通り」で筋肉維持を再確認。モンスターウォーク→ハンズアップクランチ（上バージョン）で締め。先生「筋肉量は変わらず体脂肪だけで削れている、相対的な筋力はむしろ向上」。内臓脂肪レベル6維持。減量ペース月1kg強・TDEE=1500の仮説が最大値/最小値からもほぼ一致。鶏もも→胸肉で浮いた分をお酒・フルーツに充当し1500kcal以内で会食も楽しむ運用が定着。塩分不足に注意（発汗期は味噌汁等で1日16g目安）。スーツが緩くなりLサイズ→Mサイズへ。"
+    }
+  ],
+  "waist": [
+    {
+      "date": "2026-01-10",
+      "waist": 88
+    },
+    {
+      "date": "2026-01-18",
+      "waist": 90.5
+    },
+    {
+      "date": "2026-01-24",
+      "waist": 88.5
+    },
+    {
+      "date": "2026-02-01",
+      "waist": 88.5
+    },
+    {
+      "date": "2026-02-07",
+      "waist": 88
+    },
+    {
+      "date": "2026-02-15",
+      "waist": 88
+    },
+    {
+      "date": "2026-02-22",
+      "waist": 87
+    },
+    {
+      "date": "2026-02-28",
+      "waist": 87
+    },
+    {
+      "date": "2026-03-08",
+      "waist": 87
+    },
+    {
+      "date": "2026-03-15",
+      "waist": 87
+    },
+    {
+      "date": "2026-03-22",
+      "waist": 87
+    },
+    {
+      "date": "2026-03-28",
+      "waist": 87
+    },
+    {
+      "date": "2026-04-05",
+      "waist": 87.5
+    },
+    {
+      "date": "2026-04-11",
+      "waist": 86.5
+    },
+    {
+      "date": "2026-04-18",
+      "waist": 87.5
+    },
+    {
+      "date": "2026-04-22",
+      "waist": 86.5
+    },
+    {
+      "date": "2026-04-26",
+      "waist": 87
+    },
+    {
+      "date": "2026-05-03",
+      "waist": 87.5
+    },
+    {
+      "date": "2026-05-10",
+      "waist": 87.5
+    },
+    {
+      "date": "2026-05-24",
+      "waist": 87.5
+    },
+    {
+      "date": "2026-05-31",
+      "waist": 87
+    },
+    {
+      "date": "2026-06-07",
+      "waist": 87
+    },
+    {
+      "date": "2026-06-14",
+      "waist": 87
+    },
+    {
+      "date": "2026-06-21",
+      "waist": 86.5
+    },
+    {
+      "date": "2026-06-28",
+      "waist": 86.5
+    },
+    {
+      "date": "2026-07-05",
+      "waist": 87
+    },
+    {
+      "date": "2026-07-08",
+      "waist": 86
+    },
+    {
+      "date": "2026-07-11",
+      "waist": 85.5
+    },
+    {
+      "date": "2026-07-18",
+      "waist": 85.5
+    },
+    {
+      "date": "2026-07-22",
+      "waist": 84.5
+    }
+  ],
+  "updatedAt": "2026-07-22T10:41:25.431Z"
 }
