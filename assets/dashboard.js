@@ -2002,10 +2002,15 @@ function render(data, calMap) {
 
   let html = '';
 
-  // 同期ステータスバー（自動同期データの最終更新時刻。GitHub Pages上でのみ表示）
-  if (syncStatus.meals || syncStatus.calendar) {
+  // 同期ステータスバー（自動同期データの最終更新時刻。GitHub Pages上でのみ表示）＋ 手入力データの手動クラウド同期ボタン
+  {
     const fmtS = (iso) => { if (!iso) return '—'; const d = new Date(iso); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
-    html += `<div class="sync-status">🔄 自動同期データ最終更新　食事 <b>${fmtS(syncStatus.meals)}</b> ／ 予定 <b>${fmtS(syncStatus.calendar)}</b></div>`;
+    const autoPart = (syncStatus.meals || syncStatus.calendar)
+      ? `🔄 自動同期データ最終更新　食事 <b>${fmtS(syncStatus.meals)}</b> ／ 予定 <b>${fmtS(syncStatus.calendar)}</b>`
+      : '';
+    html += `<div class="sync-status"><span>${autoPart}</span>
+      <span class="cloud-sync"><button id="cloud-sync-btn" class="cloud-sync-btn" title="体組成・トレーニング・腹囲・毎日の記録を他端末と同期">☁ クラウド同期</button><span id="cloud-sync-status" class="cloud-sync-status"></span></span>
+    </div>`;
   }
 
   // ===================== TAB 1: GAP分析 =====================
@@ -3464,6 +3469,115 @@ function render(data, calMap) {
 
 }
 
+// ===== 手入力データのクラウド同期（体組成・トレーニング・腹囲・毎日の記録） =====
+// PCで入力した値がlocalStorageにしか残らずスマホに反映されない問題への対応。
+// 「☁ クラウド同期」ボタンを押した端末が GitHub Contents API 経由で data/user_data.json
+// に直接コミットし、他の端末は起動時にそのJSONをfetchしてlocalStorageへ取り込む
+// （meals.json/calendar.json と同じ「静的JSON経由」の仕組み）。
+// トークンはこの端末のlocalStorageにのみ保存され、リポジトリには一切含まれない。
+const GH_OWNER = 'kiyohirokouno1986';
+const GH_REPO = 'kiyohirokouno1986.github.io';
+const GH_DATA_PATH = 'data/user_data.json';
+const GH_TOKEN_KEY = 'calGuide_ghToken';
+
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => { bin += String.fromCharCode(b); });
+  return btoa(bin);
+}
+
+// 日付一致でupsert（リモートを正として同じ日付のレコードを置き換え、無い日付はそのまま残す）
+function upsertByDate(key, incoming) {
+  if (!Array.isArray(incoming) || !incoming.length) return;
+  let stored = [];
+  try { const raw = localStorage.getItem(key); if (raw) stored = JSON.parse(raw) || []; } catch (e) {}
+  const byDate = new Map(stored.map(d => [d.date, d]));
+  for (const rec of incoming) byDate.set(rec.date, rec);
+  const merged = [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+  localStorage.setItem(key, JSON.stringify(merged));
+}
+// 日付+セッションの組み合わせでupsert（体組成・トレーニングログ用）
+function upsertByDateSession(key, incoming) {
+  if (!Array.isArray(incoming) || !incoming.length) return;
+  let stored = [];
+  try { const raw = localStorage.getItem(key); if (raw) stored = JSON.parse(raw) || []; } catch (e) {}
+  const keyOf = d => d.date + '|' + (d.session || '');
+  const byKey = new Map(stored.map(d => [keyOf(d), d]));
+  for (const rec of incoming) byKey.set(keyOf(rec), rec);
+  const merged = [...byKey.values()].sort((a, b) => a.date.localeCompare(b.date));
+  localStorage.setItem(key, JSON.stringify(merged));
+}
+// data/user_data.json を取り込み、各localStorageへマージ（他端末での自動反映用）。未生成(404)なら無視。
+async function loadServerUserData() {
+  try {
+    const res = await fetch('data/user_data.json', { cache: 'no-store' });
+    if (!res.ok) return;
+    const remote = await res.json();
+    if (!remote || typeof remote !== 'object') return;
+    upsertByDate(DM_KEY, remote.dailyMeasure);
+    upsertByDateSession(BC_KEY, remote.bodyComp);
+    upsertByDateSession(TL_KEY, remote.trainingLog);
+    upsertByDate(WS_KEY, remote.waist);
+  } catch (e) { /* file:// やオフライン時は無視 */ }
+}
+function getGhToken() {
+  let token = null;
+  try { token = localStorage.getItem(GH_TOKEN_KEY); } catch (e) {}
+  if (!token) {
+    token = prompt('GitHubの個人アクセストークン（Fine-grained PAT／このリポジトリへのContents読み書き権限）を入力してください。\nこの端末のブラウザにのみ保存され、コードやリポジトリには含まれません。');
+    if (token) { try { localStorage.setItem(GH_TOKEN_KEY, token.trim()); } catch (e) {} }
+  }
+  return token ? token.trim() : null;
+}
+async function syncToCloud() {
+  const statusEl = document.getElementById('cloud-sync-status');
+  const setStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
+  const token = getGhToken();
+  if (!token) return;
+  setStatus('同期中…');
+  try {
+    const payload = {
+      dailyMeasure: loadDaily(),
+      bodyComp: loadBodyComp(),
+      trainingLog: loadTraining(),
+      waist: loadWaist(),
+      updatedAt: new Date().toISOString(),
+    };
+    const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_DATA_PATH}`;
+    const headers = { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' };
+    const isAuthErr = (status) => status === 401 || status === 403;
+    let sha = null;
+    const getRes = await fetch(apiUrl, { headers });
+    if (getRes.ok) { sha = (await getRes.json()).sha; }
+    else if (isAuthErr(getRes.status)) { throw Object.assign(new Error(`認証エラー(${getRes.status})。トークンを確認してください`), { authError: true }); }
+    else if (getRes.status !== 404) { throw new Error(`取得エラー(${getRes.status})`); }
+
+    const putRes = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: { ...headers, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: 'chore: sync personal data from device',
+        content: utf8ToBase64(JSON.stringify(payload, null, 2)),
+        branch: 'master',
+        ...(sha ? { sha } : {}),
+      }),
+    });
+    if (!putRes.ok) {
+      const err = await putRes.json().catch(() => ({}));
+      throw Object.assign(new Error(`保存エラー(${putRes.status}) ${err.message || ''}`), { authError: isAuthErr(putRes.status) });
+    }
+    setStatus(`✓ 同期完了（${new Date().toLocaleTimeString('ja-JP')}）`);
+  } catch (e) {
+    if (e && e.authError) { try { localStorage.removeItem(GH_TOKEN_KEY); } catch (e2) {} }
+    setStatus(`✗ ${e.message || e}`);
+  }
+}
+function attachCloudSyncHandler() {
+  const btn = document.getElementById('cloud-sync-btn');
+  if (btn) btn.onclick = syncToCloud;
+}
+
 // === INIT ===
 // 食事データは localStorage に保存しつつ、GitHub Actions が Slack から生成する
 // data/meals.json を起動時に取り込んでマージする（手動取り込みも併用可）。
@@ -3510,6 +3624,7 @@ function rerender() {
     // 筋トレ日はGoogleカレンダーの「篠澤先生」(train)で判定（Slackキーワードは使わない）
     for (const m of meals) m.hasTrain = !!(calMap[m.date] && calMap[m.date].train);
     render(meals, calMap);
+    attachCloudSyncHandler();
   } catch(e) {
     document.getElementById('app').innerHTML = `<div class="card" style="border-left:4px solid #c62828;"><h2 style="color:#c62828;">エラー</h2><p style="font-size:0.85em;">${e.message||e}</p></div>`;
     console.error(e);
@@ -3559,6 +3674,7 @@ async function init() {
   await loadServerMeals();
   await loadServerDaily();
   await loadServerCalendar();
+  await loadServerUserData();
   rerender();
   // 同期ステータスは後追いで取得し、取れたら再描画（初回表示をブロックしない）
   await loadSyncStatus();
