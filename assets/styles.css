@@ -340,8 +340,13 @@ canvas { max-height: 260px; margin-top: 8px; }
 .arch-daily-table .ad-dt { display: block; font-size: 0.72em; opacity: 0.45; }
 
 /* ===== 同期ステータスバー ===== */
-.sync-status { font-size: 0.72em; color: #777; background: #eef2f7; border: 1px solid #e0e6ee; border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; text-align: center; }
+.sync-status { font-size: 0.72em; color: #777; background: #eef2f7; border: 1px solid #e0e6ee; border-radius: 8px; padding: 6px 10px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .sync-status b { color: #1a237e; font-weight: 700; }
+.cloud-sync { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.cloud-sync-btn { background: linear-gradient(135deg, #6c5ce7, #8b7cf0); color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 1em; font-weight: 700; cursor: pointer; white-space: nowrap; }
+.cloud-sync-btn:hover { filter: brightness(1.06); }
+.cloud-sync-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(100,255,218,0.35); }
+.cloud-sync-status { font-size: 0.95em; color: #555; white-space: nowrap; }
 
 /* ===== 停滞・ウーシュ判定カード ===== */
 .woosh-banner { display: flex; gap: 12px; align-items: flex-start; border-radius: 12px; padding: 14px; margin-bottom: 12px; }
