@@ -186,11 +186,12 @@ canvas { max-height: 260px; margin-top: 8px; }
 .bc-kpi-item .bl { font-size: 0.62em; color: #888; font-weight: 600; }
 .bc-kpi-item .bd { font-size: 0.65em; font-weight: 700; }
 
-/* Body comp history table */
-.bc-table { width: 100%; border-collapse: collapse; font-size: 0.76em; margin-top: 8px; }
-.bc-table th { padding: 6px 4px; border-bottom: 2px solid #ddd; font-weight: 600; text-align: center; color: #666; white-space: nowrap; }
+/* Body comp history table（10列と横長のため overflow-x:auto の親でスクロール表示。
+   width指定なし＝内容幅で広がらせて初めてスクロールが機能する） */
+.bc-table { border-collapse: collapse; font-size: 0.76em; margin-top: 8px; min-width: 100%; }
+.bc-table th { padding: 6px 8px; border-bottom: 2px solid #ddd; font-weight: 600; text-align: center; color: #666; white-space: nowrap; }
 .bc-table th:first-child { text-align: left; }
-.bc-table td { padding: 6px 4px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+.bc-table td { padding: 6px 8px; border-bottom: 1px solid #f0f0f0; text-align: center; white-space: nowrap; }
 .bc-table td:first-child { text-align: left; font-weight: 500; }
 .bc-table tr:hover { background: #fafafa; }
 .bc-del { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1em; padding: 2px 4px; }
