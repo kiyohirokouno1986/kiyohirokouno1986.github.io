@@ -3312,7 +3312,7 @@ function render(data, calMap) {
         scales: {
           y: { type: 'linear', position: 'left', min: 67, max: 76, title: { display: true, text: '体重 kg', font: { size: 9 } }, ticks: { font: { size: 8 } } },
           y1: { type: 'linear', position: 'right', min: 22, max: 33, grid: { drawOnChartArea: false }, title: { display: true, text: '体脂肪率 %', font: { size: 9 } }, ticks: { font: { size: 8 } } },
-          y2: { type: 'linear', position: 'right', min: 16, max: 24, grid: { drawOnChartArea: false }, title: { display: true, text: '体脂肪量 kg', font: { size: 9, weight: 'bold' }, color: '#c62828' }, ticks: { font: { size: 8 }, color: '#c62828' } },
+          y2: { type: 'linear', position: 'right', min: 14, max: 24, grid: { drawOnChartArea: false }, title: { display: true, text: '体脂肪量 kg', font: { size: 9, weight: 'bold' }, color: '#c62828' }, ticks: { font: { size: 8 }, color: '#c62828' } },
           x: { ticks: { font: { size: 7 }, maxRotation: 0, autoSkip: false } }
         }
       }
