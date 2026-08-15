@@ -1481,6 +1481,24 @@
       "weight": 69.6,
       "fatPct": 22.5,
       "muscle": 51.1
+    },
+    {
+      "date": "2026-08-13",
+      "weight": 69.1,
+      "fatPct": 22.5,
+      "muscle": 51
+    },
+    {
+      "date": "2026-08-14",
+      "weight": 69.3,
+      "fatPct": 21.9,
+      "muscle": 51.3
+    },
+    {
+      "date": "2026-08-15",
+      "weight": 70.3,
+      "fatPct": 21.4,
+      "muscle": 52.4
     }
   ],
   "bodyComp": [
@@ -2992,5 +3010,5 @@
       "waist": 84
     }
   ],
-  "updatedAt": "2026-08-12T04:03:41.590Z"
+  "updatedAt": "2026-08-15T02:13:08.913Z"
 }
