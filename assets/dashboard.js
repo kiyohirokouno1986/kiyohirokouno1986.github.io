@@ -2688,6 +2688,61 @@ function render(data, calMap) {
     <div class="dm-kpi-item" style="background:transparent;"></div>
   </div>`;
 
+  // --- Daily input form ---
+  html += `<div class="dm-section"><h2>⚖️ 毎日の記録 <button class="bc-toggle" id="dm-toggle-btn">＋記録</button></h2>`;
+  html += `<div class="dm-form" id="dm-form">
+    <div class="dm-form-grid">
+      <div class="dm-field"><label>日付 *</label><input type="date" id="dm-date" value="${today}"></div>
+      <div class="dm-field"><label>体重(kg) *</label><input type="number" id="dm-weight" step="0.1" placeholder="71.3"></div>
+      <div class="dm-field"><label>体脂肪率(%)</label><input type="number" id="dm-fatpct" step="0.1" placeholder="23.6"></div>
+      <div class="dm-field"><label>筋肉量(kg)</label><input type="number" id="dm-muscle" step="0.1" placeholder="51.7"></div>
+    </div>
+    <div style="margin-top:8px;text-align:right;">
+      <button class="tl-btn tl-btn-primary" id="dm-save">保存</button>
+    </div>
+  </div>`;
+
+  // --- 記録更新フラグの事前計算（日付昇順で過去ベストを更新した日を検出）---
+  // 筋肉量=過去最大を更新／体脂肪量・体脂肪率=過去最低を更新した瞬間にアイコンを付ける
+  const dmRecord = {};
+  {
+    let maxMuscle = -Infinity, minFatMass = Infinity, minFatPct = Infinity;
+    for (let i = 0; i < dmData.length; i++) {
+      const d = dmData[i];
+      const fm = calcFatMass(d);
+      const f = {};
+      if (d.muscle != null) { if (d.muscle > maxMuscle && maxMuscle !== -Infinity) f.muscle = true; if (d.muscle > maxMuscle) maxMuscle = d.muscle; }
+      if (fm != null) { if (fm < minFatMass && minFatMass !== Infinity) f.fatMass = true; if (fm < minFatMass) minFatMass = fm; }
+      if (d.fatPct != null) { if (d.fatPct < minFatPct && minFatPct !== Infinity) f.fatPct = true; if (d.fatPct < minFatPct) minFatPct = d.fatPct; }
+      if (f.muscle || f.fatMass || f.fatPct) dmRecord[i] = f;
+    }
+  }
+  const recBadge = (on, kind) => on
+    ? `<span class="dm-rec ${kind}" title="${kind === 'up' ? '筋肉量 過去最大を更新！' : '過去最低を更新！'}">${kind === 'up' ? '🏆' : '🔥'}</span>`
+    : '';
+
+  // --- Daily history table ---
+  html += `<div class="dm-history" id="dm-history">`;
+  html += `<div class="dm-history-row header"><div>日付</div><div>体重</div><div>体脂肪率</div><div>体脂肪量</div><div>除脂肪体重</div><div>筋肉量</div><div></div></div>`;
+  for (let di = dmData.length - 1; di >= 0; di--) {
+    const d = dmData[di];
+    const ma7w = calcMA(dmData, 'weight', di, 7);
+    const lbm = calcLBM(d);
+    const fm = calcFatMass(d);
+    const rec = dmRecord[di] || {};
+    html += `<div class="dm-history-row">
+      <div>${fmtDate(d.date)}</div>
+      <div><strong>${d.weight.toFixed(1)}</strong><span class="dm-ma-badge">${ma7w != null ? ma7w.toFixed(1) : ''}</span></div>
+      <div>${d.fatPct != null ? d.fatPct.toFixed(1) + '%' : '—'}${recBadge(rec.fatPct, 'down')}</div>
+      <div style="color:#c62828;font-weight:700;">${fm != null ? fm.toFixed(1) : '—'}${recBadge(rec.fatMass, 'down')}</div>
+      <div style="color:#1b5e20;font-weight:700;">${lbm != null ? lbm.toFixed(1) : '—'}</div>
+      <div>${d.muscle != null ? d.muscle.toFixed(1) : '—'}${recBadge(rec.muscle, 'up')}</div>
+      <div><button class="dm-del" data-idx="${di}" title="削除">✕</button></div>
+    </div>`;
+  }
+  html += `</div>`;
+  html += `</div>`; // end dm-section
+
   // --- Daily chart ---
   html += `<div class="dm-chart-card"><h2>📈 毎日計測 推移チャート</h2>
     <div class="dm-filter" id="dm-chart-filter">
@@ -2989,60 +3044,6 @@ function render(data, calMap) {
     }
   }
 
-  // --- Daily input form ---
-  html += `<div class="dm-section"><h2>⚖️ 毎日の記録 <button class="bc-toggle" id="dm-toggle-btn">＋記録</button></h2>`;
-  html += `<div class="dm-form" id="dm-form">
-    <div class="dm-form-grid">
-      <div class="dm-field"><label>日付 *</label><input type="date" id="dm-date" value="${today}"></div>
-      <div class="dm-field"><label>体重(kg) *</label><input type="number" id="dm-weight" step="0.1" placeholder="71.3"></div>
-      <div class="dm-field"><label>体脂肪率(%)</label><input type="number" id="dm-fatpct" step="0.1" placeholder="23.6"></div>
-      <div class="dm-field"><label>筋肉量(kg)</label><input type="number" id="dm-muscle" step="0.1" placeholder="51.7"></div>
-    </div>
-    <div style="margin-top:8px;text-align:right;">
-      <button class="tl-btn tl-btn-primary" id="dm-save">保存</button>
-    </div>
-  </div>`;
-
-  // --- 記録更新フラグの事前計算（日付昇順で過去ベストを更新した日を検出）---
-  // 筋肉量=過去最大を更新／体脂肪量・体脂肪率=過去最低を更新した瞬間にアイコンを付ける
-  const dmRecord = {};
-  {
-    let maxMuscle = -Infinity, minFatMass = Infinity, minFatPct = Infinity;
-    for (let i = 0; i < dmData.length; i++) {
-      const d = dmData[i];
-      const fm = calcFatMass(d);
-      const f = {};
-      if (d.muscle != null) { if (d.muscle > maxMuscle && maxMuscle !== -Infinity) f.muscle = true; if (d.muscle > maxMuscle) maxMuscle = d.muscle; }
-      if (fm != null) { if (fm < minFatMass && minFatMass !== Infinity) f.fatMass = true; if (fm < minFatMass) minFatMass = fm; }
-      if (d.fatPct != null) { if (d.fatPct < minFatPct && minFatPct !== Infinity) f.fatPct = true; if (d.fatPct < minFatPct) minFatPct = d.fatPct; }
-      if (f.muscle || f.fatMass || f.fatPct) dmRecord[i] = f;
-    }
-  }
-  const recBadge = (on, kind) => on
-    ? `<span class="dm-rec ${kind}" title="${kind === 'up' ? '筋肉量 過去最大を更新！' : '過去最低を更新！'}">${kind === 'up' ? '🏆' : '🔥'}</span>`
-    : '';
-
-  // --- Daily history table ---
-  html += `<div class="dm-history" id="dm-history">`;
-  html += `<div class="dm-history-row header"><div>日付</div><div>体重</div><div>体脂肪率</div><div>体脂肪量</div><div>除脂肪体重</div><div>筋肉量</div><div></div></div>`;
-  for (let di = dmData.length - 1; di >= 0; di--) {
-    const d = dmData[di];
-    const ma7w = calcMA(dmData, 'weight', di, 7);
-    const lbm = calcLBM(d);
-    const fm = calcFatMass(d);
-    const rec = dmRecord[di] || {};
-    html += `<div class="dm-history-row">
-      <div>${fmtDate(d.date)}</div>
-      <div><strong>${d.weight.toFixed(1)}</strong><span class="dm-ma-badge">${ma7w != null ? ma7w.toFixed(1) : ''}</span></div>
-      <div>${d.fatPct != null ? d.fatPct.toFixed(1) + '%' : '—'}${recBadge(rec.fatPct, 'down')}</div>
-      <div style="color:#c62828;font-weight:700;">${fm != null ? fm.toFixed(1) : '—'}${recBadge(rec.fatMass, 'down')}</div>
-      <div style="color:#1b5e20;font-weight:700;">${lbm != null ? lbm.toFixed(1) : '—'}</div>
-      <div>${d.muscle != null ? d.muscle.toFixed(1) : '—'}${recBadge(rec.muscle, 'up')}</div>
-      <div><button class="dm-del" data-idx="${di}" title="削除">✕</button></div>
-    </div>`;
-  }
-  html += `</div>`;
-  html += `</div>`; // end dm-section
   html += `</div>`; // end tab-daily
 
   // ===================== TAB 4: トレーニング =====================
