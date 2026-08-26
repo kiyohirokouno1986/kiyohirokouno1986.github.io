@@ -2900,7 +2900,7 @@ function render(data, calMap) {
   // リコンプでは体重は横ばいでも体脂肪量は落ちるため、体重ではなく体脂肪量(体重×体脂肪率)の最低値を参照する。
   {
     const fs = [...dmData].filter(d => d.weight != null && d.fatPct != null)
-      .map(d => ({ date: d.date, fm: +(d.weight * d.fatPct / 100).toFixed(1) }))
+      .map(d => ({ date: d.date, fm: calcFatMass(d) }))
       .sort((a, b) => a.date.localeCompare(b.date));
     const mins = []; let recMin = Infinity;
     for (const d of fs) { if (d.fm < recMin) { mins.push(d); recMin = d.fm; } }
@@ -2914,7 +2914,7 @@ function render(data, calMap) {
         const gPerDay = days > 0 ? Math.round(drop * 1000 / days) : 0;
         const kcalPerDay = days > 0 ? Math.round(drop * 7200 / days) : 0;
         const dt = new Date(cur.date + 'T12:00:00');
-        rowsMin += `<tr><td>${dt.getMonth()+1}/${dt.getDate()} <span style="color:#c62828;">🔥${cur.fm}</span></td><td>${days}日</td><td style="color:#2d6a4f;font-weight:700;">-${drop}kg</td><td>-${gPerDay}g/日</td><td>-${kcalPerDay.toLocaleString()}</td></tr>`;
+        rowsMin += `<tr><td>${dt.getMonth()+1}/${dt.getDate()} <span style="color:#c62828;">🔥${cur.fm.toFixed(1)}</span></td><td>${days}日</td><td style="color:#2d6a4f;font-weight:700;">-${drop}kg</td><td>-${gPerDay}g/日</td><td>-${kcalPerDay.toLocaleString()}</td></tr>`;
       }
       const first = mins[0], last = mins[mins.length - 1];
       const totDays = dayNum(last.date) - dayNum(first.date);
@@ -2926,7 +2926,7 @@ function render(data, calMap) {
         : '';
       html += `<div class="dm-section"><h2>🔥 体脂肪量・最低値更新ペース <span style="font-size:0.6em;color:#888;font-weight:400;">先生メソッド：最低値どうしを結ぶ</span></h2>
         <div class="led-kpis" style="grid-template-columns:repeat(3,1fr);">
-          <div class="led-kpi"><div class="lk-l">最低値の推移</div><div class="lk-v" style="color:#c62828;">${first.fm}→${last.fm}<span>kg</span></div></div>
+          <div class="led-kpi"><div class="lk-l">最低値の推移</div><div class="lk-v" style="color:#c62828;">${first.fm.toFixed(1)}→${last.fm.toFixed(1)}<span>kg</span></div></div>
           <div class="led-kpi"><div class="lk-l">累計 / 期間</div><div class="lk-v" style="color:#2d6a4f;">-${totDrop}<span>kg / ${totDays}日</span></div></div>
           <div class="led-kpi"><div class="lk-l">平均ペース</div><div class="lk-v" style="color:#2d6a4f;">-${avgG}<span>g/日</span></div></div>
         </div>
