@@ -752,6 +752,9 @@ const SEED_DAILY = [
   { date:'2026-10-18', weight:70.5, fatPct:22.5, muscle:51.8 },
   { date:'2026-10-19', weight:70.4, fatPct:22.9, muscle:51.4 },
   { date:'2026-10-21', weight:71.6, fatPct:22.6, muscle:52.6 },
+  { date:'2026-10-22', weight:71.0, fatPct:22.3, muscle:52.2 },
+  { date:'2026-10-28', weight:69.9, fatPct:22.4, muscle:51.4 },
+  { date:'2026-10-29', weight:69.3, fatPct:22.9, muscle:50.6 },
 ];
 
 function loadDaily() {
